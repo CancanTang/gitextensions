@@ -1,7 +1,8 @@
-﻿namespace GitCommands;
-
-public enum CommitMessageType
+﻿namespace GitCommands
 {
-    Normal = 0,
-    Merge
+    public enum CommitMessageType
+    {
+        Normal = 0,
+        Merge
+    }
 }

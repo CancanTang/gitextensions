@@ -2,39 +2,40 @@
 using GitCommands;
 using GitUI.ScriptsEngine;
 
-namespace GitExtensions.UITests.ScriptEngine;
-
-[TestFixture]
-public class ScriptManagerTests
+namespace GitExtensions.UITests.ScriptEngine
 {
-    [Test]
-    public async Task Can_save_settings()
+    [TestFixture]
+    public class ScriptManagerTests
     {
-        string originalScripts = AppSettings.OwnScripts;
-
-        try
+        [Test]
+        public async Task Can_save_settings()
         {
-            ScriptsManager scriptsManager = new();
+            string originalScripts = AppSettings.OwnScripts;
 
-            AppSettings.OwnScripts = "<ArrayOfScriptInfo />";
-
-            BindingList<ScriptInfo> scripts = scriptsManager.GetScripts();
-
-            scripts.Add(new ScriptInfo()
+            try
             {
-                Name = "name",
-                Command = "cmd",
-                Arguments = "args"
-            });
+                ScriptsManager scriptsManager = new();
 
-            string? xml = scriptsManager.SerializeIntoXml();
+                AppSettings.OwnScripts = "<ArrayOfScriptInfo />";
 
-            // Verify as a string, as the xml verifier ignores line breaks.
-            await Verifier.VerifyXml(xml);
-        }
-        finally
-        {
-            AppSettings.OwnScripts = originalScripts;
+                BindingList<ScriptInfo> scripts = scriptsManager.GetScripts();
+
+                scripts.Add(new ScriptInfo()
+                {
+                    Name = "name",
+                    Command = "cmd",
+                    Arguments = "args"
+                });
+
+                string? xml = scriptsManager.SerializeIntoXml();
+
+                // Verify as a string, as the xml verifier ignores line breaks.
+                await Verifier.VerifyXml(xml);
+            }
+            finally
+            {
+                AppSettings.OwnScripts = originalScripts;
+            }
         }
     }
 }

@@ -1,68 +1,68 @@
 ﻿using GitCommands;
 using GitExtUtils.GitUI.Theming;
 
-namespace GitUI.Theming;
-
-public interface IThemePathProvider
+namespace GitUI.Theming
 {
-    string GetThemePath(ThemeId id);
-
-    string AppThemesDirectory { get; }
-
-    string? UserThemesDirectory { get; }
-
-    string ThemeExtension { get; }
-}
-
-public class ThemePathProvider : IThemePathProvider
-{
-    private const string Subdirectory = "Themes";
-
-    public ThemePathProvider()
+    public interface IThemePathProvider
     {
-        string appDirectory = AppSettings.GetGitExtensionsDirectory() ??
-            throw new DirectoryNotFoundException("Application directory not found");
-        AppThemesDirectory = Path.Combine(appDirectory, Subdirectory);
+        string GetThemePath(ThemeId id);
 
-        string? userDirectory = AppSettings.ApplicationDataPath.Value;
+        string AppThemesDirectory { get; }
 
-        // in portable version appDirectory and userDirectory are same,
-        // hence we don't have a separate directory for user themes
-        UserThemesDirectory = string.Equals(appDirectory, userDirectory, StringComparison.OrdinalIgnoreCase)
-            ? null
-            : Path.Combine(userDirectory, Subdirectory);
+        string? UserThemesDirectory { get; }
 
-        ThemeExtension = ".css";
+        string ThemeExtension { get; }
     }
 
-    public string AppThemesDirectory { get; }
-
-    public string? UserThemesDirectory { get; }
-
-    public string ThemeExtension { get; }
-
-    /// <exception cref="InvalidOperationException">
-    /// Attempt to resolve a custom theme from a %UserAppData% folder in a portable version.
-    /// </exception>
-    /// <exception cref="FileNotFoundException">Theme does not exist.</exception>
-    public string GetThemePath(ThemeId id)
+    public class ThemePathProvider : IThemePathProvider
     {
-        string path;
-        if (id.IsBuiltin)
+        private const string Subdirectory = "Themes";
+
+        public ThemePathProvider()
         {
-            string name = id == ThemeId.DefaultLight ? ThemeId.InvariantThemeFileName : id.Name;
-            path = Path.Combine(AppThemesDirectory, name + ThemeExtension);
+            string appDirectory = AppSettings.GetGitExtensionsDirectory() ??
+                throw new DirectoryNotFoundException("Application directory not found");
+            AppThemesDirectory = Path.Combine(appDirectory, Subdirectory);
+
+            string? userDirectory = AppSettings.ApplicationDataPath.Value;
+
+            // in portable version appDirectory and userDirectory are same,
+            // hence we don't have a separate directory for user themes
+            UserThemesDirectory = string.Equals(appDirectory, userDirectory, StringComparison.OrdinalIgnoreCase)
+                ? null
+                : Path.Combine(userDirectory, Subdirectory);
+
+            ThemeExtension = ".css";
         }
-        else
+
+        public string AppThemesDirectory { get; }
+
+        public string? UserThemesDirectory { get; }
+
+        public string ThemeExtension { get; }
+
+        /// <exception cref="InvalidOperationException">
+        /// Attempt to resolve a custom theme from a %UserAppData% folder in a portable version.
+        /// </exception>
+        /// <exception cref="FileNotFoundException">Theme does not exist.</exception>
+        public string GetThemePath(ThemeId id)
         {
-            if (UserThemesDirectory is null)
+            string path;
+            if (id.IsBuiltin)
             {
-                throw new InvalidOperationException("Portable mode only supports local themes");
+                path = Path.Combine(AppThemesDirectory, id.Name + ThemeExtension);
+            }
+            else
+            {
+                if (UserThemesDirectory is null)
+                {
+                    throw new InvalidOperationException("Portable mode only supports local themes");
+                }
+
+                path = Path.Combine(UserThemesDirectory, id.Name + ThemeExtension);
             }
 
-            path = Path.Combine(UserThemesDirectory, id.Name + ThemeExtension);
+            return path;
         }
-
-        return path;
     }
 }

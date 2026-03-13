@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using System.Text;
+﻿using System.Text;
 using Microsoft;
 using Microsoft.VisualStudio.Threading;
 
@@ -46,7 +44,6 @@ public sealed class GitItemStatus
 
     private Flags _flags;
 
-    #pragma warning disable CS8618 // Non-nullable property 'Path' must contain a non-null value when exiting constructor.
     public GitItemStatus(string name)
     {
         Requires.NotNull(name, nameof(name));
@@ -63,39 +60,8 @@ public sealed class GitItemStatus
         return GitItemStatusConverter.FromStatusCharacter(StagedStatus.WorkTree, name, GitItemStatusConverter.UnusedCharacter);
     }
 
-    public string Name
-    {
-        get;
-        set
-        {
-            if (field == value)
-            {
-                return;
-            }
-
-            field = value;
-
-            int pathEndIndex = GetPathEndIndex(Name);
-            Path = RelativePath.From(pathEndIndex >= 1 ? Name[..pathEndIndex] : "");
-
-            return;
-
-            static int GetPathEndIndex(string name)
-            {
-                if (name.Length == 0)
-                {
-                    return 0;
-                }
-
-                int lastIndex = name.Length - 1;
-                int startIndex = name[lastIndex] == '/' ? lastIndex - 1 : lastIndex;
-                return name.LastIndexOf('/', startIndex);
-            }
-        }
-    }
-
+    public string Name { get; set; }
     public string? OldName { get; set; }
-    public RelativePath Path { get; private set; }
     public string? ErrorMessage { get; set; }
     public ObjectId? TreeGuid { get; set; }
     public string? RenameCopyPercentage { get; set; }
@@ -326,11 +292,11 @@ public sealed class GitItemStatus
 
         if (IsRenamed)
         {
-            str.Append("Renamed\n   ").Append(OldName).Append("\n to\n   ").Append(Name);
+            str.Append("Renamed\n   ").Append(OldName).Append("\nto\n   ").Append(Name);
         }
         else if (IsCopied)
         {
-            str.Append("Copied\n   ").Append(OldName).Append("\n to\n   ").Append(Name);
+            str.Append("Copied\n   ").Append(OldName).Append("\nto\n   ").Append(Name);
         }
         else
         {

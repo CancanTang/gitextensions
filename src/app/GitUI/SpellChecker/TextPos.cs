@@ -1,13 +1,14 @@
-﻿namespace GitUI.SpellChecker;
-
-public readonly struct TextPos
+﻿namespace GitUI.SpellChecker
 {
-    public int End { get; }
-    public int Start { get; }
-
-    public TextPos(int start, int end)
+    public readonly struct TextPos
     {
-        Start = start;
-        End = end;
+        public int End { get; }
+        public int Start { get; }
+
+        public TextPos(int start, int end)
+        {
+            Start = start;
+            End = end;
+        }
     }
 }

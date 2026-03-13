@@ -6,51 +6,52 @@ using GitExtensions.Extensibility.Settings;
 using GitExtensions.Plugins.Bitbucket.Properties;
 using ResourceManager;
 
-namespace GitExtensions.Plugins.Bitbucket;
-
-[Export(typeof(IGitPlugin))]
-public class BitbucketPlugin : GitPluginBase
+namespace GitExtensions.Plugins.Bitbucket
 {
-    public readonly StringSetting BitbucketUsername = new("Bitbucket Username", string.Empty);
-    public readonly PasswordSetting BitbucketPassword = new("Bitbucket Password", string.Empty);
-    public readonly StringSetting BitbucketBaseUrl = new("Specify the base URL to Bitbucket", "https://example.bitbucket.com");
-    public readonly BoolSetting BitbucketDisableSsl = new("Disable SSL verification", false);
-
-    private readonly TranslationString _yourRepositoryIsNotInBitbucket = new("Your repository is not hosted in BitBucket Server.");
-
-    public BitbucketPlugin() : base(true)
+    [Export(typeof(IGitPlugin))]
+    public class BitbucketPlugin : GitPluginBase
     {
-        Id = new Guid("0DA2C988-37A1-461C-BAD4-AFE4930C3157");
-        Name = "Bitbucket Server";
-        Translate(AppSettings.CurrentTranslation);
+        public readonly StringSetting BitbucketUsername = new("Bitbucket Username", string.Empty);
+        public readonly PasswordSetting BitbucketPassword = new("Bitbucket Password", string.Empty);
+        public readonly StringSetting BitbucketBaseUrl = new("Specify the base URL to Bitbucket", "https://example.bitbucket.com");
+        public readonly BoolSetting BitbucketDisableSsl = new("Disable SSL verification", false);
 
-        Icon = Resources.IconPluginBitbucket;
-    }
+        private readonly TranslationString _yourRepositoryIsNotInBitbucket = new("Your repository is not hosted in BitBucket Server.");
 
-    public override bool Execute(GitUIEventArgs args)
-    {
-        Settings? settings = Bitbucket.Settings.Parse(args.GitModule, Settings, this);
-        if (settings is null)
+        public BitbucketPlugin() : base(true)
         {
-            MessageBox.Show(args.OwnerForm,
-                            _yourRepositoryIsNotInBitbucket.Text,
-                            string.Empty,
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Error);
-            return false;
+            Id = new Guid("0DA2C988-37A1-461C-BAD4-AFE4930C3157");
+            Name = "Bitbucket Server";
+            Translate(AppSettings.CurrentTranslation);
+
+            Icon = Resources.IconPluginBitbucket;
         }
 
-        using BitbucketPullRequestForm frm = new(settings, args.GitModule);
-        frm.ShowDialog(args.OwnerForm);
+        public override bool Execute(GitUIEventArgs args)
+        {
+            Settings? settings = Bitbucket.Settings.Parse(args.GitModule, Settings, this);
+            if (settings is null)
+            {
+                MessageBox.Show(args.OwnerForm,
+                                _yourRepositoryIsNotInBitbucket.Text,
+                                string.Empty,
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Error);
+                return false;
+            }
 
-        return true;
-    }
+            using BitbucketPullRequestForm frm = new(settings, args.GitModule);
+            frm.ShowDialog(args.OwnerForm);
 
-    public override IEnumerable<ISetting> GetSettings()
-    {
-        yield return BitbucketUsername;
-        yield return BitbucketPassword;
-        yield return BitbucketBaseUrl;
-        yield return BitbucketDisableSsl;
+            return true;
+        }
+
+        public override IEnumerable<ISetting> GetSettings()
+        {
+            yield return BitbucketUsername;
+            yield return BitbucketPassword;
+            yield return BitbucketBaseUrl;
+            yield return BitbucketDisableSsl;
+        }
     }
 }

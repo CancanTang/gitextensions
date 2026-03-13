@@ -1,42 +1,43 @@
 ﻿using GitCommands;
 
-namespace GitUI.CommandsDialogs.BrowseDialog;
-
-internal static class FormBrowseUtil
+namespace GitUI.CommandsDialogs.BrowseDialog
 {
-    public static bool FileOrParentDirectoryExists(string path)
+    internal static class FormBrowseUtil
     {
-        return File.Exists(path) || (Directory.Exists(path) && new FileInfo(path).Directory.Exists);
-    }
-
-    public static bool IsFileOrDirectory(string? path)
-    {
-        return File.Exists(path) || Directory.Exists(path);
-    }
-
-    public static void ShowFileOrParentFolderInFileExplorer(string path)
-    {
-        if (File.Exists(path))
+        public static bool FileOrParentDirectoryExists(string path)
         {
-            FileInfo fileInfo = new(path);
-            OsShellUtil.SelectPathInFileExplorer(fileInfo.FullName);
+            return File.Exists(path) || (Directory.Exists(path) && new FileInfo(path).Directory.Exists);
         }
-        else if (Directory.Exists(path))
-        {
-            FileInfo fileInfo = new(path);
-            OsShellUtil.OpenWithFileExplorer(fileInfo.Directory.FullName);
-        }
-    }
 
-    public static void ShowFileOrFolderInFileExplorer(string path)
-    {
-        if (File.Exists(path))
+        public static bool IsFileOrDirectory(string? path)
         {
-            OsShellUtil.SelectPathInFileExplorer(path);
+            return File.Exists(path) || Directory.Exists(path);
         }
-        else if (Directory.Exists(path))
+
+        public static void ShowFileOrParentFolderInFileExplorer(string path)
         {
-            OsShellUtil.OpenWithFileExplorer(path);
+            if (File.Exists(path))
+            {
+                FileInfo fileInfo = new(path);
+                OsShellUtil.SelectPathInFileExplorer(fileInfo.FullName);
+            }
+            else if (Directory.Exists(path))
+            {
+                FileInfo fileInfo = new(path);
+                OsShellUtil.OpenWithFileExplorer(fileInfo.Directory.FullName);
+            }
+        }
+
+        public static void ShowFileOrFolderInFileExplorer(string path)
+        {
+            if (File.Exists(path))
+            {
+                OsShellUtil.SelectPathInFileExplorer(path);
+            }
+            else if (Directory.Exists(path))
+            {
+                OsShellUtil.OpenWithFileExplorer(path);
+            }
         }
     }
 }

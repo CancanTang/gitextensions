@@ -1,25 +1,26 @@
-﻿namespace GitUI.CommandsDialogs.SettingsDialog.Pages;
-
-public partial class HotkeysSettingsPage : SettingsPageWithHeader
+﻿namespace GitUI.CommandsDialogs.SettingsDialog.Pages
 {
-    public HotkeysSettingsPage(IServiceProvider serviceProvider)
-        : base(serviceProvider)
+    public partial class HotkeysSettingsPage : SettingsPageWithHeader
     {
-        InitializeComponent();
-        InitializeComplete();
-    }
+        public HotkeysSettingsPage(IServiceProvider serviceProvider)
+            : base(serviceProvider)
+        {
+            InitializeComponent();
+            InitializeComplete();
+        }
 
-    protected override void SettingsToPage()
-    {
-        controlHotkeys.ReloadSettings();
+        protected override void SettingsToPage()
+        {
+            controlHotkeys.ReloadSettings();
 
-        base.SettingsToPage();
-    }
+            base.SettingsToPage();
+        }
 
-    protected override void PageToSettings()
-    {
-        controlHotkeys.SaveSettings();
+        protected override void PageToSettings()
+        {
+            controlHotkeys.SaveSettings();
 
-        base.PageToSettings();
+            base.PageToSettings();
+        }
     }
 }

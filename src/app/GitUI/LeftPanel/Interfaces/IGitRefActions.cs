@@ -1,16 +1,17 @@
-﻿namespace GitUI.LeftPanel.Interfaces;
-
-internal interface IGitRefActions
+﻿namespace GitUI.LeftPanel.Interfaces
 {
-    string FullPath { get; }
+    internal interface IGitRefActions
+    {
+        string FullPath { get; }
 
-    bool Checkout();
+        bool Checkout();
 
-    bool CreateBranch();
+        bool CreateBranch();
 
-    bool Merge();
+        bool Merge();
 
-    bool Rebase();
+        bool Rebase();
 
-    bool Reset();
+        bool Reset();
+    }
 }

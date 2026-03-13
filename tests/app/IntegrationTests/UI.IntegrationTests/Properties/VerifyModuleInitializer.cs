@@ -1,10 +1,11 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace UI.IntegrationTests.Properties;
-
-internal class VerifyModuleInitializer
+namespace UI.IntegrationTests.Properties
 {
-    [ModuleInitializer]
-    public static void Init() =>
-        VerifierSettings.UseStrictJson();
+    internal class VerifyModuleInitializer
+    {
+        [ModuleInitializer]
+        public static void Init() =>
+            VerifierSettings.UseStrictJson();
+    }
 }

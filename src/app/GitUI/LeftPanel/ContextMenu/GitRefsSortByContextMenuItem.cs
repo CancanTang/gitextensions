@@ -3,67 +3,68 @@ using GitCommands.Utils;
 using GitUI.Properties;
 using GitUIPluginInterfaces;
 
-namespace GitUI.LeftPanel.ContextMenu;
-
-internal class GitRefsSortByContextMenuItem : ToolStripMenuItem
+namespace GitUI.LeftPanel.ContextMenu
 {
-    private readonly Action _onSortByChanged;
-
-    public GitRefsSortByContextMenuItem(Action onSortByChanged)
+    internal class GitRefsSortByContextMenuItem : ToolStripMenuItem
     {
-        _onSortByChanged = onSortByChanged;
+        private readonly Action _onSortByChanged;
 
-        Image = Images.SortBy;
-        Text = TranslatedStrings.SortBy;
-
-        foreach ((string text, GitRefsSortBy value) option in EnumHelper.GetValues<GitRefsSortBy>().Select(e => (Text: e.GetDescription(), Value: e)))
+        public GitRefsSortByContextMenuItem(Action onSortByChanged)
         {
-            ToolStripMenuItem item = new()
+            _onSortByChanged = onSortByChanged;
+
+            Image = Images.SortBy;
+            Text = TranslatedStrings.SortBy;
+
+            foreach ((string text, GitRefsSortBy value) option in EnumHelper.GetValues<GitRefsSortBy>().Select(e => (Text: e.GetDescription(), Value: e)))
             {
-                Text = option.text,
-                Image = null,
-                Tag = option.value
-            };
+                ToolStripMenuItem item = new()
+                {
+                    Text = option.text,
+                    Image = null,
+                    Tag = option.value
+                };
 
-            item.Click += Item_Click;
-            DropDownItems.Add(item);
+                item.Click += Item_Click;
+                DropDownItems.Add(item);
+            }
+
+            DropDownOpening += (s, e) => RequerySortingMethod();
+            RequerySortingMethod();
         }
 
-        DropDownOpening += (s, e) => RequerySortingMethod();
-        RequerySortingMethod();
-    }
-
-    private void RequerySortingMethod()
-    {
-        GitRefsSortBy currentSort = AppSettings.RefsSortBy;
-        foreach (ToolStripMenuItem item in DropDownItems)
+        private void RequerySortingMethod()
         {
-            item.Checked = currentSort.Equals(item.Tag);
+            GitRefsSortBy currentSort = AppSettings.RefsSortBy;
+            foreach (ToolStripMenuItem item in DropDownItems)
+            {
+                item.Checked = currentSort.Equals(item.Tag);
+            }
         }
-    }
 
-    private void Item_Click(object sender, EventArgs e)
-    {
-        if (sender is ToolStripMenuItem item)
+        private void Item_Click(object sender, EventArgs e)
         {
-            GitRefsSortBy sortingType = (GitRefsSortBy)item.Tag;
-            AppSettings.RefsSortBy = sortingType;
+            if (sender is ToolStripMenuItem item)
+            {
+                GitRefsSortBy sortingType = (GitRefsSortBy)item.Tag;
+                AppSettings.RefsSortBy = sortingType;
 
-            _onSortByChanged?.Invoke();
+                _onSortByChanged?.Invoke();
+            }
         }
-    }
 
-    internal TestAccessor GetTestAccessor() => new(this);
+        internal TestAccessor GetTestAccessor() => new(this);
 
-    internal readonly struct TestAccessor
-    {
-        private readonly GitRefsSortByContextMenuItem _contextMenuItem;
-
-        public TestAccessor(GitRefsSortByContextMenuItem menuitem)
+        internal struct TestAccessor
         {
-            _contextMenuItem = menuitem;
-        }
+            private readonly GitRefsSortByContextMenuItem _contextMenuItem;
 
-        public readonly void RaiseDropDownOpening() => _contextMenuItem.RequerySortingMethod();
+            public TestAccessor(GitRefsSortByContextMenuItem menuitem)
+            {
+                _contextMenuItem = menuitem;
+            }
+
+            public void RaiseDropDownOpening() => _contextMenuItem.RequerySortingMethod();
+        }
     }
 }

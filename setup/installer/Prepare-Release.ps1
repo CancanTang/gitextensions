@@ -1,5 +1,5 @@
 ﻿# Example:
-#    .\Prepare-Release.ps1 -milestones 36,37
+#    .\Prepare-Release.ps1 -oldVersion 2.51.01 -newVersion 2.51.02 -milestones 36,37
 #
 
 [CmdletBinding()]
@@ -7,9 +7,6 @@ Param(
     #[Parameter(Mandatory=$True, Position=3)]
     [string] $milestones
 )
-
-$repoRoot = Resolve-Path  "../../"
-
 
 function Generate-Changelog {
     [CmdletBinding()]
@@ -19,7 +16,7 @@ function Generate-Changelog {
 
     $baseUri = "https://api.github.com/repos/gitextensions/gitextensions"
 
-    $changelogFile = "$repoRoot/src/app/GitUI/Resources/ChangeLog.md";
+    $changelogFile = "Changelog.md";
     $totalIssues = @();
 
     $milestones | ForEach-Object {
@@ -56,10 +53,7 @@ function Generate-Changelog {
         $issueLinks += "[#$($issue.number)]:$($issue.html_url)"
     }
 
-    $oldChangelog = Get-Content -Encoding utf8 $changelogFile
-    $oldChangelog | Select-Object -First 3 | Out-File $changelogFile -Encoding utf8
-
-    "### Version $milestoneTitle ($milestoneDue)" | Out-File $changelogFile -Append -Encoding utf8
+    "### Version $milestoneTitle ($milestoneDue)" | Out-File $changelogFile -Encoding utf8
     "`r`n#### Changes:" | Out-File $changelogFile -Append -Encoding utf8
     $issues | ForEach-Object {
         $issue = $_;
@@ -67,9 +61,6 @@ function Generate-Changelog {
     }
     "`r`n" | Out-File $changelogFile -Append -Encoding utf8
     $issueLinks | Out-File $changelogFile -Append -Encoding utf8
-    "`r`n" | Out-File $changelogFile -Append -Encoding utf8
-
-    $oldChangelog | Select-Object -Skip 3 | Out-File $changelogFile -Append -Encoding utf8
 }
 
 function Update-Contributors {
@@ -82,7 +73,7 @@ function Update-Contributors {
     ping | Out-Null
     [Console]::OutputEncoding = [Text.UTF8Encoding]::UTF8
 
-    $file = "$repoRoot/src/app/GitUI/Properties/Resources.resx";
+    $file = '../GitUI/Properties/Resources.resx';
     [xml]$content = Get-Content $file -Encoding UTF8;
     $rawTeam = ($content.root.data | Where name -eq "Team").Value;
     $rawContributors = ($content.root.data | Where name -eq "Coders").Value;

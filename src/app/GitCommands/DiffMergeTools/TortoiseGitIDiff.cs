@@ -1,22 +1,23 @@
-namespace GitCommands.DiffMergeTools;
-
-internal class TortoiseGitIDiff : DiffMergeTool
+namespace GitCommands.DiffMergeTools
 {
-    /// <inheritdoc />
-    public override string ExeFileName => "TortoiseGitIDiff.exe";
-
-    /// <inheritdoc />
-    public override bool IsMergeTool => false;
-
-    /// <inheritdoc />
-    public override string DiffCommand => "/left:\"$LOCAL\" /right:\"$REMOTE\" /fit /overlay";
-
-    /// <inheritdoc />
-    public override string Name => "TortoiseGitIDiff";
-
-    /// <inheritdoc />
-    public override IEnumerable<string> SearchPaths => new[]
+    internal class TortoiseGitIDiff : DiffMergeTool
     {
-        @"TortoiseGit\bin\",
-    };
+        /// <inheritdoc />
+        public override string ExeFileName => "TortoiseGitIDiff.exe";
+
+        /// <inheritdoc />
+        public override bool IsMergeTool => false;
+
+        /// <inheritdoc />
+        public override string DiffCommand => "/left:\"$LOCAL\" /right:\"$REMOTE\" /fit /overlay";
+
+        /// <inheritdoc />
+        public override string Name => "TortoiseGitIDiff";
+
+        /// <inheritdoc />
+        public override IEnumerable<string> SearchPaths => new[]
+        {
+            @"TortoiseGit\bin\",
+        };
+    }
 }

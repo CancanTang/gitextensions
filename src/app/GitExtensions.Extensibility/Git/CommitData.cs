@@ -1,7 +1,6 @@
 using GitExtensions.Extensibility.Extensions;
-using GitExtensions.Extensibility.Git;
 
-namespace GitUIPluginInterfaces;
+namespace GitExtensions.Extensibility.Git;
 
 public sealed class CommitData
 {
@@ -38,9 +37,4 @@ public sealed class CommitData
     /// Gets and sets the commit message.
     /// </summary>
     public string Body { get; set; }
-
-    /// <summary>
-    /// Git <see href="https://git-scm.com/docs/git-notes">Notes</see>
-    /// </summary>
-    public string? Notes { get; set; }
 }

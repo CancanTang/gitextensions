@@ -1,26 +1,27 @@
 ﻿using System.Text;
 
-namespace GitUI.Avatars;
-
-internal static class HexString
+namespace GitUI.Avatars
 {
-    /// <summary>
-    /// Converts a byte array into its lowercase hex representation.
-    /// </summary>
-    public static string FromByteArray(byte[] data)
+    internal static class HexString
     {
-        if (data?.Length is not > 0)
+        /// <summary>
+        /// Converts a byte array into its lowercase hex representation.
+        /// </summary>
+        public static string FromByteArray(byte[] data)
         {
-            return string.Empty;
+            if (data?.Length is not > 0)
+            {
+                return string.Empty;
+            }
+
+            StringBuilder builder = new(capacity: data.Length * 2);
+
+            foreach (byte b in data)
+            {
+                builder.AppendFormat("{0:x2}", b);
+            }
+
+            return builder.ToString();
         }
-
-        StringBuilder builder = new(capacity: data.Length * 2);
-
-        foreach (byte b in data)
-        {
-            builder.AppendFormat("{0:x2}", b);
-        }
-
-        return builder.ToString();
     }
 }

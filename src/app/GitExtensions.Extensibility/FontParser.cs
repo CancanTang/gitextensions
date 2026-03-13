@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using System.Globalization;
+﻿using System.Globalization;
 
 namespace GitExtensions.Extensibility;
 
@@ -15,7 +13,7 @@ public static class FontParser
             "{0};{1};{2};{3};{4}", value.FontFamily.Name, value.Size, InvariantCultureId, value.Bold ? 1 : 0, value.Italic ? 1 : 0);
     }
 
-    public static Font Parse(this string? value, Font defaultValue)
+    public static Font Parse(this string value, Font defaultValue)
     {
         if (string.IsNullOrWhiteSpace(value))
         {

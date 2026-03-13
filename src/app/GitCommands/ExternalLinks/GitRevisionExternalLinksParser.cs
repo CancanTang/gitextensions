@@ -1,28 +1,29 @@
 ﻿using GitCommands.Settings;
 using GitUIPluginInterfaces;
 
-namespace GitCommands.ExternalLinks;
-
-public interface IGitRevisionExternalLinksParser
+namespace GitCommands.ExternalLinks
 {
-    IEnumerable<ExternalLink> Parse(GitRevision revision, DistributedSettings settings);
-}
-
-public sealed class GitRevisionExternalLinksParser : IGitRevisionExternalLinksParser
-{
-    private readonly IConfiguredLinkDefinitionsProvider _effectiveLinkDefinitionsProvider;
-    private readonly IExternalLinkRevisionParser _externalLinkRevisionParser;
-
-    public GitRevisionExternalLinksParser(IConfiguredLinkDefinitionsProvider effectiveLinkDefinitionsProvider, IExternalLinkRevisionParser externalLinkRevisionParser)
+    public interface IGitRevisionExternalLinksParser
     {
-        _effectiveLinkDefinitionsProvider = effectiveLinkDefinitionsProvider;
-        _externalLinkRevisionParser = externalLinkRevisionParser;
+        IEnumerable<ExternalLink> Parse(GitRevision revision, DistributedSettings settings);
     }
 
-    public IEnumerable<ExternalLink> Parse(GitRevision revision, DistributedSettings settings)
+    public sealed class GitRevisionExternalLinksParser : IGitRevisionExternalLinksParser
     {
-        IReadOnlyList<ExternalLinkDefinition> definitions = _effectiveLinkDefinitionsProvider.Get(settings);
-        return definitions.Where(definition => definition.Enabled)
-                          .SelectMany(definition => _externalLinkRevisionParser.Parse(revision, definition));
+        private readonly IConfiguredLinkDefinitionsProvider _effectiveLinkDefinitionsProvider;
+        private readonly IExternalLinkRevisionParser _externalLinkRevisionParser;
+
+        public GitRevisionExternalLinksParser(IConfiguredLinkDefinitionsProvider effectiveLinkDefinitionsProvider, IExternalLinkRevisionParser externalLinkRevisionParser)
+        {
+            _effectiveLinkDefinitionsProvider = effectiveLinkDefinitionsProvider;
+            _externalLinkRevisionParser = externalLinkRevisionParser;
+        }
+
+        public IEnumerable<ExternalLink> Parse(GitRevision revision, DistributedSettings settings)
+        {
+            IReadOnlyList<ExternalLinkDefinition> definitions = _effectiveLinkDefinitionsProvider.Get(settings);
+            return definitions.Where(definition => definition.Enabled)
+                              .SelectMany(definition => _externalLinkRevisionParser.Parse(revision, definition));
+        }
     }
 }

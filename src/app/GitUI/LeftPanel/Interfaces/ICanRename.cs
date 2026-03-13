@@ -1,6 +1,7 @@
-﻿namespace GitUI.LeftPanel.Interfaces;
-
-public interface ICanRename
+﻿namespace GitUI.LeftPanel.Interfaces
 {
-    bool Rename();
+    public interface ICanRename
+    {
+        bool Rename();
+    }
 }

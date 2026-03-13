@@ -1,33 +1,41 @@
 ﻿using GitCommands;
 
-namespace GitUI;
-
-public interface IFindFilePredicateProvider
+namespace GitUI
 {
-    /// <summary>
-    /// Returns the names of files that match the specified search pattern.
-    /// </summary>
-    /// <param name="searchPattern">The search string to match against the paths of files.</param>
-    Func<string?, bool> Get(string searchPattern, string workingDir);
-}
-
-public sealed class FindFilePredicateProvider : IFindFilePredicateProvider
-{
-    public Func<string?, bool> Get(string searchPattern, string workingDir)
+    public interface IFindFilePredicateProvider
     {
-        ArgumentNullException.ThrowIfNull(searchPattern);
-        ArgumentNullException.ThrowIfNull(workingDir);
+        /// <summary>
+        /// Returns the names of files that match the specified search pattern.
+        /// </summary>
+        /// <param name="searchPattern">The search string to match against the paths of files.</param>
+        Func<string?, bool> Get(string searchPattern, string workingDir);
+    }
 
-        string pattern = searchPattern.ToPosixPath();
-        string dir = workingDir.ToPosixPath();
-
-        if (pattern.StartsWith(dir, StringComparison.OrdinalIgnoreCase))
+    public sealed class FindFilePredicateProvider : IFindFilePredicateProvider
+    {
+        public Func<string?, bool> Get(string searchPattern, string workingDir)
         {
-            pattern = pattern[dir.Length..].TrimStart('/');
-            return fileName => fileName?.StartsWith(pattern, StringComparison.OrdinalIgnoreCase) is true;
-        }
+            if (searchPattern is null)
+            {
+                throw new ArgumentNullException(nameof(searchPattern));
+            }
 
-        // Method Contains have no override with StringComparison parameter
-        return fileName => fileName?.IndexOf(pattern, StringComparison.OrdinalIgnoreCase) is >= 0;
+            if (workingDir is null)
+            {
+                throw new ArgumentNullException(nameof(workingDir));
+            }
+
+            string pattern = searchPattern.ToPosixPath();
+            string dir = workingDir.ToPosixPath();
+
+            if (pattern.StartsWith(dir, StringComparison.OrdinalIgnoreCase))
+            {
+                pattern = pattern[dir.Length..].TrimStart('/');
+                return fileName => fileName?.StartsWith(pattern, StringComparison.OrdinalIgnoreCase) is true;
+            }
+
+            // Method Contains have no override with StringComparison parameter
+            return fileName => fileName?.IndexOf(pattern, StringComparison.OrdinalIgnoreCase) is >= 0;
+        }
     }
 }

@@ -2,23 +2,24 @@ using GitCommands;
 using GitExtensions.Extensibility.Git;
 using NSubstitute;
 
-namespace GitCommandsTests;
-
-[TestFixture]
-public class CommitDataManagerTest
+namespace GitCommandsTests
 {
-    private CommitDataManager _commitDataManager;
-    private IGitModule _module;
-    private Func<IGitModule> _getModule;
-
-    [SetUp]
-    public void Setup()
+    [TestFixture]
+    public class CommitDataManagerTest
     {
-        _module = Substitute.For<IGitModule>();
-        _module.ReEncodeStringFromLossless(Arg.Any<string>()).Returns(x => x[0]);
-        _module.ReEncodeCommitMessage(Arg.Any<string>()).Returns(x => x[0]);
+        private CommitDataManager _commitDataManager;
+        private IGitModule _module;
+        private Func<IGitModule> _getModule;
 
-        _getModule = () => _module;
-        _commitDataManager = new CommitDataManager(_getModule);
+        [SetUp]
+        public void Setup()
+        {
+            _module = Substitute.For<IGitModule>();
+            _module.ReEncodeStringFromLossless(Arg.Any<string>()).Returns(x => x[0]);
+            _module.ReEncodeCommitMessage(Arg.Any<string>()).Returns(x => x[0]);
+
+            _getModule = () => _module;
+            _commitDataManager = new CommitDataManager(_getModule);
+        }
     }
 }

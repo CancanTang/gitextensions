@@ -2,75 +2,76 @@
 using GitExtensions.Extensibility.Translations;
 using GitExtUtils.GitUI;
 
-namespace GitUI.CommandsDialogs.SettingsDialog.Pages;
-
-public partial class FormChooseTranslation : GitExtensionsForm
+namespace GitUI.CommandsDialogs.SettingsDialog.Pages
 {
-    public FormChooseTranslation()
+    public partial class FormChooseTranslation : GitExtensionsForm
     {
-        InitializeComponent();
-        label1.Font = FontUtil.MainInstructionFont;
-        label1.ForeColor = FontUtil.MainInstructionColor;
-        Text = "Choose language";
-        InitializeComplete();
-    }
-
-    protected override void OnLoad(EventArgs e)
-    {
-        base.OnLoad(e);
-
-        List<string> translations = [.. Translator.GetAllTranslations()];
-        translations.Sort();
-        translations.Insert(0, "English");
-
-        ImageList imageList = new()
+        public FormChooseTranslation()
         {
-            ColorDepth = ColorDepth.Depth32Bit,
-            ImageSize = DpiUtil.Scale(new Size(150, 75)),
-        };
+            InitializeComponent();
+            label1.Font = FontUtil.MainInstructionFont;
+            label1.ForeColor = FontUtil.MainInstructionColor;
+            Text = "Choose language";
+            InitializeComplete();
+        }
 
-        foreach (string translation in translations)
+        protected override void OnLoad(EventArgs e)
         {
-            string imagePath = Path.Combine(Translator.GetTranslationDir(), translation + ".gif");
-            if (File.Exists(imagePath))
+            base.OnLoad(e);
+
+            List<string> translations = new(Translator.GetAllTranslations());
+            translations.Sort();
+            translations.Insert(0, "English");
+
+            ImageList imageList = new()
             {
-                Image image = Image.FromFile(imagePath);
-                imageList.Images.Add(translation, image);
+                ColorDepth = ColorDepth.Depth32Bit,
+                ImageSize = DpiUtil.Scale(new Size(150, 75)),
+            };
+
+            foreach (string translation in translations)
+            {
+                string imagePath = Path.Combine(Translator.GetTranslationDir(), translation + ".gif");
+                if (File.Exists(imagePath))
+                {
+                    Image image = Image.FromFile(imagePath);
+                    imageList.Images.Add(translation, image);
+                }
+            }
+
+            lvTranslations.LargeImageList = imageList;
+
+            foreach (string translation in translations)
+            {
+                if (imageList.Images.ContainsKey(translation))
+                {
+                    lvTranslations.Items.Add(new ListViewItem(translation, translation) { Tag = translation });
+                }
+                else
+                {
+                    lvTranslations.Items.Add(new ListViewItem(translation) { Tag = translation });
+                }
             }
         }
 
-        lvTranslations.LargeImageList = imageList;
-
-        foreach (string translation in translations)
+        private void FormChooseTranslation_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (imageList.Images.ContainsKey(translation))
+            if (string.IsNullOrEmpty(AppSettings.Translation))
             {
-                lvTranslations.Items.Add(new ListViewItem(translation, translation) { Tag = translation });
-            }
-            else
-            {
-                lvTranslations.Items.Add(new ListViewItem(translation) { Tag = translation });
+                AppSettings.Translation = "English";
             }
         }
-    }
 
-    private void FormChooseTranslation_FormClosing(object sender, FormClosingEventArgs e)
-    {
-        if (string.IsNullOrEmpty(AppSettings.Translation))
+        private void lvTranslations_ItemActivate(object sender, EventArgs e)
         {
-            AppSettings.Translation = "English";
-        }
-    }
+            // take the selection if any, else see the fallback in FormChooseTranslation_FormClosing
+            ListView.SelectedListViewItemCollection selectedItems = ((ListView)sender).SelectedItems;
+            if (selectedItems.Count > 0)
+            {
+                AppSettings.Translation = selectedItems[0].Tag.ToString();
+            }
 
-    private void lvTranslations_ItemActivate(object sender, EventArgs e)
-    {
-        // take the selection if any, else see the fallback in FormChooseTranslation_FormClosing
-        ListView.SelectedListViewItemCollection selectedItems = ((ListView)sender).SelectedItems;
-        if (selectedItems.Count > 0)
-        {
-            AppSettings.Translation = selectedItems[0].Tag.ToString();
+            Close();
         }
-
-        Close();
     }
 }

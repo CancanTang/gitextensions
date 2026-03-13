@@ -1,151 +1,152 @@
 ﻿using GitExtensions.Extensibility.Settings;
 using GitExtUtils.GitUI;
 
-namespace GitUI.CommandsDialogs.SettingsDialog;
-
-public abstract partial class AutoLayoutSettingsPage : DistributedSettingsPage, ISettingsLayout
+namespace GitUI.CommandsDialogs.SettingsDialog
 {
-    private ISettingsLayout? _settingsLayout;
-
-    public AutoLayoutSettingsPage(IServiceProvider serviceProvider)
-       : base(serviceProvider)
+    public abstract partial class AutoLayoutSettingsPage : DistributedSettingsPage, ISettingsLayout
     {
-    }
+        private ISettingsLayout? _settingsLayout;
 
-    protected virtual ISettingsLayout GetSettingsLayout()
-    {
-        if (_settingsLayout is null)
+        public AutoLayoutSettingsPage(IServiceProvider serviceProvider)
+           : base(serviceProvider)
         {
-            _settingsLayout = CreateSettingsLayout();
-            if (_settingsLayout.GetControl().Parent is null)
+        }
+
+        protected virtual ISettingsLayout GetSettingsLayout()
+        {
+            if (_settingsLayout is null)
             {
-                Controls.Add(_settingsLayout.GetControl());
+                _settingsLayout = CreateSettingsLayout();
+                if (_settingsLayout.GetControl().Parent is null)
+                {
+                    Controls.Add(_settingsLayout.GetControl());
+                }
             }
+
+            return _settingsLayout;
         }
 
-        return _settingsLayout;
-    }
-
-    protected virtual ISettingsLayout CreateSettingsLayout()
-    {
-        return new TableSettingsLayout(this, CreateDefaultTableLayoutPanel());
-    }
-
-    public static TableLayoutPanel CreateDefaultTableLayoutPanel()
-    {
-        return new TableLayoutPanel
+        protected virtual ISettingsLayout CreateSettingsLayout()
         {
-            AutoSize = true,
-            AutoSizeMode = AutoSizeMode.GrowAndShrink,
-            ColumnCount = 3,
-            ColumnStyles =
-            {
-                new ColumnStyle(),
-                new ColumnStyle(SizeType.Percent, 100F),
-                new ColumnStyle()
-            },
-            Dock = DockStyle.Top,
-            Location = new Point(0, 0),
-            RowCount = 0,
-            Size = new Size(951, 518)
-        };
-    }
+            return new TableSettingsLayout(this, CreateDefaultTableLayoutPanel());
+        }
 
-    public void AddSettingControl(ISettingControlBinding controlBinding)
-    {
-        GetSettingsLayout().AddSettingControl(controlBinding);
-    }
-
-    public Control GetControl()
-    {
-        throw new NotImplementedException();
-    }
-
-    public void AddSettingsLayout(ISettingsLayout layout)
-    {
-        GetSettingsLayout().AddSettingsLayout(layout);
-    }
-}
-
-public interface ISettingsLayout
-{
-    void AddSettingControl(ISettingControlBinding controlBinding);
-    void AddSettingsLayout(ISettingsLayout layout);
-    Control GetControl();
-    void AddControlBinding(ISettingControlBinding controlBinding);
-}
-
-public abstract class BaseSettingsLayout : ISettingsLayout
-{
-    public readonly ISettingsLayout ParentLayout;
-
-    protected BaseSettingsLayout(ISettingsLayout parentLayout)
-    {
-        ParentLayout = parentLayout;
-    }
-
-    public void AddControlBinding(ISettingControlBinding aControlBinding)
-    {
-        ParentLayout.AddControlBinding(aControlBinding);
-    }
-
-    public void AddSettingControl(ISettingControlBinding aControlBinding)
-    {
-        AddControlBinding(aControlBinding);
-        AddSettingControlImpl(aControlBinding);
-    }
-
-    public abstract void AddSettingControlImpl(ISettingControlBinding controlBinding);
-    public abstract void AddSettingsLayout(ISettingsLayout layout);
-    public abstract Control GetControl();
-}
-
-public class TableSettingsLayout : BaseSettingsLayout
-{
-    protected TableLayoutPanel Panel { get; }
-    private int _currentRow = -1;
-
-    public TableSettingsLayout(ISettingsLayout parentLayout, TableLayoutPanel panel)
-        : base(parentLayout)
-    {
-        Panel = panel;
-    }
-
-    public override void AddSettingControlImpl(ISettingControlBinding controlBinding)
-    {
-        _currentRow++;
-        TableLayoutPanel tableLayout = Panel;
-
-        string caption = controlBinding.Caption();
-
-        if (caption is not null)
+        public static TableLayoutPanel CreateDefaultTableLayoutPanel()
         {
-            Label label = new()
+            return new TableLayoutPanel
             {
-                Text = controlBinding.Caption(),
                 AutoSize = true,
-                Anchor = AnchorStyles.Left | AnchorStyles.Top,
-                Margin = new Padding(0, DpiUtil.Scale(2), 0, 0)
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                ColumnCount = 3,
+                ColumnStyles =
+                {
+                    new ColumnStyle(),
+                    new ColumnStyle(SizeType.Percent, 100F),
+                    new ColumnStyle()
+                },
+                Dock = DockStyle.Top,
+                Location = new Point(0, 0),
+                RowCount = 0,
+                Size = new Size(951, 518)
             };
-
-            tableLayout.Controls.Add(label, 0, _currentRow);
         }
 
-        Control control = controlBinding.GetControl();
-        control.Dock = DockStyle.Fill;
-        tableLayout.Controls.Add(control, 1, _currentRow);
+        public void AddSettingControl(ISettingControlBinding controlBinding)
+        {
+            GetSettingsLayout().AddSettingControl(controlBinding);
+        }
+
+        public Control GetControl()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddSettingsLayout(ISettingsLayout layout)
+        {
+            GetSettingsLayout().AddSettingsLayout(layout);
+        }
     }
 
-    public override void AddSettingsLayout(ISettingsLayout layout)
+    public interface ISettingsLayout
     {
-        _currentRow++;
-        Control control = layout.GetControl();
-        control.Dock = DockStyle.Fill;
-        Panel.Controls.Add(control, 1, _currentRow);
+        void AddSettingControl(ISettingControlBinding controlBinding);
+        void AddSettingsLayout(ISettingsLayout layout);
+        Control GetControl();
+        void AddControlBinding(ISettingControlBinding controlBinding);
     }
 
-    public override Control GetControl()
+    public abstract class BaseSettingsLayout : ISettingsLayout
     {
-        return Panel;
+        public readonly ISettingsLayout ParentLayout;
+
+        protected BaseSettingsLayout(ISettingsLayout parentLayout)
+        {
+            ParentLayout = parentLayout;
+        }
+
+        public void AddControlBinding(ISettingControlBinding aControlBinding)
+        {
+            ParentLayout.AddControlBinding(aControlBinding);
+        }
+
+        public void AddSettingControl(ISettingControlBinding aControlBinding)
+        {
+            AddControlBinding(aControlBinding);
+            AddSettingControlImpl(aControlBinding);
+        }
+
+        public abstract void AddSettingControlImpl(ISettingControlBinding controlBinding);
+        public abstract void AddSettingsLayout(ISettingsLayout layout);
+        public abstract Control GetControl();
+    }
+
+    public class TableSettingsLayout : BaseSettingsLayout
+    {
+        protected TableLayoutPanel Panel { get; }
+        private int _currentRow = -1;
+
+        public TableSettingsLayout(ISettingsLayout parentLayout, TableLayoutPanel panel)
+            : base(parentLayout)
+        {
+            Panel = panel;
+        }
+
+        public override void AddSettingControlImpl(ISettingControlBinding controlBinding)
+        {
+            _currentRow++;
+            TableLayoutPanel tableLayout = Panel;
+
+            string caption = controlBinding.Caption();
+
+            if (caption is not null)
+            {
+                Label label = new()
+                {
+                    Text = controlBinding.Caption(),
+                    AutoSize = true,
+                    Anchor = AnchorStyles.Left | AnchorStyles.Top,
+                    Margin = new Padding(0, DpiUtil.Scale(2), 0, 0)
+                };
+
+                tableLayout.Controls.Add(label, 0, _currentRow);
+            }
+
+            Control control = controlBinding.GetControl();
+            control.Dock = DockStyle.Fill;
+            tableLayout.Controls.Add(control, 1, _currentRow);
+        }
+
+        public override void AddSettingsLayout(ISettingsLayout layout)
+        {
+            _currentRow++;
+            Control control = layout.GetControl();
+            control.Dock = DockStyle.Fill;
+            Panel.Controls.Add(control, 1, _currentRow);
+        }
+
+        public override Control GetControl()
+        {
+            return Panel;
+        }
     }
 }

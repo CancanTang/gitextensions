@@ -1,20 +1,21 @@
-namespace GitCommands.DiffMergeTools;
-
-internal class Kdiff3 : DiffMergeTool
+namespace GitCommands.DiffMergeTools
 {
-    /// <inheritdoc />
-    public override string ExeFileName => "kdiff3.exe";
-
-    /// <inheritdoc />
-    public override string MergeCommand => "\"$BASE\" \"$LOCAL\" \"$REMOTE\" -o \"$MERGED\"";
-
-    /// <inheritdoc />
-    public override string Name => "kdiff3";
-
-    /// <inheritdoc />
-    public override IEnumerable<string> SearchPaths => new[]
+    internal class Kdiff3 : DiffMergeTool
     {
-        // regkdiff3path
-        @"KDiff3"
-    };
+        /// <inheritdoc />
+        public override string ExeFileName => "kdiff3.exe";
+
+        /// <inheritdoc />
+        public override string MergeCommand => "\"$BASE\" \"$LOCAL\" \"$REMOTE\" -o \"$MERGED\"";
+
+        /// <inheritdoc />
+        public override string Name => "kdiff3";
+
+        /// <inheritdoc />
+        public override IEnumerable<string> SearchPaths => new[]
+        {
+            // regkdiff3path
+            @"KDiff3"
+        };
+    }
 }

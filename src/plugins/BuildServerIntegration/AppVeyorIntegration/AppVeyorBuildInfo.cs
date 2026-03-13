@@ -2,51 +2,52 @@ using GitExtensions.Extensibility.BuildServerIntegration;
 using GitExtensions.Extensibility.Git;
 using GitUIPluginInterfaces.BuildServerIntegration;
 
-namespace AppVeyorIntegration;
-
-public sealed class AppVeyorBuildInfo : BuildInfo
+namespace AppVeyorIntegration
 {
-    private static readonly IBuildDurationFormatter _buildDurationFormatter = new BuildDurationFormatter();
-
-    private int _buildProgressCount;
-
-    public string? BuildId { get; set; }
-    public ObjectId? CommitId { get; set; }
-    public string? AppVeyorBuildReportUrl { get; set; }
-    public string? Branch { get; set; }
-    public string? BaseApiUrl { get; set; }
-    public string? BaseWebUrl { get; set; }
-    public string? PullRequestText { get; set; }
-    public string? PullRequestTitle { get; set; }
-    public string? TestsResultText { get; set; }
-
-    public bool IsRunning => Status == BuildStatus.InProgress;
-
-    public void ChangeProgressCounter()
+    public sealed class AppVeyorBuildInfo : BuildInfo
     {
-        _buildProgressCount = (_buildProgressCount % 3) + 1;
-    }
+        private static readonly IBuildDurationFormatter _buildDurationFormatter = new BuildDurationFormatter();
 
-    public void UpdateDescription()
-    {
-        Description = _buildDurationFormatter.Format(Duration) + " " + TestsResultText + (!string.IsNullOrWhiteSpace(PullRequestText) ? " " + PullRequestText : string.Empty) + " " + Id;
-        Tooltip = DisplayStatus + Environment.NewLine
-                                + (Duration.HasValue ? _buildDurationFormatter.Format(Duration) + Environment.NewLine : string.Empty)
-                                + (!string.IsNullOrWhiteSpace(TestsResultText) ? TestsResultText + Environment.NewLine : string.Empty)
-                                + (!string.IsNullOrWhiteSpace(PullRequestText) ? PullRequestText + ": " + PullRequestTitle + Environment.NewLine : string.Empty)
-                                + Id;
-    }
+        private int _buildProgressCount;
 
-    private string DisplayStatus
-    {
-        get
+        public string? BuildId { get; set; }
+        public ObjectId? CommitId { get; set; }
+        public string? AppVeyorBuildReportUrl { get; set; }
+        public string? Branch { get; set; }
+        public string? BaseApiUrl { get; set; }
+        public string? BaseWebUrl { get; set; }
+        public string? PullRequestText { get; set; }
+        public string? PullRequestTitle { get; set; }
+        public string? TestsResultText { get; set; }
+
+        public bool IsRunning => Status == BuildStatus.InProgress;
+
+        public void ChangeProgressCounter()
         {
-            if (Status != BuildStatus.InProgress)
-            {
-                return Status.ToString("G");
-            }
+            _buildProgressCount = (_buildProgressCount % 3) + 1;
+        }
 
-            return "In progress" + new string('.', _buildProgressCount) + new string(' ', 3 - _buildProgressCount);
+        public void UpdateDescription()
+        {
+            Description = _buildDurationFormatter.Format(Duration) + " " + TestsResultText + (!string.IsNullOrWhiteSpace(PullRequestText) ? " " + PullRequestText : string.Empty) + " " + Id;
+            Tooltip = DisplayStatus + Environment.NewLine
+                                    + (Duration.HasValue ? _buildDurationFormatter.Format(Duration) + Environment.NewLine : string.Empty)
+                                    + (!string.IsNullOrWhiteSpace(TestsResultText) ? TestsResultText + Environment.NewLine : string.Empty)
+                                    + (!string.IsNullOrWhiteSpace(PullRequestText) ? PullRequestText + ": " + PullRequestTitle + Environment.NewLine : string.Empty)
+                                    + Id;
+        }
+
+        private string DisplayStatus
+        {
+            get
+            {
+                if (Status != BuildStatus.InProgress)
+                {
+                    return Status.ToString("G");
+                }
+
+                return "In progress" + new string('.', _buildProgressCount) + new string(' ', 3 - _buildProgressCount);
+            }
         }
     }
 }

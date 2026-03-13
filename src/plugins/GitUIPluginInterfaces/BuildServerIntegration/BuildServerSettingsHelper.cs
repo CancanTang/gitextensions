@@ -1,38 +1,39 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
-namespace GitUIPluginInterfaces.BuildServerIntegration;
-
-public static class BuildServerSettingsHelper
+namespace GitUIPluginInterfaces.BuildServerIntegration
 {
-    public static bool IsRegexValid(string regexText)
+    public static class BuildServerSettingsHelper
     {
-        try
+        public static bool IsRegexValid(string regexText)
         {
-            _ = new Regex(regexText);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    public static bool IsUrlValid([NotNullWhen(returnValue: true)] string? url)
-    {
-        if (url is null)
-        {
-            return false;
+            try
+            {
+                new Regex(regexText);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
-        try
+        public static bool IsUrlValid([NotNullWhen(returnValue: true)] string? url)
         {
-            _ = new Uri(url);
-            return true;
-        }
-        catch
-        {
-            return false;
+            if (url is null)
+            {
+                return false;
+            }
+
+            try
+            {
+                _ = new Uri(url);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

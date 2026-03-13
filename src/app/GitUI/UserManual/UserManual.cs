@@ -1,17 +1,18 @@
-﻿namespace GitUI.UserManual;
-
-public static class UserManual
+﻿namespace GitUI.UserManual
 {
-    public static string UrlFor(string subFolder, string anchorName)
+    public static class UserManual
     {
-        return For(subFolder, anchorName).GetUrl();
-    }
+        public static string UrlFor(string subFolder, string anchorName)
+        {
+            return For(subFolder, anchorName).GetUrl();
+        }
 
-    private static IProvideUserManual For(string subFolder, string anchorName)
-    {
-        return new StandardHtmlUserManual(subFolder, anchorName);
+        private static IProvideUserManual For(string subFolder, string anchorName)
+        {
+            return new StandardHtmlUserManual(subFolder, anchorName);
 
-        // or local singlehtml help / TODO: put manual to GitExt setup
-        // return new SingleHtmlUserManual(anchorName);
+            // or local singlehtml help / TODO: put manual to GitExt setup
+            // return new SingleHtmlUserManual(anchorName);
+        }
     }
 }

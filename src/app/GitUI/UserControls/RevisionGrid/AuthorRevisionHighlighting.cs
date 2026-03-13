@@ -3,42 +3,43 @@ using GitExtensions.Extensibility.Git;
 using GitUIPluginInterfaces;
 using JetBrains.Annotations;
 
-namespace GitUI.UserControls;
-
-internal sealed class AuthorRevisionHighlighting
+namespace GitUI.UserControls
 {
-    public string? AuthorEmailToHighlight { get; private set; }
-
-    /// <returns><c>true</c> if the UI should be refreshed in response to this change.</returns>
-    [MustUseReturnValue]
-    public bool ProcessRevisionSelectionChange(IGitModule currentModule, IReadOnlyCollection<GitRevision> selectedRevisions)
+    internal sealed class AuthorRevisionHighlighting
     {
-        if (selectedRevisions.Count > 1)
+        public string? AuthorEmailToHighlight { get; private set; }
+
+        /// <returns><c>true</c> if the UI should be refreshed in response to this change.</returns>
+        [MustUseReturnValue]
+        public bool ProcessRevisionSelectionChange(IGitModule currentModule, IReadOnlyCollection<GitRevision> selectedRevisions)
         {
+            if (selectedRevisions.Count > 1)
+            {
+                return false;
+            }
+
+            GitRevision revision = selectedRevisions.FirstOrDefault();
+
+            bool changed = !string.Equals(revision?.AuthorEmail, AuthorEmailToHighlight, StringComparison.OrdinalIgnoreCase);
+            if (changed)
+            {
+                AuthorEmailToHighlight = revision is not null
+                    ? revision.AuthorEmail
+                    : currentModule.GetEffectiveSetting(SettingKeyString.UserEmail);
+                return true;
+            }
+
             return false;
         }
 
-        GitRevision revision = selectedRevisions.FirstOrDefault();
-
-        bool changed = !string.Equals(revision?.AuthorEmail, AuthorEmailToHighlight, StringComparison.OrdinalIgnoreCase);
-        if (changed)
+        public bool IsHighlighted(GitRevision? revision)
         {
-            AuthorEmailToHighlight = revision is not null
-                ? revision.AuthorEmail
-                : currentModule.GetEffectiveSetting(SettingKeyString.UserEmail);
-            return true;
+            if (string.IsNullOrWhiteSpace(revision?.AuthorEmail))
+            {
+                return false;
+            }
+
+            return string.Equals(revision.AuthorEmail, AuthorEmailToHighlight, StringComparison.OrdinalIgnoreCase);
         }
-
-        return false;
-    }
-
-    public bool IsHighlighted(GitRevision? revision)
-    {
-        if (string.IsNullOrWhiteSpace(revision?.AuthorEmail))
-        {
-            return false;
-        }
-
-        return string.Equals(revision.AuthorEmail, AuthorEmailToHighlight, StringComparison.OrdinalIgnoreCase);
     }
 }

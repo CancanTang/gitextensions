@@ -1,55 +1,33 @@
-﻿#nullable enable
-
-using GitCommands;
+﻿using GitCommands;
 using GitExtensions.Extensibility.Git;
 using GitExtensions.Extensibility.Settings;
+using GitUIPluginInterfaces;
 
-namespace GitUI.CommandsDialogs.SettingsDialog;
-
-public partial class SettingsPageWithHeader : SettingsPageBase, IGlobalSettingsPage
+namespace GitUI.CommandsDialogs.SettingsDialog
 {
-    private readonly bool _canSaveInsideRepo;
-    private readonly Lazy<SettingsPageHeader> _header;
-
-    public SettingsPageWithHeader(IServiceProvider serviceProvider)
-        : base(serviceProvider)
+    public partial class SettingsPageWithHeader : SettingsPageBase, IGlobalSettingsPage
     {
-        _header = new(() => new SettingsPageHeader(this, _canSaveInsideRepo));
-        if (serviceProvider is IGitUICommands uiCommands)
+        private SettingsPageHeader? _header;
+        private bool _canSaveInsideRepo;
+
+        public SettingsPageWithHeader(IServiceProvider serviceProvider)
+            : base(serviceProvider)
         {
-            _canSaveInsideRepo = uiCommands.Module.IsValidGitWorkingDir();
-        }
-    }
-
-    public override Control GuiControl => _header.Value;
-
-    public override bool ReadOnly
-    {
-        get
-        {
-            // Lazy might be being initialized yet, the EffectiveSettings are current, then return true
-            return TryGetHeader()?.ReadOnly ?? true;
-
-            SettingsPageHeader? TryGetHeader()
+            if (serviceProvider is IGitUICommands uiCommands)
             {
-                try
-                {
-                    return _header.Value;
-                }
-                catch (InvalidOperationException)
-                {
-                    return null;
-                }
+                _canSaveInsideRepo = uiCommands.Module.IsValidGitWorkingDir();
             }
         }
-    }
 
-    public virtual void SetGlobalSettings()
-    {
-    }
+        public override Control GuiControl => _header ??= new SettingsPageHeader(this, _canSaveInsideRepo);
 
-    protected override SettingsSource GetCurrentSettings()
-    {
-        return AppSettings.SettingsContainer;
+        public virtual void SetGlobalSettings()
+        {
+        }
+
+        protected override SettingsSource GetCurrentSettings()
+        {
+            return AppSettings.SettingsContainer;
+        }
     }
 }

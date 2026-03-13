@@ -1,8 +1,9 @@
-namespace ResourceManager.CommitDataRenders;
-
-public interface IHeaderRenderStyleProvider
+namespace ResourceManager.CommitDataRenders
 {
-    Font GetFont(Graphics g);
-    int GetMaxWidth();
-    IEnumerable<int> GetTabStops();
+    public interface IHeaderRenderStyleProvider
+    {
+        Font GetFont(Graphics g);
+        int GetMaxWidth();
+        IEnumerable<int> GetTabStops();
+    }
 }

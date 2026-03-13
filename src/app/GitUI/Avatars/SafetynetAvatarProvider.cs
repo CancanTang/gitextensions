@@ -1,66 +1,66 @@
 ﻿using System.Diagnostics;
-using GitExtUtils.GitUI.Theming;
 
-namespace GitUI.Avatars;
-
-/// <summary>
-/// A provider proxy that makes sure that the requested image size is reasonable.
-/// </summary>
-/// <remarks>
-/// If the image size is less than one it will be set to a default value (64px)
-/// and the upper size is limited to 512px to prevent unreasonable avatar sizes.
-///
-/// If the inner provider crashes or returns null an "emergency fallback" is provided.
-/// </remarks>
-public sealed class SafetynetAvatarProvider : IAvatarProvider
+namespace GitUI.Avatars
 {
-    private const int _upperSizeLimit = 512;
-    private const int _defaultSize = 64;
-
-    private readonly IAvatarProvider _avatarProvider;
-    private readonly Lazy<Image> _safetyNetFallback = new(GenerateSafetynetFallback);
-
-    public SafetynetAvatarProvider(IAvatarProvider avatarProvider)
+    /// <summary>
+    /// A provider proxy that makes sure that the requested image size is reasonable.
+    /// </summary>
+    /// <remarks>
+    /// If the image size is less than one it will be set to a default value (64px)
+    /// and the upper size is limited to 512px to prevent unreasonable avatar sizes.
+    ///
+    /// If the inner provider crashes or returns null an "emergency fallback" is provided.
+    /// </remarks>
+    public sealed class SafetynetAvatarProvider : IAvatarProvider
     {
-        _avatarProvider = avatarProvider ?? throw new ArgumentNullException(nameof(avatarProvider));
-    }
+        private const int _upperSizeLimit = 512;
+        private const int _defaultSize = 64;
 
-    public bool PerformsIo => _avatarProvider.PerformsIo;
+        private readonly IAvatarProvider _avatarProvider;
+        private readonly Lazy<Image> _safetyNetFallback = new(GenerateSafetynetFallback);
 
-    public async Task<Image?> GetAvatarAsync(string email, string? name, int imageSize)
-    {
-        if (imageSize < 1)
+        public SafetynetAvatarProvider(IAvatarProvider avatarProvider)
         {
-            imageSize = _defaultSize;
+            _avatarProvider = avatarProvider ?? throw new ArgumentNullException(nameof(avatarProvider));
         }
 
-        if (imageSize > _upperSizeLimit)
-        {
-            imageSize = _upperSizeLimit;
-        }
+        public bool PerformsIo => _avatarProvider.PerformsIo;
 
-        try
+        public async Task<Image?> GetAvatarAsync(string email, string? name, int imageSize)
         {
-            Image image = await _avatarProvider.GetAvatarAsync(email, name, imageSize);
-
-            if (image is not null)
+            if (imageSize < 1)
             {
-                return image;
+                imageSize = _defaultSize;
             }
+
+            if (imageSize > _upperSizeLimit)
+            {
+                imageSize = _upperSizeLimit;
+            }
+
+            try
+            {
+                Image image = await _avatarProvider.GetAvatarAsync(email, name, imageSize);
+
+                if (image is not null)
+                {
+                    return image;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Something went wrong. Log, ignore and proceed with fallback.
+                Trace.WriteLine(ex.Message);
+            }
+
+            return _safetyNetFallback.Value;
         }
-        catch (Exception ex)
+
+        private static Image GenerateSafetynetFallback()
         {
-            // Something went wrong. Log, ignore and proceed with fallback.
-            Trace.WriteLine(ex.Message);
+            Bitmap bmp = new(1, 1);
+            bmp.SetPixel(0, 0, Color.Red);
+            return bmp;
         }
-
-        return _safetyNetFallback.Value;
-    }
-
-    private static Image GenerateSafetynetFallback()
-    {
-        Bitmap bmp = new(1, 1);
-        bmp.SetPixel(0, 0, Color.Red.AdaptBackColor());
-        return bmp;
     }
 }

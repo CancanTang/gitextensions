@@ -1,17 +1,18 @@
 ﻿using GitCommands;
 using GitExtensions.Extensibility;
 
-namespace GitUI.ScriptsEngine;
-
-public static class PowerShellHelper
+namespace GitUI.ScriptsEngine
 {
-    internal static void RunPowerShell(string command, string? argument, string workingDir, bool runInBackground)
+    public static class PowerShellHelper
     {
-        const string filename = "powershell.exe";
-        string arguments = (runInBackground ? "" : "-NoExit") + " -ExecutionPolicy Unrestricted -Command \"" + command + " " + argument + "\"";
-        EnvironmentConfiguration.SetEnvironmentVariables();
+        internal static void RunPowerShell(string command, string? argument, string workingDir, bool runInBackground)
+        {
+            const string filename = "powershell.exe";
+            string arguments = (runInBackground ? "" : "-NoExit") + " -ExecutionPolicy Unrestricted -Command \"" + command + " " + argument + "\"";
+            EnvironmentConfiguration.SetEnvironmentVariables();
 
-        IExecutable executable = new Executable(filename, workingDir);
-        executable.Start(arguments, createWindow: !runInBackground);
+            IExecutable executable = new Executable(filename, workingDir);
+            executable.Start(arguments, createWindow: !runInBackground);
+        }
     }
 }

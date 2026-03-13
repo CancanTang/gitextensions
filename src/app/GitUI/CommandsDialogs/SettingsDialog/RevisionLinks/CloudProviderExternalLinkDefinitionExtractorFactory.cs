@@ -1,22 +1,23 @@
-﻿namespace GitUI.CommandsDialogs.SettingsDialog.RevisionLinks;
-
-public sealed class CloudProviderExternalLinkDefinitionExtractorFactory : ICloudProviderExternalLinkDefinitionExtractorFactory
+﻿namespace GitUI.CommandsDialogs.SettingsDialog.RevisionLinks
 {
-    public ICloudProviderExternalLinkDefinitionExtractor? Get(CloudProviderKind cloudProviderKind)
+    public sealed class CloudProviderExternalLinkDefinitionExtractorFactory : ICloudProviderExternalLinkDefinitionExtractorFactory
     {
-        return cloudProviderKind switch
+        public ICloudProviderExternalLinkDefinitionExtractor? Get(CloudProviderKind cloudProviderKind)
         {
-            CloudProviderKind.GitHub => new GitHubExternalLinkDefinitionExtractor(),
-            CloudProviderKind.AzureDevOps => new AzureDevopsExternalLinkDefinitionExtractor(),
-            _ => null
-        };
-    }
+            return cloudProviderKind switch
+            {
+                CloudProviderKind.GitHub => new GitHubExternalLinkDefinitionExtractor(),
+                CloudProviderKind.AzureDevOps => new AzureDevopsExternalLinkDefinitionExtractor(),
+                _ => null
+            };
+        }
 
-    public IEnumerable<ICloudProviderExternalLinkDefinitionExtractor> GetAllExtractor()
-    {
-        IEnumerable<CloudProviderKind> cloudProviderKinds = Enum.GetValues<CloudProviderKind>();
-        CloudProviderExternalLinkDefinitionExtractorFactory cloudProviderExternalLinkDefinitionExtractorFactory = new();
-        return cloudProviderKinds.Select(c => cloudProviderExternalLinkDefinitionExtractorFactory.Get(c))
-            .WhereNotNull();
+        public IEnumerable<ICloudProviderExternalLinkDefinitionExtractor> GetAllExtractor()
+        {
+            IEnumerable<CloudProviderKind> cloudProviderKinds = Enum.GetValues(typeof(CloudProviderKind)).OfType<CloudProviderKind>();
+            CloudProviderExternalLinkDefinitionExtractorFactory cloudProviderExternalLinkDefinitionExtractorFactory = new();
+            return cloudProviderKinds.Select(c => cloudProviderExternalLinkDefinitionExtractorFactory.Get(c))
+                .WhereNotNull();
+        }
     }
 }

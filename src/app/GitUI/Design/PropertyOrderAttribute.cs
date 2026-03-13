@@ -1,12 +1,13 @@
-﻿namespace GitUI.Design;
-
-[AttributeUsage(AttributeTargets.Property)]
-internal class PropertyOrderAttribute : Attribute
+﻿namespace GitUI.Design
 {
-    public PropertyOrderAttribute(int order)
+    [AttributeUsage(AttributeTargets.Property)]
+    internal class PropertyOrderAttribute : Attribute
     {
-        Order = order;
-    }
+        public PropertyOrderAttribute(int order)
+        {
+            Order = order;
+        }
 
-    public int Order { get; }
+        public int Order { get; }
+    }
 }

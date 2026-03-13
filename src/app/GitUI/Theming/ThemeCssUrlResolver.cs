@@ -1,40 +1,41 @@
 ﻿using GitExtUtils.GitUI.Theming;
 
-namespace GitUI.Theming;
-
-public interface IThemeCssUrlResolver
+namespace GitUI.Theming
 {
-    string ResolveCssUrl(string url);
-}
-
-public class ThemeCssUrlResolver : IThemeCssUrlResolver
-{
-    private const string CssVariableUserThemesDirectory = "{UserAppData}/";
-    private readonly IThemePathProvider _themePathProvider;
-
-    public ThemeCssUrlResolver(IThemePathProvider themePathProvider)
+    public interface IThemeCssUrlResolver
     {
-        _themePathProvider = themePathProvider;
+        string ResolveCssUrl(string url);
     }
 
-    public string ResolveCssUrl(string url)
+    public class ThemeCssUrlResolver : IThemeCssUrlResolver
     {
-        if (url.EndsWith(_themePathProvider.ThemeExtension, StringComparison.OrdinalIgnoreCase))
+        private const string CssVariableUserThemesDirectory = "{UserAppData}/";
+        private readonly IThemePathProvider _themePathProvider;
+
+        public ThemeCssUrlResolver(IThemePathProvider themePathProvider)
         {
-            url = url[..^_themePathProvider.ThemeExtension.Length];
+            _themePathProvider = themePathProvider;
         }
 
-        ThemeId id = url.StartsWith(CssVariableUserThemesDirectory)
-            ? new ThemeId(url[CssVariableUserThemesDirectory.Length..], isBuiltin: false)
-            : new ThemeId(url, isBuiltin: true);
+        public string ResolveCssUrl(string url)
+        {
+            if (url.EndsWith(_themePathProvider.ThemeExtension, StringComparison.OrdinalIgnoreCase))
+            {
+                url = url[..^_themePathProvider.ThemeExtension.Length];
+            }
 
-        try
-        {
-            return _themePathProvider.GetThemePath(id);
-        }
-        catch (Exception ex)
-        {
-            throw new ThemeCssUrlResolverException(ex.Message, ex);
+            ThemeId id = url.StartsWith(CssVariableUserThemesDirectory)
+                ? new ThemeId(url[CssVariableUserThemesDirectory.Length..], isBuiltin: false)
+                : new ThemeId(url, isBuiltin: true);
+
+            try
+            {
+                return _themePathProvider.GetThemePath(id);
+            }
+            catch (Exception ex)
+            {
+                throw new ThemeCssUrlResolverException(ex.Message, ex);
+            }
         }
     }
 }

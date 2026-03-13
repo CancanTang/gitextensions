@@ -3,110 +3,111 @@ using GitExtensions.Extensibility;
 using GitExtensions.Extensibility.Git;
 using GitUIPluginInterfaces;
 
-namespace GitCommands.Git;
-
-public interface IGitRevisionTester
+namespace GitCommands.Git
 {
-    /// <summary>
-    /// Finds if all of the first selected are parents to the selected revision
-    /// </summary>
-    /// <param name="firstSelected">The first selected revisions (A)</param>
-    /// <param name="selectedRevision">The currently (last) selected revision (B)</param>
-    /// <returns>
-    /// True if one of the first selected is parent
-    /// </returns>
-    bool AllFirstAreParentsToSelected(IEnumerable<ObjectId>? firstSelected, GitRevision? selectedRevision);
-
-    /// <summary>
-    /// Finds if any of the git items exists as a file.
-    /// </summary>
-    /// <param name="selectedItemsWithParent">List of items to resolve and check</param>
-    /// <returns>
-    /// True if at least one file exists.
-    /// </returns>
-    bool AnyLocalFileExists(IEnumerable<GitItemStatus>? selectedItemsWithParent);
-
-    bool Matches(GitRevision? revision, string criteria);
-}
-
-public class GitRevisionTester : IGitRevisionTester
-{
-    private readonly IFullPathResolver _fullPathResolver;
-    private readonly IFileSystem _fileSystem;
-
-    public GitRevisionTester(IFullPathResolver fullPathResolver, IFileSystem? fileSystem = null)
+    public interface IGitRevisionTester
     {
-        _fullPathResolver = fullPathResolver;
-        _fileSystem = fileSystem ?? new FileSystem();
+        /// <summary>
+        /// Finds if all of the first selected are parents to the selected revision
+        /// </summary>
+        /// <param name="firstSelected">The first selected revisions (A)</param>
+        /// <param name="selectedRevision">The currently (last) selected revision (B)</param>
+        /// <returns>
+        /// True if one of the first selected is parent
+        /// </returns>
+        bool AllFirstAreParentsToSelected(IEnumerable<ObjectId>? firstSelected, GitRevision? selectedRevision);
+
+        /// <summary>
+        /// Finds if any of the git items exists as a file.
+        /// </summary>
+        /// <param name="selectedItemsWithParent">List of items to resolve and check</param>
+        /// <returns>
+        /// True if at least one file exists.
+        /// </returns>
+        bool AnyLocalFileExists(IEnumerable<GitItemStatus>? selectedItemsWithParent);
+
+        bool Matches(GitRevision? revision, string criteria);
     }
 
-    /// <inheritdoc />
-    public bool AllFirstAreParentsToSelected(IEnumerable<ObjectId>? firstSelected, GitRevision? selectedRevision)
+    public class GitRevisionTester : IGitRevisionTester
     {
-        if (selectedRevision?.ParentIds is null || firstSelected is null)
+        private readonly IFullPathResolver _fullPathResolver;
+        private readonly IFileSystem _fileSystem;
+
+        public GitRevisionTester(IFullPathResolver fullPathResolver, IFileSystem? fileSystem = null)
         {
-            return false;
+            _fullPathResolver = fullPathResolver;
+            _fileSystem = fileSystem ?? new FileSystem();
         }
 
-        foreach (ObjectId item in firstSelected)
+        /// <inheritdoc />
+        public bool AllFirstAreParentsToSelected(IEnumerable<ObjectId>? firstSelected, GitRevision? selectedRevision)
         {
-            if (!selectedRevision.ParentIds.Contains(item))
+            if (selectedRevision?.ParentIds is null || firstSelected is null)
             {
                 return false;
             }
-        }
 
-        return true;
-    }
+            foreach (ObjectId item in firstSelected)
+            {
+                if (!selectedRevision.ParentIds.Contains(item))
+                {
+                    return false;
+                }
+            }
 
-    /// <inheritdoc />
-    public bool AnyLocalFileExists(IEnumerable<GitItemStatus>? selectedItemsWithParent)
-    {
-        if (selectedItemsWithParent is null)
-        {
-            return false;
-        }
-
-        List<GitItemStatus> items = selectedItemsWithParent as List<GitItemStatus> ?? [.. selectedItemsWithParent];
-        bool localExists = items.Any(item => !item.IsTracked);
-        if (localExists)
-        {
             return true;
         }
 
-        foreach (GitItemStatus item in items)
+        /// <inheritdoc />
+        public bool AnyLocalFileExists(IEnumerable<GitItemStatus>? selectedItemsWithParent)
         {
-            string? filePath = _fullPathResolver.Resolve(item.Name);
-            if (_fileSystem.File.Exists(filePath))
+            if (selectedItemsWithParent is null)
+            {
+                return false;
+            }
+
+            List<GitItemStatus> items = selectedItemsWithParent as List<GitItemStatus> ?? selectedItemsWithParent.ToList();
+            bool localExists = items.Any(item => !item.IsTracked);
+            if (localExists)
             {
                 return true;
             }
-        }
 
-        return false;
-    }
+            foreach (GitItemStatus item in items)
+            {
+                string? filePath = _fullPathResolver.Resolve(item.Name);
+                if (_fileSystem.File.Exists(filePath))
+                {
+                    return true;
+                }
+            }
 
-    /// <inheritdoc />
-    public bool Matches(GitRevision? revision, string criteria)
-    {
-        if (revision is null || string.IsNullOrWhiteSpace(criteria))
-        {
-            // don't throw exception for performance reasons
             return false;
         }
 
-        if (revision.Refs.Where(gitHead => !string.IsNullOrWhiteSpace(gitHead.Name))
-                         .Any(gitHead => gitHead.Name.Contains(criteria, StringComparison.OrdinalIgnoreCase)))
+        /// <inheritdoc />
+        public bool Matches(GitRevision? revision, string criteria)
         {
-            return true;
-        }
+            if (revision is null || string.IsNullOrWhiteSpace(criteria))
+            {
+                // don't throw exception for performance reasons
+                return false;
+            }
 
-        if (criteria.Length > 2 && revision.Guid?.StartsWith(criteria, StringComparison.CurrentCultureIgnoreCase) == true)
-        {
-            return true;
-        }
+            if (revision.Refs.Where(gitHead => !string.IsNullOrWhiteSpace(gitHead.Name))
+                             .Any(gitHead => gitHead.Name.IndexOf(criteria, StringComparison.OrdinalIgnoreCase) >= 0))
+            {
+                return true;
+            }
 
-        return revision.Author?.IndexOf(criteria, StringComparison.CurrentCultureIgnoreCase) >= 0 ||
-               (revision.Body ?? revision.Subject)?.IndexOf(criteria, StringComparison.OrdinalIgnoreCase) >= 0;
+            if (criteria.Length > 2 && revision.Guid?.StartsWith(criteria, StringComparison.CurrentCultureIgnoreCase) == true)
+            {
+                return true;
+            }
+
+            return revision.Author?.IndexOf(criteria, StringComparison.CurrentCultureIgnoreCase) >= 0 ||
+                   (revision.Body ?? revision.Subject)?.IndexOf(criteria, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
     }
 }

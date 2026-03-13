@@ -1,30 +1,31 @@
-﻿namespace GitExtUtils.GitUI.Theming;
-
-public class BrushScope : IDisposable
+﻿namespace GitExtUtils.GitUI.Theming
 {
-    private readonly bool _isSystemBrush;
-
-    public static BrushScope ForSystemBrush(Brush brush) =>
-        new(brush, isSystemBrush: true);
-
-    public static BrushScope ForRegularBrush(Brush brush) =>
-        new(brush, isSystemBrush: false);
-
-    private BrushScope(Brush brush, bool isSystemBrush)
+    public class BrushScope : IDisposable
     {
-        Brush = brush;
-        _isSystemBrush = isSystemBrush;
-    }
+        private readonly bool _isSystemBrush;
 
-    public Brush Brush { get; }
+        public static BrushScope ForSystemBrush(Brush brush) =>
+            new(brush, isSystemBrush: true);
 
-    public void Dispose()
-    {
-        if (!_isSystemBrush)
+        public static BrushScope ForRegularBrush(Brush brush) =>
+            new(brush, isSystemBrush: false);
+
+        private BrushScope(Brush brush, bool isSystemBrush)
         {
-            Brush.Dispose();
+            Brush = brush;
+            _isSystemBrush = isSystemBrush;
         }
 
-        GC.SuppressFinalize(this);
+        public Brush Brush { get; }
+
+        public void Dispose()
+        {
+            if (!_isSystemBrush)
+            {
+                Brush.Dispose();
+            }
+
+            GC.SuppressFinalize(this);
+        }
     }
 }

@@ -1,34 +1,35 @@
 ﻿using System.Text;
 
-namespace GitUIPluginInterfaces;
-
-public struct CmdResult
+namespace GitUIPluginInterfaces
 {
-    public string? StdOutput;
-    public string? StdError;
-    public int ExitCode;
-
-    public readonly bool ExitedSuccessfully => ExitCode == 0;
-
-    public readonly string GetString()
+    public struct CmdResult
     {
-        StringBuilder sb = new();
+        public string? StdOutput;
+        public string? StdError;
+        public int ExitCode;
 
-        if (!string.IsNullOrEmpty(StdOutput))
+        public bool ExitedSuccessfully => ExitCode == 0;
+
+        public string GetString()
         {
-            sb.Append(StdOutput);
-        }
+            StringBuilder sb = new();
 
-        if (!string.IsNullOrEmpty(StdError) && !string.IsNullOrEmpty(StdOutput))
-        {
-            sb.AppendLine();
-        }
+            if (!string.IsNullOrEmpty(StdOutput))
+            {
+                sb.Append(StdOutput);
+            }
 
-        if (!string.IsNullOrEmpty(StdError))
-        {
-            sb.Append(StdError);
-        }
+            if (!string.IsNullOrEmpty(StdError) && !string.IsNullOrEmpty(StdOutput))
+            {
+                sb.AppendLine();
+            }
 
-        return sb.ToString();
+            if (!string.IsNullOrEmpty(StdError))
+            {
+                sb.Append(StdError);
+            }
+
+            return sb.ToString();
+        }
     }
 }

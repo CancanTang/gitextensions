@@ -2,102 +2,103 @@
 using GitUI;
 using GitUI.CommandsDialogs;
 
-namespace GitExtensions.UITests.CommandsDialogs;
-
-[Apartment(ApartmentState.STA)]
-public class FormInitTests
+namespace GitExtensions.UITests.CommandsDialogs
 {
-    // Created once for the fixture
-    private ReferenceRepository _referenceRepository;
-
-    // Created once for each test
-    private GitUICommands _commands;
-
-    [SetUp]
-    public void SetUp()
+    [Apartment(ApartmentState.STA)]
+    public class FormInitTests
     {
-        _referenceRepository = new ReferenceRepository();
-        _commands = new GitUICommands(GlobalServiceContainer.CreateDefaultMockServiceContainer(), _referenceRepository.Module);
-    }
+        // Created once for the fixture
+        private ReferenceRepository _referenceRepository;
 
-    [TearDown]
-    public void TearDown()
-    {
-        _referenceRepository.Dispose();
-    }
+        // Created once for each test
+        private GitUICommands _commands;
 
-    [Test]
-    public void Should_show_supplied_path()
-    {
-        string currentDir = "bla";
-        RunFormTest(
-            form =>
-            {
-                ClassicAssert.AreEqual(currentDir, form.GetTestAccessor().DirectoryCombo.Text);
-            },
-            currentDir);
-    }
+        [SetUp]
+        public void SetUp()
+        {
+            ReferenceRepository.ResetRepo(ref _referenceRepository);
+            _commands = new GitUICommands(GlobalServiceContainer.CreateDefaultMockServiceContainer(), _referenceRepository.Module);
+        }
 
-    // Strictly speaking this is a test for GitUICommands.StartInitializeDialog
-    [Test]
-    public void Should_show_current_GitModuleWorkingDir_if_supplied_path_null()
-    {
-        RunFormTest(
-            form =>
-            {
-                ClassicAssert.AreEqual(_referenceRepository.Module.WorkingDir, form.GetTestAccessor().DirectoryCombo.Text);
-            },
-            null);
-    }
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            _referenceRepository.Dispose();
+        }
 
-    [TestCase("")]
-    [TestCase(null)]
-    [TestCase("    ")]
-    [TestCase(@"foo\bar")]
-    public void IsRootedDirectoryPath_should_detect_invalid_paths(string input)
-    {
-        string currentDir = "bla";
-        RunFormTest(
-            form =>
-            {
-                ClassicAssert.IsFalse(form.GetTestAccessor().IsRootedDirectoryPath(input));
-            },
-            currentDir);
-    }
+        [Test]
+        public void Should_show_supplied_path()
+        {
+            string currentDir = "bla";
+            RunFormTest(
+                form =>
+                {
+                    Assert.AreEqual(currentDir, form.GetTestAccessor().DirectoryCombo.Text);
+                },
+                currentDir);
+        }
 
-    [TestCase(@"c:\foo\bar")]
-    [TestCase(@"c:\foo\bar\")]
-    [TestCase(@"c:")]
-    [TestCase(@"  c:\foo\bar  ")]
-    public void IsRootedDirectoryPath_returns_true_on_valid_paths(string input)
-    {
-        string currentDir = "bla";
-        RunFormTest(
-            form =>
-            {
-                ClassicAssert.IsTrue(form.GetTestAccessor().IsRootedDirectoryPath(input));
-            },
-            currentDir);
-    }
+        // Strictly speaking this is a test for GitUICommands.StartInitializeDialog
+        [Test]
+        public void Should_show_current_GitModuleWorkingDir_if_supplied_path_null()
+        {
+            RunFormTest(
+                form =>
+                {
+                    Assert.AreEqual(_referenceRepository.Module.WorkingDir, form.GetTestAccessor().DirectoryCombo.Text);
+                },
+                null);
+        }
 
-    private void RunFormTest(Action<FormInit> testDriver, string path)
-    {
-        RunFormTest(
-            form =>
-            {
-                testDriver(form);
-                return Task.CompletedTask;
-            },
-            path);
-    }
+        [TestCase("")]
+        [TestCase(null)]
+        [TestCase("    ")]
+        [TestCase(@"foo\bar")]
+        public void IsRootedDirectoryPath_should_detect_invalid_paths(string input)
+        {
+            string currentDir = "bla";
+            RunFormTest(
+                form =>
+                {
+                    Assert.IsFalse(form.GetTestAccessor().IsRootedDirectoryPath(input));
+                },
+                currentDir);
+        }
 
-    private void RunFormTest(Func<FormInit, Task> testDriverAsync, string path)
-    {
-        UITest.RunForm(
-            () =>
-            {
-                ClassicAssert.True(_commands.StartInitializeDialog(owner: null, path));
-            },
-            testDriverAsync);
+        [TestCase(@"c:\foo\bar")]
+        [TestCase(@"c:\foo\bar\")]
+        [TestCase(@"c:")]
+        [TestCase(@"  c:\foo\bar  ")]
+        public void IsRootedDirectoryPath_returns_true_on_valid_paths(string input)
+        {
+            string currentDir = "bla";
+            RunFormTest(
+                form =>
+                {
+                    Assert.IsTrue(form.GetTestAccessor().IsRootedDirectoryPath(input));
+                },
+                currentDir);
+        }
+
+        private void RunFormTest(Action<FormInit> testDriver, string path)
+        {
+            RunFormTest(
+                form =>
+                {
+                    testDriver(form);
+                    return Task.CompletedTask;
+                },
+                path);
+        }
+
+        private void RunFormTest(Func<FormInit, Task> testDriverAsync, string path)
+        {
+            UITest.RunForm(
+                () =>
+                {
+                    Assert.True(_commands.StartInitializeDialog(owner: null, path));
+                },
+                testDriverAsync);
+        }
     }
 }

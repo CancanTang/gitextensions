@@ -1,45 +1,46 @@
 ﻿using GitCommands.Remotes;
 
-namespace GitUI.UserControls;
-
-public partial class RemotesComboboxControl : GitModuleControl
+namespace GitUI.UserControls
 {
-    public RemotesComboboxControl()
+    public partial class RemotesComboboxControl : GitModuleControl
     {
-        InitializeComponent();
-        InitializeComplete();
-        AllowMultiselect = false;
-    }
-
-    public string SelectedRemote
-    {
-        get => comboBoxRemotes.Text;
-        set => comboBoxRemotes.Text = value;
-    }
-
-    private bool _allowMultiselect;
-    public bool AllowMultiselect
-    {
-        get { return _allowMultiselect; }
-        set
+        public RemotesComboboxControl()
         {
-            _allowMultiselect = value;
-            buttonSelectMultipleRemotes.Visible = _allowMultiselect;
-            if (_allowMultiselect)
+            InitializeComponent();
+            InitializeComplete();
+            AllowMultiselect = false;
+        }
+
+        public string SelectedRemote
+        {
+            get => comboBoxRemotes.Text;
+            set => comboBoxRemotes.Text = value;
+        }
+
+        private bool _allowMultiselect;
+        public bool AllowMultiselect
+        {
+            get { return _allowMultiselect; }
+            set
             {
-                throw new NotImplementedException();
+                _allowMultiselect = value;
+                buttonSelectMultipleRemotes.Visible = _allowMultiselect;
+                if (_allowMultiselect)
+                {
+                    throw new NotImplementedException();
+                }
             }
         }
-    }
 
-    private void RemotesComboboxControl_Load(object sender, EventArgs e)
-    {
-        if (Site?.DesignMode is true)
+        private void RemotesComboboxControl_Load(object sender, EventArgs e)
         {
-            return;
-        }
+            if (Site?.DesignMode is true)
+            {
+                return;
+            }
 
-        ConfigFileRemoteSettingsManager remotesManager = new(() => Module);
-        comboBoxRemotes.DataSource = remotesManager.LoadRemotes(false).Select(x => x.Name).ToList();
+            ConfigFileRemoteSettingsManager remotesManager = new(() => Module);
+            comboBoxRemotes.DataSource = remotesManager.LoadRemotes(false).Select(x => x.Name).ToList();
+        }
     }
 }

@@ -3,12 +3,8 @@
   <Import Project="eng\Tests.props" />
 
   <PropertyGroup>
-    <LangVersion>14.0</LangVersion>
-
+    <LangVersion>12</LangVersion>
     <NoWarn>$(NoWarn);1573;1591;1712</NoWarn>
-    <!-- URIs should not be hardcoded -->
-    <NoWarn>$(NoWarn);S1075</NoWarn>
-
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Nullable>enable</Nullable>
 
@@ -16,7 +12,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <TargetFramework>$(SolutionTargetFramework)</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <SuppressNETCoreSdkPreviewMessage>false</SuppressNETCoreSdkPreviewMessage>
+    <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)eng\GitExtensions.ruleset</CodeAnalysisRuleSet>
 
     <!-- More information: https://aka.ms/msbuild/net8-binaryformatter -->

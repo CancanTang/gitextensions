@@ -1,34 +1,38 @@
 ﻿using GitExtensions.Extensibility.Git;
 using GitUIPluginInterfaces;
 
-namespace GitUI.CommandsDialogs;
-
-public partial class FormBlame : GitModuleForm
+namespace GitUI.CommandsDialogs
 {
-    public string FileName { get; }
-
-    private FormBlame(IGitUICommands commands) : base(commands)
+    public partial class FormBlame : GitModuleForm
     {
-        InitializeComponent();
-        InitializeComplete();
-    }
+        public string FileName { get; }
 
-    public FormBlame(IGitUICommands commands, string fileName, GitRevision? revision, int? initialLine = null)
-        : this(commands)
-    {
-        if (string.IsNullOrEmpty(fileName))
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+        private FormBlame(IGitUICommands commands)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+            : base(commands)
         {
-            return;
+            InitializeComponent();
+            InitializeComplete();
         }
 
-        FileName = fileName;
+        public FormBlame(IGitUICommands commands, string fileName, GitRevision? revision, int? initialLine = null)
+            : this(commands)
+        {
+            if (string.IsNullOrEmpty(fileName))
+            {
+                return;
+            }
 
-        _ = blameControl1.LoadBlameAsync(revision ?? Module.GetRevision(), children: null, fileName, revisionGridInfo: null, revisionGridFileUpdate: null, controlToMask: null, Module.FilesEncoding, initialLine);
-        blameControl1.ConfigureRepositoryHostPlugin(PluginRegistry.TryGetGitHosterForModule(Module));
-    }
+            FileName = fileName;
 
-    private void FormBlameLoad(object sender, EventArgs e)
-    {
-        Text = $"Blame ({FileName})";
+            _ = blameControl1.LoadBlameAsync(revision ?? Module.GetRevision(), children: null, fileName, revisionGridInfo: null, revisionGridUpdate: null, controlToMask: null, Module.FilesEncoding, initialLine);
+            blameControl1.ConfigureRepositoryHostPlugin(PluginRegistry.TryGetGitHosterForModule(Module));
+        }
+
+        private void FormBlameLoad(object sender, EventArgs e)
+        {
+            Text = $"Blame ({FileName})";
+        }
     }
 }

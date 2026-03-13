@@ -1,12 +1,21 @@
-﻿namespace GitUIPluginInterfaces.BuildServerIntegration;
-
-public interface IBuildDurationFormatter
+﻿namespace GitUIPluginInterfaces.BuildServerIntegration
 {
-    string Format(long? durationMilliseconds);
-}
+    public interface IBuildDurationFormatter
+    {
+        string Format(long? durationMilliseconds);
+    }
 
-public class BuildDurationFormatter : IBuildDurationFormatter
-{
-    public string Format(long? durationMilliseconds)
-        => durationMilliseconds.HasValue ? TimeSpan.FromMilliseconds(durationMilliseconds.Value).ToString(@"mm\:ss") : string.Empty;
+    public class BuildDurationFormatter : IBuildDurationFormatter
+    {
+        public string Format(long? durationMilliseconds)
+        {
+            if (durationMilliseconds.HasValue)
+            {
+                string timeText = TimeSpan.FromMilliseconds(durationMilliseconds.Value).ToString(@"mm\:ss");
+                return $"({timeText})";
+            }
+
+            return string.Empty;
+        }
+    }
 }

@@ -1,71 +1,70 @@
 ﻿using GitUI.UserControls.RevisionGrid;
 
-namespace GitUI.LeftPanel;
-
-internal abstract class BaseRevisionTree : Tree
+namespace GitUI.LeftPanel
 {
-    private readonly ExclusiveTaskRunner _updateTaskRunner = ThreadHelper.CreateExclusiveTaskRunner();
-
-    protected readonly ICheckRefs _refsSource;
-
-    public BaseRevisionTree(TreeNode treeNode, IGitUICommandsSource uiCommands, ICheckRefs refsSource)
-        : base(treeNode, uiCommands)
+    internal abstract class BaseRevisionTree : Tree
     {
-        _refsSource = refsSource;
-    }
+        private readonly ExclusiveTaskRunner _updateTaskRunner = ThreadHelper.CreateExclusiveTaskRunner();
 
-    public override void Dispose()
-    {
-        _updateTaskRunner.Dispose();
-        base.Dispose();
-    }
+        protected readonly ICheckRefs _refsSource;
 
-    protected override void OnDetached()
-    {
-        _updateTaskRunner.CancelCurrent();
-        base.OnDetached();
-    }
-
-    internal virtual void UpdateVisibility()
-    {
-        TreeView treeView = TreeViewNode.TreeView;
-
-        if (treeView is null || !IsAttached)
+        public BaseRevisionTree(TreeNode treeNode, IGitUICommandsSource uiCommands, ICheckRefs refsSource)
+            : base(treeNode, uiCommands)
         {
-            return;
+            _refsSource = refsSource;
         }
 
-        _updateTaskRunner.RunDetached(async cancellationToken =>
+        public override void Dispose()
         {
-#pragma warning disable VSTHRD003 // Avoid awaiting foreign Tasks
-            await LoadingCompleted.Task;
-#pragma warning restore VSTHRD003 // Avoid awaiting foreign Tasks
+            _updateTaskRunner.Dispose();
+            base.Dispose();
+        }
 
-            await treeView.SwitchToMainThreadAsync(cancellationToken);
+        protected override void OnDetached()
+        {
+            _updateTaskRunner.CancelCurrent();
+            base.OnDetached();
+        }
 
-            // Check again after switch to main thread
-            treeView = TreeViewNode.TreeView;
+        internal virtual void UpdateVisibility()
+        {
+            TreeView treeView = TreeViewNode.TreeView;
 
             if (treeView is null || !IsAttached)
             {
                 return;
             }
 
-            foreach (BaseRevisionNode node in Nodes.DepthEnumerator<BaseRevisionNode>())
+            _updateTaskRunner.RunDetached(async cancellationToken =>
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                if (node.ObjectId is null)
+                await LoadingCompleted.Task;
+
+                await treeView.SwitchToMainThreadAsync(cancellationToken);
+
+                // Check again after switch to main thread
+                treeView = TreeViewNode.TreeView;
+
+                if (treeView is null || !IsAttached)
                 {
-                    continue;
+                    return;
                 }
 
-                bool isVisible = _refsSource.Contains(node.ObjectId);
-                if (node.Visible != isVisible)
+                foreach (BaseRevisionNode node in Nodes.DepthEnumerator<BaseRevisionNode>())
                 {
-                    node.Visible = isVisible;
-                    node.ApplyStyle();
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (node.ObjectId is null)
+                    {
+                        continue;
+                    }
+
+                    bool isVisible = _refsSource.Contains(node.ObjectId);
+                    if (node.Visible != isVisible)
+                    {
+                        node.Visible = isVisible;
+                        node.ApplyStyle();
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 }

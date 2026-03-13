@@ -1,14 +1,10 @@
 ﻿# Overview
 
-Git Extensions supports color customization to some extent:
+Git Extensions supports color customization, specifically a user can choose between
+a default (operating system defined), a bright or a dark themes.
 
-- Activate Windows light or dark app mode
-- Customize app spceific colors
-
-There is no full theme support, system colors cannot be changed.
-
-Git Extensions includes a light+ theme (slightly darker panels compared to the built-in light theme),
-a dark theme for system dark mode and a dark+ mode with slightly darker panels.
+There is a [Wiki page on Dark Theme](https://github.com/gitextensions/gitextensions/wiki/Dark-Theme)
+with some background information and a list of known issues.
 
 ## Themes location
 
@@ -17,7 +13,7 @@ is an 'Installed' or a 'Portable' version. Both come with a predefined set of th
 `{App install}\Themes` directory.
 
 In addition the Installed version looks for user-defined themes in
-`%AppData%\GitExtensions\GitExtensions\Themes` directory.
+`%AppData%\Roaming\GitExtensions\GitExtensions\Themes` directory.
 
 For each found theme file `ColorSettings` page will show an entry in the Theme dropdown list.
 
@@ -31,7 +27,7 @@ The default theme is in `Themes\invariant.css`.
 #### Custom themes
 
 Any modifications for personal use should be saved to
-`%AppData%\GitExtensions\GitExtensions\Themes` directory, because any changes to
+`%AppData%\Roaming\GitExtensions\GitExtensions\Themes` directory, because any changes to
 `{App install}\Themes` directory will be lost as soon as user updates or re-installs the app.
 
 ### Portable application
@@ -41,13 +37,15 @@ It only uses pre-installed themes from `{App install}\Themes` directory.
 
 ## How to create a custom theme
 
-Copy `Themes\dark.css` or `Theme\invariant.css` and change color values. Use a text editor, preferably
+Copy `Themes\dark.css` or `Theme\bright.css` and change color values. Use a text editor, preferably
 with .css syntax highlighting and inline color display.
 
-Only application colors like branch labels in the revision grid and
-diff colors can be changed, the system colors cannot be changed.
+Currently only application colors like branch labels in the revision grid and
+diff colors can be changed, the system colors listed in the templates will not be changed.
+Furthermore a dark theme is only usable if the Windows system theme is dark.
+(Dark mode in Windows settings is not sufficient to change system colors to be dark.)
 
-There is an extension for Visual Studio to show .css colors inline.
+There is a plugin for Visual Studio to show .css colors inline.
 
 Visual Studio Code and JetBrains Rider displays .css colors inline out-of-the-box.
 
@@ -58,21 +56,21 @@ Use .css import directive to reuse color values from another theme.
 - To import from a preinstalled theme:
 
 ```css
-@import url("dark.css");
+@import url("bright.css");
 ```
 
 - To import from a user-defined theme:
 
 ```css
-@import url("{UserAppData}/dark_custom.css");
+@import url("{UserAppData}/bright_custom.css");
 ```
 
 ### Specify alternative color values for colorblind users
 
 To keep the number of themes small, color variations for colorblind users are specified without
-creating a separate theme. See for example `dark.css`:
+creating a separate theme. See for example `bright.css`:
 
 ```css
-.AnsiTerminalRedBackNormal { color: #620707; }
-.AnsiTerminalRedBackNormal.colorblind { color: #080646; }
+.Graph            { color: #8a0000 } /* hsl(0,   100%, 27%) */
+.Graph.colorblind { color: #0600a8 } /* hsl(242, 100%, 33%) */
 ```

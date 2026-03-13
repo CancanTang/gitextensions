@@ -1,49 +1,47 @@
 ﻿using System.Reactive.Linq;
 
-namespace GitCommands;
-
-public enum DiffListSortType
+namespace GitCommands
 {
-    /// <summary>
-    /// Sorts by file path alphanumerically
-    /// </summary>
-    FilePath,
-    FilePathFlat,
-
-    /// <summary>
-    /// Sorts by file extension then by path
-    /// </summary>
-    FileExtension,
-    FileExtensionFlat,
-
-    /// <summary>
-    /// Sorts by git change type. Addition, Deletions, edits, etc. then by path
-    /// </summary>
-    FileStatus,
-    FileStatusFlat
-}
-
-public interface IDiffListSortService
-{
-    DiffListSortType DiffListSorting { get; set; }
-
-    event EventHandler DiffListSortingChanged;
-}
-
-public static class DiffListSortServiceExtensions
-{
-    /// <summary>
-    /// Provides the <see cref="IDiffListSortService.DiffListSorting"/> immediately and then an element for each <see cref="IDiffListSortService.DiffListSortingChanged"/>.
-    /// </summary>
-    /// <param name="diffListSortService">The diff list service</param>
-    /// <returns>A hot stream with one immediate cold element.</returns>
-    public static IObservable<DiffListSortType> CurrentAndFutureSorting(this IDiffListSortService diffListSortService)
+    public enum DiffListSortType
     {
-        return Observable.Return(diffListSortService.DiffListSorting)
-            .Concat(Observable.FromEventPattern(
-                h => diffListSortService.DiffListSortingChanged += h,
-                h => diffListSortService.DiffListSortingChanged -= h)
-                .Select(_ => diffListSortService.DiffListSorting))
-            .DistinctUntilChanged();
+        /// <summary>
+        /// Sorts by file path alphanumerically
+        /// </summary>
+        FilePath,
+
+        /// <summary>
+        /// Sorts by file extension then by path
+        /// </summary>
+        FileExtension,
+
+        /// <summary>
+        /// Sorts by git change type. Addition, Deletions, edits, etc. then by path
+        /// </summary>
+        FileStatus
+    }
+
+    public interface IDiffListSortService
+    {
+        DiffListSortType DiffListSorting { get; set; }
+
+        event EventHandler DiffListSortingChanged;
+    }
+
+    public static class DiffListSortServiceExtensions
+    {
+        /// <summary>
+        /// Provides the <see cref="IDiffListSortService.DiffListSorting"/> immediately and then an element for each <see cref="IDiffListSortService.DiffListSortingChanged"/>.
+        /// </summary>
+        /// <param name="diffListSortService">The diff list service</param>
+        /// <returns>A hot stream with one immediate cold element.</returns>
+        public static IObservable<DiffListSortType> CurrentAndFutureSorting(this IDiffListSortService diffListSortService)
+        {
+            return Observable.Return(diffListSortService.DiffListSorting)
+                .Concat(Observable.FromEventPattern(
+                    h => diffListSortService.DiffListSortingChanged += h,
+                    h => diffListSortService.DiffListSortingChanged -= h)
+                    .Select(_ => diffListSortService.DiffListSorting))
+                .DistinctUntilChanged();
+        }
     }
 }

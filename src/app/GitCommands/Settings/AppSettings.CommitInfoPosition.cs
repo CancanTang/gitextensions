@@ -1,9 +1,10 @@
-﻿namespace GitCommands;
-
-public enum CommitInfoPosition
+﻿namespace GitCommands
 {
-    // DO NOT RENAME THESE -- doing so will break user preferences
-    BelowList = 0,
-    LeftwardFromList = 1,
-    RightwardFromList = 2
+    public enum CommitInfoPosition
+    {
+        // DO NOT RENAME THESE -- doing so will break user preferences
+        BelowList = 0,
+        LeftwardFromList = 1,
+        RightwardFromList = 2
+    }
 }

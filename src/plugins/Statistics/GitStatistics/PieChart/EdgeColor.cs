@@ -1,75 +1,76 @@
 ﻿using GitExtensions.Extensibility;
 
-namespace GitExtensions.Plugins.GitStatistics.PieChart;
-
-/// <summary>
-///   Structure representing edge color used for rendering.
-/// </summary>
-public static class EdgeColor
+namespace GitExtensions.Plugins.GitStatistics.PieChart
 {
-    private const float BrightnessThreshold = 0.4F;
-
     /// <summary>
-    ///   Gets the actual color used for rendering.
+    ///   Structure representing edge color used for rendering.
     /// </summary>
-    public static Color GetRenderingColor(EdgeColorType edgeColorType, Color color)
+    public static class EdgeColor
     {
-        DebugHelpers.Assert(color != Color.Empty, "color != Color.Empty");
-        if (edgeColorType is (EdgeColorType.Contrast or EdgeColorType.EnhancedContrast))
+        private const float BrightnessThreshold = 0.4F;
+
+        /// <summary>
+        ///   Gets the actual color used for rendering.
+        /// </summary>
+        public static Color GetRenderingColor(EdgeColorType edgeColorType, Color color)
         {
-            edgeColorType = GetContrastColorType(color, edgeColorType);
+            DebugHelpers.Assert(color != Color.Empty, "color != Color.Empty");
+            if (edgeColorType is (EdgeColorType.Contrast or EdgeColorType.EnhancedContrast))
+            {
+                edgeColorType = GetContrastColorType(color, edgeColorType);
+            }
+
+            float correctionFactor = 0;
+            switch (edgeColorType)
+            {
+                case EdgeColorType.SystemColor:
+                    return SystemColors.WindowText;
+                case EdgeColorType.SurfaceColor:
+                    return color;
+                case EdgeColorType.FullContrast:
+                    return GetFullContrastColor(color);
+                case EdgeColorType.DarkerThanSurface:
+                    correctionFactor = -ColorUtil.BrightnessEnhancementFactor1;
+                    break;
+                case EdgeColorType.DarkerDarkerThanSurface:
+                    correctionFactor = -ColorUtil.BrightnessEnhancementFactor2;
+                    break;
+                case EdgeColorType.LighterThanSurface:
+                    correctionFactor = +ColorUtil.BrightnessEnhancementFactor1;
+                    break;
+                case EdgeColorType.LighterLighterThanSurface:
+                    correctionFactor = +ColorUtil.BrightnessEnhancementFactor2;
+                    break;
+                case EdgeColorType.NoEdge:
+                    return Color.Transparent;
+            }
+
+            return ColorUtil.CreateColorWithCorrectedLightness(color, correctionFactor);
         }
 
-        float correctionFactor = 0;
-        switch (edgeColorType)
+        private static EdgeColorType GetContrastColorType(Color color, EdgeColorType colorType)
         {
-            case EdgeColorType.SystemColor:
-                return SystemColors.WindowText;
-            case EdgeColorType.SurfaceColor:
-                return color;
-            case EdgeColorType.FullContrast:
-                return GetFullContrastColor(color);
-            case EdgeColorType.DarkerThanSurface:
-                correctionFactor = -ColorUtil.BrightnessEnhancementFactor1;
-                break;
-            case EdgeColorType.DarkerDarkerThanSurface:
-                correctionFactor = -ColorUtil.BrightnessEnhancementFactor2;
-                break;
-            case EdgeColorType.LighterThanSurface:
-                correctionFactor = +ColorUtil.BrightnessEnhancementFactor1;
-                break;
-            case EdgeColorType.LighterLighterThanSurface:
-                correctionFactor = +ColorUtil.BrightnessEnhancementFactor2;
-                break;
-            case EdgeColorType.NoEdge:
-                return Color.Transparent;
-        }
+            DebugHelpers.Assert(colorType is (EdgeColorType.Contrast or EdgeColorType.EnhancedContrast), "colorType is(EdgeColorType.Contrast or EdgeColorType.EnhancedContrast)");
+            if (color.GetBrightness() > BrightnessThreshold)
+            {
+                return colorType ==
+                       EdgeColorType.Contrast
+                           ? EdgeColorType.DarkerThanSurface
+                           : EdgeColorType.DarkerDarkerThanSurface;
+            }
 
-        return ColorUtil.CreateColorWithCorrectedLightness(color, correctionFactor);
-    }
-
-    private static EdgeColorType GetContrastColorType(Color color, EdgeColorType colorType)
-    {
-        DebugHelpers.Assert(colorType is (EdgeColorType.Contrast or EdgeColorType.EnhancedContrast), "colorType is(EdgeColorType.Contrast or EdgeColorType.EnhancedContrast)");
-        if (color.GetBrightness() > BrightnessThreshold)
-        {
             return colorType ==
                    EdgeColorType.Contrast
-                       ? EdgeColorType.DarkerThanSurface
-                       : EdgeColorType.DarkerDarkerThanSurface;
+                       ? EdgeColorType.LighterThanSurface
+                       : EdgeColorType.LighterLighterThanSurface;
         }
 
-        return colorType ==
-               EdgeColorType.Contrast
-                   ? EdgeColorType.LighterThanSurface
-                   : EdgeColorType.LighterLighterThanSurface;
-    }
-
-    private static Color GetFullContrastColor(Color color)
-    {
-        return
-            color.GetBrightness() > BrightnessThreshold
-                ? Color.Black
-                : Color.White;
+        private static Color GetFullContrastColor(Color color)
+        {
+            return
+                color.GetBrightness() > BrightnessThreshold
+                    ? Color.Black
+                    : Color.White;
+        }
     }
 }

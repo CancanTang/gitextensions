@@ -1,10 +1,11 @@
-﻿namespace System;
-
-internal static partial class NativeMethods
+﻿namespace System
 {
-    public struct CHARRANGE
+    internal static partial class NativeMethods
     {
-        public int cpMin;         // First character of range (0 for start of doc)
-        public int cpMax;         // Last character of range (-1 for end of doc)
+        public struct CHARRANGE
+        {
+            public int cpMin;         // First character of range (0 for start of doc)
+            public int cpMax;         // Last character of range (-1 for end of doc)
+        }
     }
 }

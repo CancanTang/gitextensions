@@ -1,37 +1,38 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace GitUI;
-
-/// <summary>
-/// A form that explains that the command needed authentication, and offers to load a private key.
-/// </summary>
-public partial class FormPuttyError : GitExtensionsForm
+namespace GitUI
 {
-    /// <summary>Shows the "SSH error" dialog modally, and returns the path to the key, if one was loaded.</summary>
-    public static bool AskForKey(IWin32Window parent, [NotNullWhen(returnValue: true)] out string? keyPath)
+    /// <summary>
+    /// A form that explains that the command needed authentication, and offers to load a private key.
+    /// </summary>
+    public partial class FormPuttyError : GitExtensionsForm
     {
-        using FormPuttyError form = new();
-        DialogResult result = form.ShowDialog(parent);
-        keyPath = form.KeyPath;
-        return result == DialogResult.Retry;
-    }
-
-    public string? KeyPath { get; private set; }
-
-    public FormPuttyError()
-    {
-        InitializeComponent();
-        InitializeComplete();
-    }
-
-    private void LoadSSHKey_Click(object sender, EventArgs e)
-    {
-        string pathLoaded = BrowseForPrivateKey.BrowseAndLoad(this);
-        if (!string.IsNullOrEmpty(pathLoaded))
+        /// <summary>Shows the "SSH error" dialog modally, and returns the path to the key, if one was loaded.</summary>
+        public static bool AskForKey(IWin32Window parent, [NotNullWhen(returnValue: true)] out string? keyPath)
         {
-            KeyPath = pathLoaded;
-            DialogResult = DialogResult.Retry;
-            Close();
+            using FormPuttyError form = new();
+            DialogResult result = form.ShowDialog(parent);
+            keyPath = form.KeyPath;
+            return result == DialogResult.Retry;
+        }
+
+        public string? KeyPath { get; private set; }
+
+        public FormPuttyError()
+        {
+            InitializeComponent();
+            InitializeComplete();
+        }
+
+        private void LoadSSHKey_Click(object sender, EventArgs e)
+        {
+            string pathLoaded = BrowseForPrivateKey.BrowseAndLoad(this);
+            if (!string.IsNullOrEmpty(pathLoaded))
+            {
+                KeyPath = pathLoaded;
+                DialogResult = DialogResult.Retry;
+                Close();
+            }
         }
     }
 }

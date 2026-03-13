@@ -1,14 +1,10 @@
-﻿#nullable enable
+﻿using GitCommands.Settings;
 
-using GitCommands.Settings;
-
-namespace GitUI.CommandsDialogs.SettingsDialog;
-
-public readonly record struct DistributedSettingsSet(
-    DistributedSettings EffectiveSettings,
-    DistributedSettings LocalSettings,
-    DistributedSettings DistributedSettings,
-    DistributedSettings GlobalSettings)
+namespace GitUI.CommandsDialogs.SettingsDialog
 {
-    public void Save() => EffectiveSettings.Save();
+    public readonly record struct DistributedSettingsSet(
+        DistributedSettings EffectiveSettings,
+        DistributedSettings LocalSettings,
+        DistributedSettings DistributedSettings,
+        DistributedSettings GlobalSettings);
 }

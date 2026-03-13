@@ -31,11 +31,14 @@ public interface IProcess : IDisposable
     StreamReader StandardOutput { get; }
 
     /// <summary>
-    /// Gets the redirected output from the process's standard error stream.
+    /// Gets an object that facilitates writing to the process's standard error stream.
     /// </summary>
+    /// <remarks>
+    /// To access the underlying <see cref="Stream"/>, dereference <see cref="StreamWriter.BaseStream"/>.
+    /// </remarks>
     /// <exception cref="InvalidOperationException">This process's output was not redirected
     /// when calling <see cref="IExecutable.Start"/>.</exception>
-    string StandardError { get; }
+    StreamReader StandardError { get; }
 
     /// <summary>
     /// Kill the process at once.

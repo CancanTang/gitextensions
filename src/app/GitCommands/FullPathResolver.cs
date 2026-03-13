@@ -1,50 +1,51 @@
 using GitExtensions.Extensibility;
 
-namespace GitCommands;
-
-public sealed class FullPathResolver : IFullPathResolver
+namespace GitCommands
 {
-    private readonly Func<string> _getWorkingDir;
-
-    public FullPathResolver(Func<string> getWorkingDir)
+    public sealed class FullPathResolver : IFullPathResolver
     {
-        _getWorkingDir = getWorkingDir;
-    }
+        private readonly Func<string> _getWorkingDir;
 
-    /// <inheritdoc />
-    /// <summary>
-    /// Resolves the provided path (folder or file) against the current working directory.
-    /// </summary>
-    /// <param name="path">Folder or file path to resolve.</param>
-    /// <returns>
-    /// <paramref name="path" /> if <paramref name="path" /> is rooted; otherwise resolved path from working directory of the current repository.
-    /// </returns>
-    /// <exception cref="PathTooLongException">The resolved path is too long (greater than 248 characters).</exception>
-    public string? Resolve(string? path)
-    {
-        if (string.IsNullOrWhiteSpace(path))
+        public FullPathResolver(Func<string> getWorkingDir)
         {
-            return null;
+            _getWorkingDir = getWorkingDir;
         }
 
-        if (Path.IsPathRooted(path))
+        /// <inheritdoc />
+        /// <summary>
+        /// Resolves the provided path (folder or file) against the current working directory.
+        /// </summary>
+        /// <param name="path">Folder or file path to resolve.</param>
+        /// <returns>
+        /// <paramref name="path" /> if <paramref name="path" /> is rooted; otherwise resolved path from working directory of the current repository.
+        /// </returns>
+        /// <exception cref="PathTooLongException">The resolved path is too long (greater than 248 characters).</exception>
+        public string? Resolve(string? path)
         {
-            return path;
-        }
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return null;
+            }
 
-        string workingDir = _getWorkingDir();
-        if (string.IsNullOrWhiteSpace(workingDir))
-        {
-            workingDir = Environment.CurrentDirectory;
-        }
+            if (Path.IsPathRooted(path))
+            {
+                return path;
+            }
 
-        string basePath = Path.GetFullPath(workingDir);
-        if (!basePath.EndsWith(Path.DirectorySeparatorChar.ToString())
-            && !basePath.EndsWith(Path.AltDirectorySeparatorChar.ToString()))
-        {
-            basePath += Path.DirectorySeparatorChar;
-        }
+            string workingDir = _getWorkingDir();
+            if (string.IsNullOrWhiteSpace(workingDir))
+            {
+                workingDir = Environment.CurrentDirectory;
+            }
 
-        return PathUtil.Resolve(basePath, path);
+            string basePath = Path.GetFullPath(workingDir);
+            if (!basePath.EndsWith(Path.DirectorySeparatorChar.ToString())
+                && !basePath.EndsWith(Path.AltDirectorySeparatorChar.ToString()))
+            {
+                basePath += Path.DirectorySeparatorChar;
+            }
+
+            return PathUtil.Resolve(basePath, path);
+        }
     }
 }

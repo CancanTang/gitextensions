@@ -3,65 +3,66 @@ using GitExtensions.Extensibility.Git;
 using GitUI.LeftPanel.Interfaces;
 using GitUI.Properties;
 
-namespace GitUI.LeftPanel;
-
-[DebuggerDisplay("(Tag) FullPath = {FullPath}, Hash = {ObjectId}, Visible: {Visible}")]
-internal sealed class TagNode : BaseRevisionNode, IGitRefActions, ICanDelete
+namespace GitUI.LeftPanel
 {
-    public TagNode(Tree tree, in ObjectId? objectId, string fullPath, bool visible)
-        : base(tree, fullPath, visible)
+    [DebuggerDisplay("(Tag) FullPath = {FullPath}, Hash = {ObjectId}, Visible: {Visible}")]
+    internal sealed class TagNode : BaseRevisionNode, IGitRefActions, ICanDelete
     {
-        ObjectId = objectId;
-    }
-
-    internal override void OnSelected()
-    {
-        if (Tree.IgnoreSelectionChangedEvent)
+        public TagNode(Tree tree, in ObjectId? objectId, string fullPath, bool visible)
+            : base(tree, fullPath, visible)
         {
-            return;
+            ObjectId = objectId;
         }
 
-        base.OnSelected();
-        SelectRevision();
-    }
+        internal override void OnSelected()
+        {
+            if (Tree.IgnoreSelectionChangedEvent)
+            {
+                return;
+            }
 
-    internal override void OnDoubleClick()
-    {
-        CreateBranch();
-    }
+            base.OnSelected();
+            SelectRevision();
+        }
 
-    internal override void OnDelete()
-    {
-        Delete();
-    }
+        internal override void OnDoubleClick()
+        {
+            CreateBranch();
+        }
 
-    public bool CreateBranch()
-    {
-        return UICommands.StartCreateBranchDialog(TreeViewNode.TreeView, ObjectId);
-    }
+        internal override void OnDelete()
+        {
+            Delete();
+        }
 
-    public bool Delete()
-    {
-        return UICommands.StartDeleteTagDialog(TreeViewNode.TreeView, FullPath);
-    }
+        public bool CreateBranch()
+        {
+            return UICommands.StartCreateBranchDialog(TreeViewNode.TreeView, ObjectId);
+        }
 
-    public bool Merge()
-    {
-        return UICommands.StartMergeBranchDialog(TreeViewNode.TreeView, FullPath);
-    }
+        public bool Delete()
+        {
+            return UICommands.StartDeleteTagDialog(TreeViewNode.TreeView, FullPath);
+        }
 
-    public override void ApplyStyle()
-    {
-        base.ApplyStyle();
+        public bool Merge()
+        {
+            return UICommands.StartMergeBranchDialog(TreeViewNode.TreeView, FullPath);
+        }
 
-        TreeViewNode.ImageKey = TreeViewNode.SelectedImageKey =
-            Visible
-                ? nameof(Images.TagHorizontal)
-                : nameof(Images.EyeClosed);
-    }
+        public override void ApplyStyle()
+        {
+            base.ApplyStyle();
 
-    public bool Checkout()
-    {
-        return UICommands.StartCheckoutRevisionDialog(TreeViewNode.TreeView, FullPath);
+            TreeViewNode.ImageKey = TreeViewNode.SelectedImageKey =
+                Visible
+                    ? nameof(Images.TagHorizontal)
+                    : nameof(Images.EyeClosed);
+        }
+
+        public bool Checkout()
+        {
+            return UICommands.StartCheckoutRevisionDialog(TreeViewNode.TreeView, FullPath);
+        }
     }
 }

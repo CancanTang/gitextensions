@@ -1,30 +1,31 @@
 ﻿using System.Text;
 
-namespace GitExtUtils;
-
-public static class FileUtility
+namespace GitExtUtils
 {
-    /// <summary>
-    /// Writes all text to a file. Works around issues with hidden files encountered by File.WriteAllText.
-    /// </summary>
-    /// <param name="fileName">Destination file.</param>
-    /// <param name="contents">Text to write as file contents.</param>
-    /// <param name="encoding">Encoding used for StreamWriter to convert text to bytes.</param>
-    /// <param name="filePreamble">File preamble (such as BOM) to put at the beginning of a file.</param>
-    public static void SafeWriteAllText(string fileName, string contents, Encoding encoding, byte[] filePreamble)
+    public static class FileUtility
     {
-        using FileStream fs = new(fileName, FileMode.Open);
-        using (TextWriter tw = new StreamWriter(fs, encoding, bufferSize: 4096, leaveOpen: true))
+        /// <summary>
+        /// Writes all text to a file. Works around issues with hidden files encountered by File.WriteAllText.
+        /// </summary>
+        /// <param name="fileName">Destination file.</param>
+        /// <param name="contents">Text to write as file contents.</param>
+        /// <param name="encoding">Encoding used for StreamWriter to convert text to bytes.</param>
+        /// <param name="filePreamble">File preamble (such as BOM) to put at the beginning of a file.</param>
+        public static void SafeWriteAllText(string fileName, string contents, Encoding encoding, byte[] filePreamble)
         {
-            if (filePreamble.Length > 0)
+            using FileStream fs = new(fileName, FileMode.Open);
+            using (TextWriter tw = new StreamWriter(fs, encoding, bufferSize: 4096, leaveOpen: true))
             {
-                fs.Write(filePreamble, 0, filePreamble.Length);
+                if (filePreamble.Length > 0)
+                {
+                    fs.Write(filePreamble, 0, filePreamble.Length);
+                }
+
+                tw.Write(contents);
             }
 
-            tw.Write(contents);
+            // after flushing, set the stream length to the current position in order to truncate leftover text
+            fs.SetLength(fs.Position);
         }
-
-        // after flushing, set the stream length to the current position in order to truncate leftover text
-        fs.SetLength(fs.Position);
     }
 }

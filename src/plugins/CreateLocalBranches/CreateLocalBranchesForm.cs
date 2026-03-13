@@ -3,57 +3,58 @@ using GitExtensions.Extensibility;
 using GitExtensions.Extensibility.Git;
 using GitExtUtils;
 
-namespace GitExtensions.Plugins.CreateLocalBranches;
-
-public partial class CreateLocalBranchesForm : ResourceManager.GitExtensionsFormBase
+namespace GitExtensions.Plugins.CreateLocalBranches
 {
-    private readonly GitUIEventArgs _gitUiCommands;
-
-    public CreateLocalBranchesForm(GitUIEventArgs gitUiCommands)
+    public partial class CreateLocalBranchesForm : ResourceManager.GitExtensionsFormBase
     {
-        InitializeComponent();
-        InitializeComplete();
+        private readonly GitUIEventArgs _gitUiCommands;
 
-        _gitUiCommands = gitUiCommands;
-    }
-
-    private void button1_Click(object sender, EventArgs e)
-    {
-        GitArgumentBuilder args = new("branch") { "-a" };
-        string[] references = _gitUiCommands.GitModule.GitExecutable.GetOutput(args)
-            .Split('\n', StringSplitOptions.RemoveEmptyEntries);
-
-        if (references.Length == 0)
+        public CreateLocalBranchesForm(GitUIEventArgs gitUiCommands)
         {
-            MessageBox.Show(this, "No remote branches found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            DialogResult = DialogResult.Cancel;
-            return;
+            InitializeComponent();
+            InitializeComplete();
+
+            _gitUiCommands = gitUiCommands;
         }
 
-        foreach (string reference in references)
+        private void button1_Click(object sender, EventArgs e)
         {
-            try
-            {
-                string branchName = reference.Trim(Delimiters.GitOutput);
+            GitArgumentBuilder args = new("branch") { "-a" };
+            string[] references = _gitUiCommands.GitModule.GitExecutable.GetOutput(args)
+                .Split('\n', StringSplitOptions.RemoveEmptyEntries);
 
-                if (branchName.StartsWith("remotes/" + _NO_TRANSLATE_Remote.Text + "/"))
+            if (references.Length == 0)
+            {
+                MessageBox.Show(this, "No remote branches found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                DialogResult = DialogResult.Cancel;
+                return;
+            }
+
+            foreach (string reference in references)
+            {
+                try
                 {
-                    args = new GitArgumentBuilder("branch")
+                    string branchName = reference.Trim(Delimiters.GitOutput);
+
+                    if (branchName.StartsWith("remotes/" + _NO_TRANSLATE_Remote.Text + "/"))
                     {
-                        "--track",
-                        branchName.Replace($"remotes/{_NO_TRANSLATE_Remote.Text}/", ""),
-                        branchName
-                    };
-                    _gitUiCommands.GitModule.GitExecutable.GetOutput(args);
+                        args = new GitArgumentBuilder("branch")
+                        {
+                            "--track",
+                            branchName.Replace($"remotes/{_NO_TRANSLATE_Remote.Text}/", ""),
+                            branchName
+                        };
+                        _gitUiCommands.GitModule.GitExecutable.GetOutput(args);
+                    }
+                }
+                catch
+                {
                 }
             }
-            catch
-            {
-            }
-        }
 
-        MessageBox.Show(this, string.Format("{0} local tracking branches have been created/updated.", references.Length),
-            "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        Close();
+            MessageBox.Show(this, string.Format("{0} local tracking branches have been created/updated.", references.Length),
+                "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            Close();
+        }
     }
 }

@@ -1,11 +1,12 @@
-namespace GitExtensions.Extensibility.Git;
-
-public sealed class GitModuleEventArgs : EventArgs
+namespace GitExtensions.Extensibility.Git
 {
-    public GitModuleEventArgs(IGitModule gitModule)
+    public sealed class GitModuleEventArgs : EventArgs
     {
-        GitModule = gitModule;
-    }
+        public GitModuleEventArgs(IGitModule gitModule)
+        {
+            GitModule = gitModule;
+        }
 
-    public IGitModule GitModule { get; }
+        public IGitModule GitModule { get; }
+    }
 }

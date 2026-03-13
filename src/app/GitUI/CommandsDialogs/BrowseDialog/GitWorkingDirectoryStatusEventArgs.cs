@@ -1,22 +1,23 @@
 ﻿using GitExtensions.Extensibility.Git;
 
-namespace GitUI.CommandsDialogs.BrowseDialog;
-
-public class GitWorkingDirectoryStatusEventArgs : EventArgs
+namespace GitUI.CommandsDialogs.BrowseDialog
 {
-    private readonly IReadOnlyList<GitItemStatus> _itemStatuses = [];
-
-    public GitWorkingDirectoryStatusEventArgs(IReadOnlyList<GitItemStatus> itemStatuses)
+    public class GitWorkingDirectoryStatusEventArgs : EventArgs
     {
-        _itemStatuses = itemStatuses;
-    }
+        private readonly IReadOnlyList<GitItemStatus> _itemStatuses = Array.Empty<GitItemStatus>();
 
-    public GitWorkingDirectoryStatusEventArgs()
-    {
-    }
+        public GitWorkingDirectoryStatusEventArgs(IReadOnlyList<GitItemStatus> itemStatuses)
+        {
+            _itemStatuses = itemStatuses;
+        }
 
-    /// <summary>
-    /// the status of all modified files/submodules or null if the previous information is invalidated.
-    /// </summary>
-    public IReadOnlyList<GitItemStatus>? ItemStatuses => _itemStatuses ?? [];
+        public GitWorkingDirectoryStatusEventArgs()
+        {
+        }
+
+        /// <summary>
+        /// the status of all modified files/submodules or null if the previous information is invalidated.
+        /// </summary>
+        public IReadOnlyList<GitItemStatus>? ItemStatuses => _itemStatuses ?? Array.Empty<GitItemStatus>();
+    }
 }

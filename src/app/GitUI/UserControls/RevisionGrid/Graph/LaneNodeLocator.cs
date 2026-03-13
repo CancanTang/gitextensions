@@ -1,57 +1,57 @@
-﻿namespace GitUI.UserControls.RevisionGrid.Graph;
-
-internal interface ILaneNodeLocator
+﻿namespace GitUI.UserControls.RevisionGrid.Graph
 {
-    (RevisionGraphRevision? revision, bool isAtNode, RevisionGraphRevision? singleChild) FindPrevNode(int rowIndex, int lane);
-}
-
-internal sealed class LaneNodeLocator : ILaneNodeLocator
-{
-    private readonly IRevisionGraphRowProvider _revisionGraphRowProvider;
-
-    public static readonly (RevisionGraphRevision?, bool, RevisionGraphRevision?) NotFoundResult = (null, false, null);
-
-    public LaneNodeLocator(IRevisionGraphRowProvider revisionGraphRowProvider)
+    internal interface ILaneNodeLocator
     {
-        _revisionGraphRowProvider = revisionGraphRowProvider;
+        (RevisionGraphRevision? revision, bool isAtNode) FindPrevNode(int rowIndex, int lane);
     }
 
-    public (RevisionGraphRevision? revision, bool isAtNode, RevisionGraphRevision? singleChild) FindPrevNode(int rowIndex, int lane)
+    internal sealed class LaneNodeLocator : ILaneNodeLocator
     {
-        if (rowIndex < 0 || lane < 0)
+        private readonly IRevisionGraphRowProvider _revisionGraphRowProvider;
+
+        public static readonly (RevisionGraphRevision?, bool) NotFoundResult = (null, false);
+
+        public LaneNodeLocator(IRevisionGraphRowProvider revisionGraphRowProvider)
         {
-            // as unlikely as it may be...
-            // don't throw, just pretend we couldn't find it
-            return NotFoundResult;
+            _revisionGraphRowProvider = revisionGraphRowProvider;
         }
 
-        IRevisionGraphRow? row = _revisionGraphRowProvider.GetSegmentsForRow(rowIndex);
-        if (row is null)
+        public (RevisionGraphRevision? revision, bool isAtNode) FindPrevNode(int rowIndex, int lane)
         {
-            return NotFoundResult;
-        }
-
-        if (row.GetCurrentRevisionLane() == lane)
-        {
-            return (row.Revision, isAtNode: true, singleChild: null);
-        }
-
-        IEnumerable<RevisionGraphSegment> segmentsForLane = row.GetSegmentsForIndex(lane);
-        if (segmentsForLane.Any())
-        {
-            RevisionGraphSegment firstSegment = segmentsForLane.First();
-            RevisionGraphRevision firstParent = firstSegment.Parent;
-#if DEBUG
-            if (segmentsForLane.Any(segment => segment.Parent != firstParent))
+            if (rowIndex < 0 || lane < 0)
             {
-                throw new Exception(string.Format("All segments for a lane should have the same parent.\n"
-                                                  + "Not fulfilled for rowIndex {0} lane {1} with {2} segments.",
-                                                  rowIndex, lane, segmentsForLane.Count()));
+                // as unlikely as it may be...
+                // don't throw, just pretend we couldn't find it
+                return NotFoundResult;
             }
-#endif
-            return (firstParent, isAtNode: false, firstSegment.Child);
-        }
 
-        return NotFoundResult;
+            IRevisionGraphRow? row = _revisionGraphRowProvider.GetSegmentsForRow(rowIndex);
+            if (row is null)
+            {
+                return NotFoundResult;
+            }
+
+            if (row.GetCurrentRevisionLane() == lane)
+            {
+                return (row.Revision, isAtNode: true);
+            }
+
+            IEnumerable<RevisionGraphSegment> segmentsForLane = row.GetSegmentsForIndex(lane);
+            if (segmentsForLane.Any())
+            {
+                RevisionGraphRevision firstParent = segmentsForLane.First().Parent;
+#if DEBUG
+                if (segmentsForLane.Any(segment => segment.Parent != firstParent))
+                {
+                    throw new Exception(string.Format("All segments for a lane should have the same parent.\n"
+                                                      + "Not fulfilled for rowIndex {0} lane {1} with {2} segments.",
+                                                      rowIndex, lane, segmentsForLane.Count()));
+                }
+#endif
+                return (firstParent, isAtNode: false);
+            }
+
+            return NotFoundResult;
+        }
     }
 }

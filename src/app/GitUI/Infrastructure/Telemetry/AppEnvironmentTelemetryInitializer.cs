@@ -1,31 +1,31 @@
 ﻿using GitCommands;
-using GitCommands.Git;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
 
-namespace GitUI.Infrastructure.Telemetry;
-
-internal class AppEnvironmentTelemetryInitializer : ITelemetryInitializer
+namespace GitUI.Infrastructure.Telemetry
 {
-    public void Initialize(ITelemetry telemetry)
+    internal class AppEnvironmentTelemetryInitializer : ITelemetryInitializer
     {
-        string sshClient;
-        string sshPath = AppSettings.SshPath;
-        if (string.IsNullOrEmpty(sshPath))
+        public void Initialize(ITelemetry telemetry)
         {
-            sshClient = "OpenSSH";
-        }
-        else if (GitSshHelpers.IsPlink)
-        {
-            sshClient = "PuTTY";
-        }
-        else
-        {
-            sshClient = "Other";
-        }
+            string sshClient;
+            string sshPath = AppSettings.SshPath;
+            if (string.IsNullOrEmpty(sshPath))
+            {
+                sshClient = "OpenSSH";
+            }
+            else if (GitSshHelpers.IsPlink)
+            {
+                sshClient = "PuTTY";
+            }
+            else
+            {
+                sshClient = "Other";
+            }
 
-        telemetry.Context.GlobalProperties["Git"] = GitVersion.Current.ToString();
-        telemetry.Context.GlobalProperties["SSH"] = sshClient;
-        telemetry.Context.GlobalProperties["SSH.Path"] = sshPath;
+            telemetry.Context.GlobalProperties["Git"] = GitVersion.Current.ToString();
+            telemetry.Context.GlobalProperties["SSH"] = sshClient;
+            telemetry.Context.GlobalProperties["SSH.Path"] = sshPath;
+        }
     }
 }

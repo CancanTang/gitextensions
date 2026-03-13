@@ -1,77 +1,78 @@
 ﻿using GitExtensions.Extensibility.Git;
 
-namespace GitUI.UserControls.RevisionGrid;
-
-internal sealed class ParentChildNavigationHistory
+namespace GitUI.UserControls.RevisionGrid
 {
-    private enum NavigationDirection
+    internal sealed class ParentChildNavigationHistory
     {
-        Parent,
-        Child
-    }
-
-    private readonly Action<ObjectId?> _setSelectedRevision;
-    private NavigationDirection? _direction;
-    private readonly Stack<ObjectId> _childHistory = new();
-    private readonly Stack<ObjectId> _parentHistory = new();
-
-    public ParentChildNavigationHistory(Action<ObjectId?> setSelectedRevision)
-    {
-        _setSelectedRevision = setSelectedRevision;
-    }
-
-    public bool HasPreviousChild => _childHistory.Count > 0;
-    public bool HasPreviousParent => _parentHistory.Count > 0;
-
-    public void NavigateToPreviousParent(ObjectId current)
-    {
-        ObjectId parent = _parentHistory.Pop();
-        Navigate(current, parent, NavigationDirection.Parent);
-    }
-
-    public void NavigateToPreviousChild(ObjectId current)
-    {
-        ObjectId child = _childHistory.Pop();
-        Navigate(current, child, NavigationDirection.Child);
-    }
-
-    public void NavigateToChild(ObjectId current, ObjectId? child)
-    {
-        Navigate(current, child, NavigationDirection.Child);
-    }
-
-    public void NavigateToParent(ObjectId current, ObjectId? parent)
-    {
-        Navigate(current, parent, NavigationDirection.Parent);
-    }
-
-    private void Navigate(ObjectId current, ObjectId? to, NavigationDirection direction)
-    {
-        _direction = direction;
-        if (direction == NavigationDirection.Child)
+        private enum NavigationDirection
         {
-            _parentHistory.Push(current);
-        }
-        else
-        {
-            _childHistory.Push(current);
+            Parent,
+            Child
         }
 
-        _setSelectedRevision(to);
-        _direction = null;
-    }
+        private readonly Action<ObjectId?> _setSelectedRevision;
+        private NavigationDirection? _direction;
+        private readonly Stack<ObjectId> _childHistory = new();
+        private readonly Stack<ObjectId> _parentHistory = new();
 
-    public void Clear()
-    {
-        _childHistory.Clear();
-        _parentHistory.Clear();
-    }
-
-    public void RevisionsSelectionChanged()
-    {
-        if (_direction is null)
+        public ParentChildNavigationHistory(Action<ObjectId?> setSelectedRevision)
         {
-            Clear();
+            _setSelectedRevision = setSelectedRevision;
+        }
+
+        public bool HasPreviousChild => _childHistory.Count > 0;
+        public bool HasPreviousParent => _parentHistory.Count > 0;
+
+        public void NavigateToPreviousParent(ObjectId current)
+        {
+            ObjectId parent = _parentHistory.Pop();
+            Navigate(current, parent, NavigationDirection.Parent);
+        }
+
+        public void NavigateToPreviousChild(ObjectId current)
+        {
+            ObjectId child = _childHistory.Pop();
+            Navigate(current, child, NavigationDirection.Child);
+        }
+
+        public void NavigateToChild(ObjectId current, ObjectId? child)
+        {
+            Navigate(current, child, NavigationDirection.Child);
+        }
+
+        public void NavigateToParent(ObjectId current, ObjectId? parent)
+        {
+            Navigate(current, parent, NavigationDirection.Parent);
+        }
+
+        private void Navigate(ObjectId current, ObjectId? to, NavigationDirection direction)
+        {
+            _direction = direction;
+            if (direction == NavigationDirection.Child)
+            {
+                _parentHistory.Push(current);
+            }
+            else
+            {
+                _childHistory.Push(current);
+            }
+
+            _setSelectedRevision(to);
+            _direction = null;
+        }
+
+        public void Clear()
+        {
+            _childHistory.Clear();
+            _parentHistory.Clear();
+        }
+
+        public void RevisionsSelectionChanged()
+        {
+            if (_direction is null)
+            {
+                Clear();
+            }
         }
     }
 }

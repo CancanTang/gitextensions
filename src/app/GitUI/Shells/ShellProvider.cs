@@ -1,26 +1,27 @@
 ﻿using ConEmu.WinForms;
 
-namespace GitUI.Shells;
-
-public class ShellProvider
+namespace GitUI.Shells
 {
-    private static IShellDescriptor DefaultShell = new BashShell();
-    private static readonly IShellDescriptor[] Shells = [DefaultShell, new CmdShell(), new PwshShell(), new PowerShellShell()];
-
-    public IReadOnlyList<IShellDescriptor> GetShells() => Shells;
-
-    public IShellDescriptor GetShell(string? name) => Shells.FirstOrDefault(s => s.Name == name) ?? DefaultShell;
-
-    public string GetShellCommandLine(string? shellType)
+    public class ShellProvider
     {
-        IShellDescriptor shell = GetShell(shellType);
+        private static IShellDescriptor DefaultShell = new BashShell();
+        private static readonly IShellDescriptor[] Shells = { DefaultShell, new CmdShell(), new PwshShell(), new PowerShellShell() };
 
-        if (!shell.HasExecutable || shell.ExecutableCommandLine is null)
+        public IReadOnlyList<IShellDescriptor> GetShells() => Shells;
+
+        public IShellDescriptor GetShell(string? name) => Shells.FirstOrDefault(s => s.Name == name) ?? DefaultShell;
+
+        public string GetShellCommandLine(string? shellType)
         {
-            // Fallback to default if ExecutableCommandLine is not set
-            return ConEmuConstants.DefaultConsoleCommandLine;
-        }
+            IShellDescriptor shell = GetShell(shellType);
 
-        return shell.ExecutableCommandLine;
+            if (!shell.HasExecutable || shell.ExecutableCommandLine is null)
+            {
+                // Fallback to default if ExecutableCommandLine is not set
+                return ConEmuConstants.DefaultConsoleCommandLine;
+            }
+
+            return shell.ExecutableCommandLine;
+        }
     }
 }

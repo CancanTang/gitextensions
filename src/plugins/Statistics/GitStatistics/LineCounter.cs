@@ -1,97 +1,98 @@
-﻿namespace GitExtensions.Plugins.GitStatistics;
-
-public sealed class LineCounter
+﻿namespace GitExtensions.Plugins.GitStatistics
 {
-    public event EventHandler? Updated;
-
-    public int CommentLineCount { get; private set; }
-    public int TotalLineCount { get; private set; }
-    public int DesignerLineCount { get; private set; }
-    public int TestCodeLineCount { get; private set; }
-    public int BlankLineCount { get; private set; }
-    public int CodeLineCount { get; private set; }
-
-    public Dictionary<string, int> LinesOfCodePerExtension { get; } = [];
-
-    public void FindAndAnalyzeCodeFiles(string filePattern, string directoriesToIgnore, IEnumerable<string> filesToCheck)
+    public sealed class LineCounter
     {
-        HashSet<string> extensions = filePattern.Replace("*", "").Split(';').ToHashSet(StringComparer.InvariantCultureIgnoreCase);
-        string[] directoryFilter = directoriesToIgnore.Split(';');
-        DateTime lastUpdate = DateTime.Now;
-        TimeSpan timer = TimeSpan.FromMilliseconds(500);
+        public event EventHandler? Updated;
 
-        foreach (FileInfo file in GetFiles())
+        public int CommentLineCount { get; private set; }
+        public int TotalLineCount { get; private set; }
+        public int DesignerLineCount { get; private set; }
+        public int TestCodeLineCount { get; private set; }
+        public int BlankLineCount { get; private set; }
+        public int CodeLineCount { get; private set; }
+
+        public Dictionary<string, int> LinesOfCodePerExtension { get; } = [];
+
+        public void FindAndAnalyzeCodeFiles(string filePattern, string directoriesToIgnore, IEnumerable<string> filesToCheck)
         {
-            if (DirectoryIsFiltered(file.Directory, directoryFilter))
+            HashSet<string> extensions = filePattern.Replace("*", "").Split(';').ToHashSet(StringComparer.InvariantCultureIgnoreCase);
+            string[] directoryFilter = directoriesToIgnore.Split(';');
+            DateTime lastUpdate = DateTime.Now;
+            TimeSpan timer = TimeSpan.FromMilliseconds(500);
+
+            foreach (FileInfo file in GetFiles())
             {
-                continue;
-            }
-
-            AddFile(file);
-
-            if (DateTime.Now - lastUpdate > timer)
-            {
-                lastUpdate = DateTime.Now;
-                Updated?.Invoke(this, EventArgs.Empty);
-            }
-        }
-
-        return;
-
-        bool DirectoryIsFiltered(FileSystemInfo dir, IEnumerable<string> directoryFilters)
-        {
-            return directoryFilters.Any(
-                filter => dir.FullName.EndsWith(filter, StringComparison.InvariantCultureIgnoreCase));
-        }
-
-        IEnumerable<FileInfo> GetFiles()
-        {
-            foreach (string file in filesToCheck)
-            {
-                FileInfo fileInfo = null;
-                try
-                {
-                    if (extensions.Contains(Path.GetExtension(file)))
-                    {
-                        fileInfo = new FileInfo(file);
-                    }
-                }
-                catch
+                if (DirectoryIsFiltered(file.Directory, directoryFilter))
                 {
                     continue;
                 }
 
-                if (fileInfo is not null)
+                AddFile(file);
+
+                if (DateTime.Now - lastUpdate > timer)
                 {
-                    yield return fileInfo;
+                    lastUpdate = DateTime.Now;
+                    Updated?.Invoke(this, EventArgs.Empty);
                 }
             }
-        }
 
-        void AddFile(FileInfo file)
-        {
-            if (!file.Exists)
+            return;
+
+            bool DirectoryIsFiltered(FileSystemInfo dir, IEnumerable<string> directoryFilters)
             {
-                return;
+                return directoryFilters.Any(
+                    filter => dir.FullName.EndsWith(filter, StringComparison.InvariantCultureIgnoreCase));
             }
 
-            CodeFile codeFile = CodeFile.Parse(file);
-
-            TotalLineCount += codeFile.TotalLineCount;
-            BlankLineCount += codeFile.BlankLineCount;
-            CommentLineCount += codeFile.CommentLineCount;
-            DesignerLineCount += codeFile.DesignerLineCount;
-
-            string extension = file.Extension.ToLower();
-
-            LinesOfCodePerExtension.TryGetValue(extension, out int linesForExtensions);
-            LinesOfCodePerExtension[extension] = linesForExtensions + codeFile.CodeLineCount;
-
-            CodeLineCount += codeFile.CodeLineCount;
-
-            if (codeFile.IsTestFile || file.Directory?.FullName.Contains("test", StringComparison.OrdinalIgnoreCase) == true)
+            IEnumerable<FileInfo> GetFiles()
             {
-                TestCodeLineCount += codeFile.CodeLineCount;
+                foreach (string file in filesToCheck)
+                {
+                    FileInfo fileInfo = null;
+                    try
+                    {
+                        if (extensions.Contains(Path.GetExtension(file)))
+                        {
+                            fileInfo = new FileInfo(file);
+                        }
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+
+                    if (fileInfo is not null)
+                    {
+                        yield return fileInfo;
+                    }
+                }
+            }
+
+            void AddFile(FileInfo file)
+            {
+                if (!file.Exists)
+                {
+                    return;
+                }
+
+                CodeFile codeFile = CodeFile.Parse(file);
+
+                TotalLineCount += codeFile.TotalLineCount;
+                BlankLineCount += codeFile.BlankLineCount;
+                CommentLineCount += codeFile.CommentLineCount;
+                DesignerLineCount += codeFile.DesignerLineCount;
+
+                string extension = file.Extension.ToLower();
+
+                LinesOfCodePerExtension.TryGetValue(extension, out int linesForExtensions);
+                LinesOfCodePerExtension[extension] = linesForExtensions + codeFile.CodeLineCount;
+
+                CodeLineCount += codeFile.CodeLineCount;
+
+                if (codeFile.IsTestFile || file.Directory?.FullName.Contains("test", StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    TestCodeLineCount += codeFile.CodeLineCount;
+                }
             }
         }
     }

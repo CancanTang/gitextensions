@@ -1,33 +1,34 @@
 ﻿using System.Diagnostics;
 
-namespace GitUI.Avatars;
-
-/// <summary>
-/// A helper provider that wraps another avatar provider.
-/// </summary>
-/// <remarks>
-/// The wrapper is used to support hot swapping (changing a provider without changing the reference of the root provider)
-/// It also catches and logs exceptions and works as a simple NullProvider if <see cref="Provider"/> is not set (set to null).
-/// </remarks>
-public sealed class HotSwapAvatarProvider : IAvatarProvider
+namespace GitUI.Avatars
 {
     /// <summary>
-    /// Gets or sets the currently active provider.
+    /// A helper provider that wraps another avatar provider.
     /// </summary>
-    public IAvatarProvider? Provider { get; set; }
-
-    public bool PerformsIo => Provider?.PerformsIo ?? false;
-
-    public Task<Image?> GetAvatarAsync(string email, string? name, int imageSize)
+    /// <remarks>
+    /// The wrapper is used to support hot swapping (changing a provider without changing the reference of the root provider)
+    /// It also catches and logs exceptions and works as a simple NullProvider if <see cref="Provider"/> is not set (set to null).
+    /// </remarks>
+    public sealed class HotSwapAvatarProvider : IAvatarProvider
     {
-        try
+        /// <summary>
+        /// Gets or sets the currently active provider.
+        /// </summary>
+        public IAvatarProvider? Provider { get; set; }
+
+        public bool PerformsIo => Provider?.PerformsIo ?? false;
+
+        public Task<Image?> GetAvatarAsync(string email, string? name, int imageSize)
         {
-            return Provider?.GetAvatarAsync(email, name, imageSize) ?? Task.FromResult<Image?>(null);
-        }
-        catch (Exception ex)
-        {
-            Trace.WriteLine(ex.Message);
-            return Task.FromResult<Image?>(null);
+            try
+            {
+                return Provider?.GetAvatarAsync(email, name, imageSize) ?? Task.FromResult<Image?>(null);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.Message);
+                return Task.FromResult<Image?>(null);
+            }
         }
     }
 }

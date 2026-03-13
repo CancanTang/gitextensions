@@ -1,31 +1,32 @@
 ﻿using System.ComponentModel;
 
-namespace GitUI.CommandsDialogs;
-
-public partial class EnvironmentInfo : UserControl
+namespace GitUI.CommandsDialogs
 {
-    public EnvironmentInfo()
+    public partial class EnvironmentInfo : UserControl
     {
-        if (LicenseManager.UsageMode == LicenseUsageMode.Designtime || GitModuleForm.IsUnitTestActive)
+        public EnvironmentInfo()
         {
-            UserEnvironmentInformation.Initialise(
-            "9999999999999999999999999999999999abcdef", true);
+            if (LicenseManager.UsageMode == LicenseUsageMode.Designtime || GitModuleForm.IsUnitTestActive)
+            {
+                UserEnvironmentInformation.Initialise(
+                "9999999999999999999999999999999999abcdef", true);
+            }
+
+            InitializeComponent();
+
+            environmentIssueInfo.Text = UserEnvironmentInformation.GetInformation().Replace("- ", "");
         }
 
-        InitializeComponent();
+        public ToolTip? ToolTip { get; set; }
 
-        environmentIssueInfo.Text = UserEnvironmentInformation.GetInformation().Replace("- ", "");
-    }
+        public void SetCopyButtonTooltip(string tooltip)
+        {
+            ToolTip?.SetToolTip(copyButton, tooltip);
+        }
 
-    public ToolTip? ToolTip { get; set; }
-
-    public void SetCopyButtonTooltip(string tooltip)
-    {
-        ToolTip?.SetToolTip(copyButton, tooltip);
-    }
-
-    private void copyButton_Click(object sender, EventArgs e)
-    {
-        UserEnvironmentInformation.CopyInformation();
+        private void copyButton_Click(object sender, EventArgs e)
+        {
+            UserEnvironmentInformation.CopyInformation();
+        }
     }
 }

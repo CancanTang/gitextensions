@@ -1,56 +1,66 @@
-﻿using GitCommands.Git;
+using GitCommands.Git;
 using GitExtensions.Extensibility.Git;
 
-namespace GitCommands;
-
-public interface IGitRevisionInfoProvider
+namespace GitCommands
 {
-    /// <summary>
-    /// Loads children item for the given <paramref name="item"/>.
-    /// </summary>
-    /// <returns>The item's children.</returns>
-    IEnumerable<INamedGitItem> LoadChildren(IGitItem item);
-}
-
-public sealed class GitRevisionInfoProvider : IGitRevisionInfoProvider
-{
-    private readonly Func<IGitModule> _getModule;
-
-    public GitRevisionInfoProvider(Func<IGitModule> getModule)
+    public interface IGitRevisionInfoProvider
     {
-        _getModule = getModule;
+        /// <summary>
+        /// Loads children item for the given <paramref name="item"/>.
+        /// </summary>
+        /// <returns>The item's children.</returns>
+        IEnumerable<INamedGitItem> LoadChildren(IGitItem item);
     }
 
-    /// <summary>
-    /// Loads children item for the given <paramref name="item"/>.
-    /// </summary>
-    /// <returns>The item's children.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="item"/> is <see langword="null"/>.</exception>
-    /// <exception cref="ArgumentException"><see cref="IGitItem.Guid"/> is not supplied.</exception>
-    public IEnumerable<INamedGitItem> LoadChildren(IGitItem item)
+    public sealed class GitRevisionInfoProvider : IGitRevisionInfoProvider
     {
-        ArgumentNullException.ThrowIfNull(item);
+        private readonly Func<IGitModule> _getModule;
 
-        if (item.ObjectId is null)
+        public GitRevisionInfoProvider(Func<IGitModule> getModule)
         {
-            throw new ArgumentException("Item must have a valid identifier", nameof(item));
+            _getModule = getModule;
         }
 
-        IGitModule module = _getModule() ?? throw new ArgumentException($"Require a valid instance of {nameof(IGitModule)}");
-        return YieldSubItems();
-
-        IEnumerable<INamedGitItem> YieldSubItems()
+        /// <summary>
+        /// Loads children item for the given <paramref name="item"/>.
+        /// </summary>
+        /// <returns>The item's children.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="item"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><see cref="IGitItem.Guid"/> is not supplied.</exception>
+        public IEnumerable<INamedGitItem> LoadChildren(IGitItem item)
         {
-            string basePath = (item as GitItem)?.FileName ?? string.Empty;
-
-            foreach (INamedGitItem subItem in module.GetTree(item.ObjectId, full: false))
+            if (item is null)
             {
-                if (subItem is GitItem gitItem)
-                {
-                    gitItem.FileName = Path.Combine(basePath, gitItem.FileName);
-                }
+                throw new ArgumentNullException(nameof(item));
+            }
 
-                yield return subItem;
+            if (item.ObjectId is null)
+            {
+                throw new ArgumentException("Item must have a valid identifier", nameof(item.Guid));
+            }
+
+            IGitModule module = _getModule();
+
+            if (module is null)
+            {
+                throw new ArgumentException($"Require a valid instance of {nameof(IGitModule)}");
+            }
+
+            return YieldSubItems();
+
+            IEnumerable<INamedGitItem> YieldSubItems()
+            {
+                string basePath = (item as GitItem)?.FileName ?? string.Empty;
+
+                foreach (INamedGitItem subItem in module.GetTree(item.ObjectId, full: false))
+                {
+                    if (subItem is GitItem gitItem)
+                    {
+                        gitItem.FileName = Path.Combine(basePath, gitItem.FileName);
+                    }
+
+                    yield return subItem;
+                }
             }
         }
     }

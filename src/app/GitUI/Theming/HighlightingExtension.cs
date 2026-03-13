@@ -1,19 +1,20 @@
 ﻿using GitExtUtils.GitUI.Theming;
 using ICSharpCode.TextEditor.Document;
 
-namespace GitUI.Theming;
-
-internal static class HighlightingExtension
+namespace GitUI.Theming
 {
-    public static HighlightColor Transform(this HighlightColor original)
+    internal static class HighlightingExtension
     {
-        Color backReplacement = Adapt(original.BackgroundColor, isForeground: false);
-        Color replacement = Adapt(original.Color, isForeground: true);
-        return new HighlightColor(original, replacement, backReplacement);
+        public static HighlightColor Transform(this HighlightColor original)
+        {
+            Color backReplacement = Adapt(original.BackgroundColor, isForeground: false);
+            Color replacement = Adapt(original.Color, isForeground: true);
+            return new HighlightColor(original, replacement, backReplacement);
 
-        Color Adapt(Color c, bool isForeground) =>
-            !original.Adaptable || c.IsSystemColor
-                ? c
-                : ColorHelper.AdaptColor(c, isForeground);
+            Color Adapt(Color c, bool isForeground) =>
+                c.IsSystemColor
+                    ? c
+                    : ColorHelper.AdaptColor(c, isForeground);
+        }
     }
 }

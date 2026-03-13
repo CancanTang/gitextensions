@@ -3,96 +3,97 @@ using System.Xml;
 using System.Xml.Serialization;
 using GitCommands.Settings;
 
-namespace GitCommands.ExternalLinks;
-
-public interface IExternalLinksStorage
+namespace GitCommands.ExternalLinks
 {
-    /// <summary>
-    /// Loads external link definitions from the settings.
-    /// </summary>
-    IReadOnlyList<ExternalLinkDefinition>? Load(DistributedSettings settings);
-
-    /// <summary>
-    /// Saves the provided external link definitions to the settings.
-    /// </summary>
-    void Save(DistributedSettings settings, IReadOnlyList<ExternalLinkDefinition> definitions);
-}
-
-public sealed class ExternalLinksStorage : IExternalLinksStorage
-{
-    private const string SettingName = "RevisionLinkDefs";
-
-    /// <summary>
-    /// Loads external link definitions from the settings.
-    /// </summary>
-    public IReadOnlyList<ExternalLinkDefinition>? Load(DistributedSettings settings)
+    public interface IExternalLinksStorage
     {
-        string xml = settings.GetString(SettingName, null);
-        return LoadFromXmlString(xml);
+        /// <summary>
+        /// Loads external link definitions from the settings.
+        /// </summary>
+        IReadOnlyList<ExternalLinkDefinition>? Load(DistributedSettings settings);
+
+        /// <summary>
+        /// Saves the provided external link definitions to the settings.
+        /// </summary>
+        void Save(DistributedSettings settings, IReadOnlyList<ExternalLinkDefinition> definitions);
     }
 
-    /// <summary>
-    /// Saves the provided external link definitions to the settings.
-    /// </summary>
-    public void Save(DistributedSettings settings, IReadOnlyList<ExternalLinkDefinition> definitions)
+    public sealed class ExternalLinksStorage : IExternalLinksStorage
     {
-        try
+        private const string SettingName = "RevisionLinkDefs";
+
+        /// <summary>
+        /// Loads external link definitions from the settings.
+        /// </summary>
+        public IReadOnlyList<ExternalLinkDefinition>? Load(DistributedSettings settings)
         {
-            string? xml;
-            if (definitions.Count == 0)
+            string xml = settings.GetString(SettingName, null);
+            return LoadFromXmlString(xml);
+        }
+
+        /// <summary>
+        /// Saves the provided external link definitions to the settings.
+        /// </summary>
+        public void Save(DistributedSettings settings, IReadOnlyList<ExternalLinkDefinition> definitions)
+        {
+            try
             {
-                xml = null;
-            }
-            else
-            {
-                foreach (ExternalLinkDefinition definition in definitions)
+                string? xml;
+                if (definitions.Count == 0)
                 {
-                    definition.RemoveEmptyFormats();
+                    xml = null;
+                }
+                else
+                {
+                    foreach (ExternalLinkDefinition definition in definitions)
+                    {
+                        definition.RemoveEmptyFormats();
+                    }
+
+                    XmlSerializer serializer = new(typeof(List<ExternalLinkDefinition>));
+                    XmlSerializerNamespaces ns = new();
+                    ns.Add(string.Empty, string.Empty);
+
+                    XmlWriterSettings xmlWriterSettings = new()
+                    {
+                        Indent = true
+                    };
+                    using StringWriter sw = new();
+                    using XmlWriter xmlWriter = XmlWriter.Create(sw, xmlWriterSettings);
+
+                    serializer.Serialize(xmlWriter, definitions.OrderBy(x => x.Name).ToList(), ns);
+                    xml = sw.ToString();
                 }
 
-                XmlSerializer serializer = new(typeof(List<ExternalLinkDefinition>));
-                XmlSerializerNamespaces ns = new();
-                ns.Add(string.Empty, string.Empty);
+                settings.SetString(SettingName, xml);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+            }
+        }
 
-                XmlWriterSettings xmlWriterSettings = new()
-                {
-                    Indent = true
-                };
-                using StringWriter sw = new();
-                using XmlWriter xmlWriter = XmlWriter.Create(sw, xmlWriterSettings);
-
-                serializer.Serialize(xmlWriter, definitions.OrderBy(x => x.Name).ToList(), ns);
-                xml = sw.ToString();
+        // TODO: refactor and outsource to the centralised SettingsSerializer implementations.
+        private static IReadOnlyList<ExternalLinkDefinition>? LoadFromXmlString(string? xmlString)
+        {
+            if (string.IsNullOrWhiteSpace(xmlString))
+            {
+                return Array.Empty<ExternalLinkDefinition>();
             }
 
-            settings.SetString(SettingName, xml);
-        }
-        catch (Exception e)
-        {
-            Debug.WriteLine(e);
-        }
-    }
+            try
+            {
+                XmlSerializer serializer = new(typeof(List<ExternalLinkDefinition>));
+                using StringReader stringReader = new(xmlString);
+                using XmlTextReader xmlReader = new(stringReader);
+                return serializer.Deserialize(xmlReader) as List<ExternalLinkDefinition>;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
 
-    // TODO: refactor and outsource to the centralised SettingsSerializer implementations.
-    private static IReadOnlyList<ExternalLinkDefinition>? LoadFromXmlString(string? xmlString)
-    {
-        if (string.IsNullOrWhiteSpace(xmlString))
-        {
-            return [];
+            return Array.Empty<ExternalLinkDefinition>();
         }
-
-        try
-        {
-            XmlSerializer serializer = new(typeof(List<ExternalLinkDefinition>));
-            using StringReader stringReader = new(xmlString);
-            using XmlTextReader xmlReader = new(stringReader);
-            return serializer.Deserialize(xmlReader) as List<ExternalLinkDefinition>;
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine(ex.Message);
-        }
-
-        return [];
     }
 }

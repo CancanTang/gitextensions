@@ -1,22 +1,22 @@
 ﻿using GitExtensions.Extensibility.Translations;
 
-namespace ResourceManager;
-
-/// <summary>Provides translation capabilities.</summary>
-public class Translate : ITranslate
+namespace ResourceManager
 {
-    void IDisposable.Dispose()
+    /// <summary>Provides translation capabilities.</summary>
+    public class Translate : ITranslate
     {
-        GC.SuppressFinalize(this);
-    }
+        void IDisposable.Dispose()
+        {
+        }
 
-    public virtual void AddTranslationItems(ITranslation translation)
-    {
-        TranslationUtils.AddTranslationItemsFromFields(GetType().Name, this, translation);
-    }
+        public virtual void AddTranslationItems(ITranslation translation)
+        {
+            TranslationUtils.AddTranslationItemsFromFields(GetType().Name, this, translation);
+        }
 
-    public virtual void TranslateItems(ITranslation translation)
-    {
-        TranslationUtils.TranslateItemsFromFields(GetType().Name, this, translation);
+        public virtual void TranslateItems(ITranslation translation)
+        {
+            TranslationUtils.TranslateItemsFromFields(GetType().Name, this, translation);
+        }
     }
 }

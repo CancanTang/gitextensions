@@ -1,168 +1,169 @@
 ﻿using GitExtensions.Extensibility.Git;
-using GitExtUtils.GitUI.Theming;
 using ICSharpCode.TextEditor;
 using ICSharpCode.TextEditor.Document;
 
-namespace GitUI.Editor;
-
-internal sealed class CommitMessageHighlightingStrategy : GitHighlightingStrategyBase
+namespace GitUI.Editor
 {
-    private static HighlightColor ColorSummary { get; } = new(nameof(SystemColors.WindowText), bold: true, italic: false);
-
-    private readonly List<TextMarker> _overlengthDescriptionMarkers = [];
-
-    private readonly TextMarker _markerSummaryTooLong = new(0, 0, TextMarkerType.WaveLine, Color.Red.AdaptBackColor()) { ToolTip = "Summary line is too long." };
-    private readonly TextMarker _markerSpacerNeeded = new(0, 0, TextMarkerType.WaveLine, Color.Red.AdaptBackColor()) { ToolTip = "There must be a blank line after the summary." };
-
-    public CommitMessageHighlightingStrategy(IGitModule module)
-        : base("GitCommitMessage", module)
+    internal sealed class CommitMessageHighlightingStrategy : GitHighlightingStrategyBase
     {
-    }
+        private static HighlightColor ColorSummary { get; } = new(SystemColors.WindowText, bold: true, italic: false);
 
-    // TODO pending issue is that when text is pasted into the editor, validation markers are not updated until their lines are modified (seems like a bug in the editor)
+        private readonly List<TextMarker> _overlengthDescriptionMarkers = [];
 
-    protected override void MarkTokens(IDocument document, IList<LineSegment> lines)
-    {
-        int summaryLineNumber = -1;
-        bool seenDividingSpace = false;
-        int descriptionStartLineNumber = -1;
+        private readonly TextMarker _markerSummaryTooLong = new(0, 0, TextMarkerType.WaveLine, Color.Red) { ToolTip = "Summary line is too long." };
+        private readonly TextMarker _markerSpacerNeeded = new(0, 0, TextMarkerType.WaveLine, Color.Red) { ToolTip = "There must be a blank line after the summary." };
 
-        foreach (LineSegment line in document.LineSegmentCollection)
+        public CommitMessageHighlightingStrategy(IGitModule module)
+            : base("GitCommitMessage", module)
         {
-            if (summaryLineNumber == -1)
-            {
-                if (!IsEmptyOrWhiteSpace(document, line) && !IsComment(document, line))
-                {
-                    summaryLineNumber = line.LineNumber;
-                }
-            }
-            else if (!seenDividingSpace)
-            {
-                if (IsEmptyOrWhiteSpace(document, line))
-                {
-                    seenDividingSpace = true;
-                }
-                else if (!IsComment(document, line))
-                {
-                    descriptionStartLineNumber = line.LineNumber;
-                    break;
-                }
-            }
-            else if (descriptionStartLineNumber != -1)
-            {
-                if (!IsEmptyOrWhiteSpace(document, line) && !IsComment(document, line))
-                {
-                    descriptionStartLineNumber = line.LineNumber;
-                    break;
-                }
-            }
         }
 
-        const int maxSummaryLength = 50;
-        const int maxDescriptionLength = 80;
+        // TODO pending issue is that when text is pasted into the editor, validation markers are not updated until their lines are modified (seems like a bug in the editor)
 
-        // NOTE the pattern of removing then adding markers might look suboptimal, but tracking their presence isn't reliable as they can be removed without warning
-
-        foreach (LineSegment line in lines)
+        protected override void MarkTokens(IDocument document, IList<LineSegment> lines)
         {
-            int lineNumber = line.LineNumber;
+            int summaryLineNumber = -1;
+            bool seenDividingSpace = false;
+            int descriptionStartLineNumber = -1;
 
-            if (TryHighlightComment(document, line))
+            foreach (LineSegment line in document.LineSegmentCollection)
             {
-            }
-            else
-            {
-                HighlightColor color = lineNumber == summaryLineNumber ? ColorSummary : ColorNormal;
-
-                line.Words = [new(document, line, 0, line.Length, color, hasDefaultColor: false)];
-
-                if (lineNumber == summaryLineNumber)
+                if (summaryLineNumber == -1)
                 {
-                    document.MarkerStrategy.RemoveMarker(_markerSummaryTooLong);
-
-                    if (line.Length > maxSummaryLength)
+                    if (!IsEmptyOrWhiteSpace(document, line) && !IsComment(document, line))
                     {
-                        _markerSummaryTooLong.Offset = line.Offset + maxSummaryLength;
-                        _markerSummaryTooLong.Length = line.Length - maxSummaryLength;
-                        document.MarkerStrategy.AddMarker(_markerSummaryTooLong);
+                        summaryLineNumber = line.LineNumber;
                     }
                 }
-                else if (lineNumber == descriptionStartLineNumber)
+                else if (!seenDividingSpace)
                 {
-                    document.MarkerStrategy.RemoveMarker(_markerSpacerNeeded);
-
-                    if (!seenDividingSpace)
+                    if (IsEmptyOrWhiteSpace(document, line))
                     {
-                        _markerSpacerNeeded.Offset = line.Offset;
-                        _markerSpacerNeeded.Length = line.Length;
-                        document.MarkerStrategy.AddMarker(_markerSpacerNeeded);
+                        seenDividingSpace = true;
+                    }
+                    else if (!IsComment(document, line))
+                    {
+                        descriptionStartLineNumber = line.LineNumber;
+                        break;
+                    }
+                }
+                else if (descriptionStartLineNumber != -1)
+                {
+                    if (!IsEmptyOrWhiteSpace(document, line) && !IsComment(document, line))
+                    {
+                        descriptionStartLineNumber = line.LineNumber;
+                        break;
                     }
                 }
             }
 
-            document.RequestUpdate(
-                new TextAreaUpdate(TextAreaUpdateType.SingleLine, lineNumber));
-        }
+            const int maxSummaryLength = 50;
+            const int maxDescriptionLength = 80;
 
-        if (descriptionStartLineNumber == -1)
-        {
-            if (_overlengthDescriptionMarkers.Count != 0)
+            // NOTE the pattern of removing then adding markers might look suboptimal, but tracking their presence isn't reliable as they can be removed without warning
+
+            foreach (LineSegment line in lines)
             {
-                foreach (TextMarker marker in _overlengthDescriptionMarkers)
+                int lineNumber = line.LineNumber;
+
+                if (TryHighlightComment(document, line))
                 {
-                    document.MarkerStrategy.RemoveMarker(marker);
-                }
-
-                _overlengthDescriptionMarkers.Clear();
-            }
-
-            return;
-        }
-
-        int markerIndex = 0;
-
-        foreach (LineSegment line in document.LineSegmentCollection)
-        {
-            if (line.LineNumber < descriptionStartLineNumber)
-            {
-                continue;
-            }
-
-            if (line.Length > maxDescriptionLength)
-            {
-                int markerOffset = line.Offset + maxDescriptionLength;
-                int markerLength = line.Length - maxDescriptionLength;
-
-                TextMarker overlengthMarker;
-                if (markerIndex < _overlengthDescriptionMarkers.Count)
-                {
-                    overlengthMarker = _overlengthDescriptionMarkers[markerIndex];
                 }
                 else
                 {
-                    overlengthMarker = new TextMarker(markerOffset, markerLength, TextMarkerType.WaveLine, Color.Red.AdaptBackColor()) { ToolTip = "Line is too long." };
-                    _overlengthDescriptionMarkers.Add(overlengthMarker);
-                    document.MarkerStrategy.AddMarker(overlengthMarker);
+                    HighlightColor color = lineNumber == summaryLineNumber ? ColorSummary : ColorNormal;
+
+                    line.Words = new List<TextWord>(capacity: 1)
+                        { new(document, line, 0, line.Length, color, hasDefaultColor: false) };
+
+                    if (lineNumber == summaryLineNumber)
+                    {
+                        document.MarkerStrategy.RemoveMarker(_markerSummaryTooLong);
+
+                        if (line.Length > maxSummaryLength)
+                        {
+                            _markerSummaryTooLong.Offset = line.Offset + maxSummaryLength;
+                            _markerSummaryTooLong.Length = line.Length - maxSummaryLength;
+                            document.MarkerStrategy.AddMarker(_markerSummaryTooLong);
+                        }
+                    }
+                    else if (lineNumber == descriptionStartLineNumber)
+                    {
+                        document.MarkerStrategy.RemoveMarker(_markerSpacerNeeded);
+
+                        if (!seenDividingSpace)
+                        {
+                            _markerSpacerNeeded.Offset = line.Offset;
+                            _markerSpacerNeeded.Length = line.Length;
+                            document.MarkerStrategy.AddMarker(_markerSpacerNeeded);
+                        }
+                    }
                 }
 
-                overlengthMarker.Offset = markerOffset;
-                overlengthMarker.Length = markerLength;
-
-                markerIndex++;
+                document.RequestUpdate(
+                    new TextAreaUpdate(TextAreaUpdateType.SingleLine, lineNumber));
             }
-        }
 
-        int toRemove = _overlengthDescriptionMarkers.Count - markerIndex;
-
-        if (toRemove > 0)
-        {
-            for (int i = 0; i < toRemove; i++)
+            if (descriptionStartLineNumber == -1)
             {
-                TextMarker marker = _overlengthDescriptionMarkers[markerIndex + i];
-                document.MarkerStrategy.RemoveMarker(marker);
+                if (_overlengthDescriptionMarkers.Count != 0)
+                {
+                    foreach (TextMarker marker in _overlengthDescriptionMarkers)
+                    {
+                        document.MarkerStrategy.RemoveMarker(marker);
+                    }
+
+                    _overlengthDescriptionMarkers.Clear();
+                }
+
+                return;
             }
 
-            _overlengthDescriptionMarkers.RemoveRange(markerIndex, toRemove);
+            int markerIndex = 0;
+
+            foreach (LineSegment line in document.LineSegmentCollection)
+            {
+                if (line.LineNumber < descriptionStartLineNumber)
+                {
+                    continue;
+                }
+
+                if (line.Length > maxDescriptionLength)
+                {
+                    int markerOffset = line.Offset + maxDescriptionLength;
+                    int markerLength = line.Length - maxDescriptionLength;
+
+                    TextMarker overlengthMarker;
+                    if (markerIndex < _overlengthDescriptionMarkers.Count)
+                    {
+                        overlengthMarker = _overlengthDescriptionMarkers[markerIndex];
+                    }
+                    else
+                    {
+                        overlengthMarker = new TextMarker(markerOffset, markerLength, TextMarkerType.WaveLine, Color.Red) { ToolTip = "Line is too long." };
+                        _overlengthDescriptionMarkers.Add(overlengthMarker);
+                        document.MarkerStrategy.AddMarker(overlengthMarker);
+                    }
+
+                    overlengthMarker.Offset = markerOffset;
+                    overlengthMarker.Length = markerLength;
+
+                    markerIndex++;
+                }
+            }
+
+            int toRemove = _overlengthDescriptionMarkers.Count - markerIndex;
+
+            if (toRemove > 0)
+            {
+                for (int i = 0; i < toRemove; i++)
+                {
+                    TextMarker marker = _overlengthDescriptionMarkers[markerIndex + i];
+                    document.MarkerStrategy.RemoveMarker(marker);
+                }
+
+                _overlengthDescriptionMarkers.RemoveRange(markerIndex, toRemove);
+            }
         }
     }
 }

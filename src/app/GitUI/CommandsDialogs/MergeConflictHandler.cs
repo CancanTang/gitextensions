@@ -1,49 +1,50 @@
 ﻿using GitCommands;
 using GitExtensions.Extensibility.Git;
 
-namespace GitUI.CommandsDialogs;
-
-public static class MergeConflictHandler
+namespace GitUI.CommandsDialogs
 {
-    public static bool HandleMergeConflicts(IGitUICommands commands, IWin32Window? owner, bool offerCommit = true, bool offerUpdateSubmodules = true)
+    public static class MergeConflictHandler
     {
-        if (commands.Module.InTheMiddleOfConflictedMerge())
+        public static bool HandleMergeConflicts(IGitUICommands commands, IWin32Window? owner, bool offerCommit = true, bool offerUpdateSubmodules = true)
         {
-            if (AppSettings.DontConfirmResolveConflicts || MessageBoxes.ConfirmResolveMergeConflicts(owner))
+            if (commands.Module.InTheMiddleOfConflictedMerge())
             {
-                SolveMergeConflicts(commands, owner, offerCommit);
+                if (AppSettings.DontConfirmResolveConflicts || MessageBoxes.ConfirmResolveMergeConflicts(owner))
+                {
+                    SolveMergeConflicts(commands, owner, offerCommit);
+                }
+
+                return true;
             }
 
-            return true;
-        }
-
-        if (offerUpdateSubmodules)
-        {
-            commands.UpdateSubmodules(owner);
-        }
-
-        return false;
-    }
-
-    private static void SolveMergeConflicts(IGitUICommands commands, IWin32Window? owner, bool offerCommit)
-    {
-        if (commands.Module.InTheMiddleOfConflictedMerge())
-        {
-            commands.StartResolveConflictsDialog(owner, offerCommit);
-        }
-
-        if (commands.Module.InTheMiddleOfPatch())
-        {
-            if (MessageBoxes.MiddleOfPatchApply(owner))
+            if (offerUpdateSubmodules)
             {
-                commands.StartApplyPatchDialog(owner);
+                commands.UpdateSubmodules(owner);
             }
+
+            return false;
         }
-        else if (commands.Module.InTheMiddleOfRebase())
+
+        private static void SolveMergeConflicts(IGitUICommands commands, IWin32Window? owner, bool offerCommit)
         {
-            if (MessageBoxes.MiddleOfRebase(owner))
+            if (commands.Module.InTheMiddleOfConflictedMerge())
             {
-                commands.StartTheContinueRebaseDialog(owner);
+                commands.StartResolveConflictsDialog(owner, offerCommit);
+            }
+
+            if (commands.Module.InTheMiddleOfPatch())
+            {
+                if (MessageBoxes.MiddleOfPatchApply(owner))
+                {
+                    commands.StartApplyPatchDialog(owner);
+                }
+            }
+            else if (commands.Module.InTheMiddleOfRebase())
+            {
+                if (MessageBoxes.MiddleOfRebase(owner))
+                {
+                    commands.StartTheContinueRebaseDialog(owner);
+                }
             }
         }
     }

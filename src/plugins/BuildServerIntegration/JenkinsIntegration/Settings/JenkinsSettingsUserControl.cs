@@ -3,42 +3,43 @@ using GitExtensions.Extensibility.Settings;
 using GitUIPluginInterfaces.BuildServerIntegration;
 using ResourceManager;
 
-namespace JenkinsIntegration.Settings;
-
-[Export(typeof(IBuildServerSettingsUserControl))]
-[BuildServerSettingsUserControlMetadata(JenkinsAdapter.PluginName)]
-[PartCreationPolicy(CreationPolicy.NonShared)]
-public partial class JenkinsSettingsUserControl : GitExtensionsControl, IBuildServerSettingsUserControl
+namespace JenkinsIntegration.Settings
 {
-    private string? _defaultProjectName;
-
-    public JenkinsSettingsUserControl()
+    [Export(typeof(IBuildServerSettingsUserControl))]
+    [BuildServerSettingsUserControlMetadata(JenkinsAdapter.PluginName)]
+    [PartCreationPolicy(CreationPolicy.NonShared)]
+    public partial class JenkinsSettingsUserControl : GitExtensionsControl, IBuildServerSettingsUserControl
     {
-        InitializeComponent();
-        InitializeComplete();
+        private string? _defaultProjectName;
 
-        Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
-    }
+        public JenkinsSettingsUserControl()
+        {
+            InitializeComponent();
+            InitializeComplete();
 
-    public void Initialize(string defaultProjectName, IEnumerable<string?> remotes)
-    {
-        _defaultProjectName = defaultProjectName;
-    }
+            Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
+        }
 
-    public void LoadSettings(SettingsSource buildServerConfig)
-    {
-        JenkinsServerUrl.Text = buildServerConfig.GetString("BuildServerUrl", null);
-        JenkinsProjectName.Text = buildServerConfig.GetString("ProjectName", _defaultProjectName);
-        IgnoreBuildBranch.Text = buildServerConfig.GetString("IgnoreBuildBranch", null);
-    }
+        public void Initialize(string defaultProjectName, IEnumerable<string?> remotes)
+        {
+            _defaultProjectName = defaultProjectName;
+        }
 
-    public void SaveSettings(SettingsSource buildServerConfig)
-    {
-        buildServerConfig.SetString("BuildServerUrl", JenkinsServerUrl.Text.NullIfEmpty());
-        buildServerConfig.SetString("ProjectName", JenkinsProjectName.Text.NullIfEmpty());
+        public void LoadSettings(SettingsSource buildServerConfig)
+        {
+            JenkinsServerUrl.Text = buildServerConfig.GetString("BuildServerUrl", null);
+            JenkinsProjectName.Text = buildServerConfig.GetString("ProjectName", _defaultProjectName);
+            IgnoreBuildBranch.Text = buildServerConfig.GetString("IgnoreBuildBranch", null);
+        }
 
-        // While an empty value is valid as as override for lower level settings,
-        // the behaviour requiring that the "effective" value is set is considered a worse limitation.
-        buildServerConfig.SetString("IgnoreBuildBranch", IgnoreBuildBranch.Text.NullIfEmpty());
+        public void SaveSettings(SettingsSource buildServerConfig)
+        {
+            buildServerConfig.SetString("BuildServerUrl", JenkinsServerUrl.Text.NullIfEmpty());
+            buildServerConfig.SetString("ProjectName", JenkinsProjectName.Text.NullIfEmpty());
+
+            // While an empty value is valid as as override for lower level settings,
+            // the behaviour requiring that the "effective" value is set is considered a worse limitation.
+            buildServerConfig.SetString("IgnoreBuildBranch", IgnoreBuildBranch.Text.NullIfEmpty());
+        }
     }
 }

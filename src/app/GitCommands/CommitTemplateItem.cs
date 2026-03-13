@@ -1,104 +1,83 @@
 ﻿using System.Runtime.Serialization;
 using GitCommands.Utils;
 
-namespace GitCommands;
-
-[Serializable]
-public sealed class CommitTemplateItem : ISerializable
+namespace GitCommands
 {
-    public string Name { get; set; }
-    public string Text { get; set; }
-    public Image? Icon { get; set; }
-    public bool IsRegex { get; set; }
-
-    public CommitTemplateItem(string name, string text, Image? icon, bool isRegex)
+    [Serializable]
+    public sealed class CommitTemplateItem : ISerializable
     {
-        Name = name;
-        Text = text;
-        Icon = icon;
-        IsRegex = isRegex;
-    }
+        public string Name { get; set; }
+        public string Text { get; set; }
+        public Image? Icon { get; set; }
 
-    public CommitTemplateItem()
-    {
-        Name = string.Empty;
-        Text = string.Empty;
-        Icon = null;
-        IsRegex = false;
-    }
-
-    private CommitTemplateItem(SerializationInfo info, StreamingContext context)
-    {
-        Name = (string)info.GetValue("Name", typeof(string));
-        Text = (string)info.GetValue("Text", typeof(string));
-
-        if (HasKey(info, "IsRegex"))
+        public CommitTemplateItem(string name, string text, Image? icon)
         {
-            IsRegex = (bool)info.GetValue("IsRegex", typeof(bool));
+            Name = name;
+            Text = text;
+            Icon = icon;
         }
-    }
 
-    public void GetObjectData(SerializationInfo info, StreamingContext context)
-    {
-        info.AddValue("Name", Name);
-        info.AddValue("Text", Text);
-        info.AddValue("IsRegex", IsRegex);
-    }
-
-    private bool HasKey(SerializationInfo info, string key)
-    {
-        foreach (SerializationEntry entry in info)
+        public CommitTemplateItem()
         {
-            if (entry.Name == key)
+            Name = string.Empty;
+            Text = string.Empty;
+            Icon = null;
+        }
+
+        private CommitTemplateItem(SerializationInfo info, StreamingContext context)
+        {
+            Name = (string)info.GetValue("Name", typeof(string));
+            Text = (string)info.GetValue("Text", typeof(string));
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("Name", Name);
+            info.AddValue("Text", Text);
+        }
+
+        public static void SaveToSettings(CommitTemplateItem[]? items)
+        {
+            string strVal = SerializeCommitTemplates(items);
+            AppSettings.CommitTemplates = strVal;
+        }
+
+        public static CommitTemplateItem[]? LoadFromSettings()
+        {
+            string serializedString = AppSettings.CommitTemplates;
+            CommitTemplateItem[] templates = DeserializeCommitTemplates(serializedString, out bool shouldBeUpdated);
+            if (shouldBeUpdated)
             {
-                return true;
+                SaveToSettings(templates!);
             }
+
+            return templates;
         }
 
-        return false;
-    }
-
-    public static void SaveToSettings(CommitTemplateItem[]? items)
-    {
-        string strVal = SerializeCommitTemplates(items);
-        AppSettings.CommitTemplates = strVal;
-    }
-
-    public static CommitTemplateItem[]? LoadFromSettings()
-    {
-        string serializedString = AppSettings.CommitTemplates;
-        CommitTemplateItem[] templates = DeserializeCommitTemplates(serializedString, out bool shouldBeUpdated);
-        if (shouldBeUpdated)
+        private static string SerializeCommitTemplates(CommitTemplateItem[]? items)
         {
-            SaveToSettings(templates!);
+            return JsonSerializer.Serialize(items);
         }
 
-        return templates;
-    }
-
-    private static string SerializeCommitTemplates(CommitTemplateItem[]? items)
-    {
-        return JsonSerializer.Serialize(items);
-    }
-
-    private static CommitTemplateItem[]? DeserializeCommitTemplates(string serializedString, out bool shouldBeUpdated)
-    {
-        shouldBeUpdated = false;
-        if (string.IsNullOrEmpty(serializedString))
+        private static CommitTemplateItem[]? DeserializeCommitTemplates(string serializedString, out bool shouldBeUpdated)
         {
-            return null;
-        }
+            shouldBeUpdated = false;
+            if (string.IsNullOrEmpty(serializedString))
+            {
+                return null;
+            }
 
-        CommitTemplateItem[]? commitTemplateItem = null;
-        try
-        {
-            commitTemplateItem = JsonSerializer.Deserialize<CommitTemplateItem[]>(serializedString);
-        }
-        catch
-        {
-            // do nothing
-        }
+            CommitTemplateItem[]? commitTemplateItem = null;
+            try
+            {
+                commitTemplateItem = JsonSerializer.Deserialize<CommitTemplateItem[]>(serializedString);
+            }
+            catch
+            {
+                // do nothing
+            }
 
-        return commitTemplateItem;
+            return commitTemplateItem;
+        }
     }
 }

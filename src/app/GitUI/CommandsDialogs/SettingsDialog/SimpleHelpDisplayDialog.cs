@@ -1,22 +1,23 @@
-﻿namespace GitUI.CommandsDialogs.SettingsDialog;
-
-public partial class SimpleHelpDisplayDialog : Form
+﻿namespace GitUI.CommandsDialogs.SettingsDialog
 {
-    public SimpleHelpDisplayDialog()
+    public partial class SimpleHelpDisplayDialog : Form
     {
-        InitializeComponent();
-    }
+        public SimpleHelpDisplayDialog()
+        {
+            InitializeComponent();
+        }
 
-    public string? DialogTitle { get; set; }
+        public string? DialogTitle { get; set; }
 
-    public string? ContentText { get; set; }
+        public string? ContentText { get; set; }
 
-    protected override void OnLoad(EventArgs e)
-    {
-        base.OnLoad(e);
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
 
-        Text = DialogTitle;
-        textBox1.Text = ContentText;
-        textBox1.Select(0, 0);
+            Text = DialogTitle;
+            textBox1.Text = ContentText;
+            textBox1.Select(0, 0);
+        }
     }
 }

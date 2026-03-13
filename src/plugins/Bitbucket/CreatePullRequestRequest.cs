@@ -2,108 +2,109 @@ using Microsoft;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 
-namespace GitExtensions.Plugins.Bitbucket;
-
-internal class PullRequestInfo
+namespace GitExtensions.Plugins.Bitbucket
 {
-    public string? Title { get; set; }
-    public string? Description { get; set; }
-    public Repository? SourceRepo { get; set; }
-    public Repository? TargetRepo { get; set; }
-    public string? SourceBranch { get; set; }
-    public string? TargetBranch { get; set; }
-    public IEnumerable<BitbucketUser>? Reviewers { get; set; }
-}
-
-internal class CreatePullRequestRequest : BitbucketRequestBase<JObject>
-{
-    private readonly PullRequestInfo _info;
-
-    public CreatePullRequestRequest(Settings settings, PullRequestInfo info)
-        : base(settings)
+    internal class PullRequestInfo
     {
-        _info = info;
+        public string? Title { get; set; }
+        public string? Description { get; set; }
+        public Repository? SourceRepo { get; set; }
+        public Repository? TargetRepo { get; set; }
+        public string? SourceBranch { get; set; }
+        public string? TargetBranch { get; set; }
+        public IEnumerable<BitbucketUser>? Reviewers { get; set; }
     }
 
-    protected override object RequestBody => GetPullRequestBody();
-
-    protected override Method RequestMethod => Method.POST;
-
-    protected override string ApiUrl
+    internal class CreatePullRequestRequest : BitbucketRequestBase<JObject>
     {
-        get
+        private readonly PullRequestInfo _info;
+
+        public CreatePullRequestRequest(Settings settings, PullRequestInfo info)
+            : base(settings)
         {
-            Validates.NotNull(_info.TargetRepo);
-            return string.Format(
-                "/projects/{0}/repos/{1}/pull-requests",
-                _info.TargetRepo.ProjectKey, _info.TargetRepo.RepoName);
+            _info = info;
         }
-    }
 
-    protected override JObject ParseResponse(JObject json)
-    {
-        return json;
-    }
+        protected override object RequestBody => GetPullRequestBody();
 
-    private string GetPullRequestBody()
-    {
-        Validates.NotNull(_info.SourceRepo);
-        Validates.NotNull(_info.SourceRepo.ProjectKey);
-        Validates.NotNull(_info.SourceRepo.RepoName);
-        Validates.NotNull(_info.SourceBranch);
-        Validates.NotNull(_info.TargetRepo);
-        Validates.NotNull(_info.TargetRepo.ProjectKey);
-        Validates.NotNull(_info.TargetRepo.RepoName);
-        Validates.NotNull(_info.TargetBranch);
-        Validates.NotNull(_info.Reviewers);
+        protected override Method RequestMethod => Method.POST;
 
-        JObject resource = new()
+        protected override string ApiUrl
         {
-            ["title"] = _info.Title,
-            ["description"] = _info.Description,
-
-            ["fromRef"] = CreatePullRequestRef(
-            _info.SourceRepo.ProjectKey,
-            _info.SourceRepo.RepoName, _info.SourceBranch),
-
-            ["toRef"] = CreatePullRequestRef(
-            _info.TargetRepo.ProjectKey,
-            _info.TargetRepo.RepoName, _info.TargetBranch)
-        };
-
-        JArray reviewers = [];
-        foreach (BitbucketUser reviewer in _info.Reviewers)
-        {
-            JObject r = new()
+            get
             {
-                ["user"] = new JObject
-                {
-                    ["name"] = reviewer.Slug
-                }
+                Validates.NotNull(_info.TargetRepo);
+                return string.Format(
+                    "/projects/{0}/repos/{1}/pull-requests",
+                    _info.TargetRepo.ProjectKey, _info.TargetRepo.RepoName);
+            }
+        }
+
+        protected override JObject ParseResponse(JObject json)
+        {
+            return json;
+        }
+
+        private string GetPullRequestBody()
+        {
+            Validates.NotNull(_info.SourceRepo);
+            Validates.NotNull(_info.SourceRepo.ProjectKey);
+            Validates.NotNull(_info.SourceRepo.RepoName);
+            Validates.NotNull(_info.SourceBranch);
+            Validates.NotNull(_info.TargetRepo);
+            Validates.NotNull(_info.TargetRepo.ProjectKey);
+            Validates.NotNull(_info.TargetRepo.RepoName);
+            Validates.NotNull(_info.TargetBranch);
+            Validates.NotNull(_info.Reviewers);
+
+            JObject resource = new()
+            {
+                ["title"] = _info.Title,
+                ["description"] = _info.Description,
+
+                ["fromRef"] = CreatePullRequestRef(
+                _info.SourceRepo.ProjectKey,
+                _info.SourceRepo.RepoName, _info.SourceBranch),
+
+                ["toRef"] = CreatePullRequestRef(
+                _info.TargetRepo.ProjectKey,
+                _info.TargetRepo.RepoName, _info.TargetBranch)
             };
 
-            reviewers.Add(r);
+            JArray reviewers = [];
+            foreach (BitbucketUser reviewer in _info.Reviewers)
+            {
+                JObject r = new()
+                {
+                    ["user"] = new JObject
+                    {
+                        ["name"] = reviewer.Slug
+                    }
+                };
+
+                reviewers.Add(r);
+            }
+
+            resource["reviewers"] = reviewers;
+
+            return resource.ToString();
         }
 
-        resource["reviewers"] = reviewers;
-
-        return resource.ToString();
-    }
-
-    private static JObject CreatePullRequestRef(string projectKey, string repoName, string branchName)
-    {
-        JObject reference = new()
+        private static JObject CreatePullRequestRef(string projectKey, string repoName, string branchName)
         {
-            ["id"] = branchName,
-            ["repository"] = new JObject
+            JObject reference = new()
             {
-                ["slug"] = repoName
-            }
-        };
-        reference["repository"]["project"] = new JObject
-        {
-            ["key"] = projectKey
-        };
-        return reference;
+                ["id"] = branchName,
+                ["repository"] = new JObject
+                {
+                    ["slug"] = repoName
+                }
+            };
+            reference["repository"]["project"] = new JObject
+            {
+                ["key"] = projectKey
+            };
+            return reference;
+        }
     }
 }

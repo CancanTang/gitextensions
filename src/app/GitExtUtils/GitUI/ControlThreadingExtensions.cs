@@ -2,186 +2,187 @@
 using System.Runtime.CompilerServices;
 using Microsoft.VisualStudio.Threading;
 
-namespace GitUI;
-
-public static class ControlThreadingExtensions
+namespace GitUI
 {
-    private static readonly CancellationToken _preCancelledToken;
-    private static readonly ConditionalWeakTable<IComponent, StrongBox<CancellationToken>> _controlDisposed;
-
-    static ControlThreadingExtensions()
+    public static class ControlThreadingExtensions
     {
-        using CancellationTokenSource cts = new();
-        cts.Cancel();
-        _preCancelledToken = cts.Token;
+        private static readonly CancellationToken _preCancelledToken;
+        private static readonly ConditionalWeakTable<IComponent, StrongBox<CancellationToken>> _controlDisposed;
 
-        _controlDisposed = [];
-    }
+        static ControlThreadingExtensions()
+        {
+            using CancellationTokenSource cts = new();
+            cts.Cancel();
+            _preCancelledToken = cts.Token;
+
+            _controlDisposed = [];
+        }
 
 #pragma warning disable VSTHRD004 // Await SwitchToMainThreadAsync
-    public static ControlMainThreadAwaitable SwitchToMainThreadAsync(this ToolStripItem control, CancellationToken cancellationToken = default)
-    {
-        if (cancellationToken.IsCancellationRequested)
+        public static ControlMainThreadAwaitable SwitchToMainThreadAsync(this ToolStripItem control, CancellationToken cancellationToken = default)
         {
-            return new ControlMainThreadAwaitable(ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken), disposable: null);
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return new ControlMainThreadAwaitable(ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken), disposable: null);
+            }
+
+            if (control.IsDisposed)
+            {
+                return new ControlMainThreadAwaitable(ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(_preCancelledToken), disposable: null);
+            }
+
+            CancellationToken disposedCancellationToken = ToolStripItemDisposedCancellationFactory.Instance.GetOrCreateCancellationToken(control);
+            CancellationTokenSource? cancellationTokenSource = null;
+            if (cancellationToken.CanBeCanceled)
+            {
+                cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(disposedCancellationToken, cancellationToken);
+                disposedCancellationToken = cancellationTokenSource.Token;
+            }
+
+            JoinableTaskFactory.MainThreadAwaitable mainThreadAwaiter = ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(disposedCancellationToken);
+            return new ControlMainThreadAwaitable(mainThreadAwaiter, cancellationTokenSource);
         }
 
-        if (control.IsDisposed)
+        public static ControlMainThreadAwaitable SwitchToMainThreadAsync(this Control control, CancellationToken cancellationToken = default)
         {
-            return new ControlMainThreadAwaitable(ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(_preCancelledToken), disposable: null);
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return new ControlMainThreadAwaitable(ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken), disposable: null);
+            }
+
+            if (control.IsDisposed)
+            {
+                return new ControlMainThreadAwaitable(ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(_preCancelledToken), disposable: null);
+            }
+
+            CancellationToken disposedCancellationToken = ControlIsDisposedCancellationFactory.Instance.GetOrCreateCancellationToken(control);
+            CancellationTokenSource? cancellationTokenSource = null;
+            if (cancellationToken.CanBeCanceled)
+            {
+                cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(disposedCancellationToken, cancellationToken);
+                disposedCancellationToken = cancellationTokenSource.Token;
+            }
+
+            JoinableTaskFactory.MainThreadAwaitable mainThreadAwaiter = ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(disposedCancellationToken);
+            return new ControlMainThreadAwaitable(mainThreadAwaiter, cancellationTokenSource);
         }
-
-        CancellationToken disposedCancellationToken = ToolStripItemDisposedCancellationFactory.Instance.GetOrCreateCancellationToken(control);
-        CancellationTokenSource? cancellationTokenSource = null;
-        if (cancellationToken.CanBeCanceled)
-        {
-            cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(disposedCancellationToken, cancellationToken);
-            disposedCancellationToken = cancellationTokenSource.Token;
-        }
-
-        JoinableTaskFactory.MainThreadAwaitable mainThreadAwaiter = ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(disposedCancellationToken);
-        return new ControlMainThreadAwaitable(mainThreadAwaiter, cancellationTokenSource);
-    }
-
-    public static ControlMainThreadAwaitable SwitchToMainThreadAsync(this Control control, CancellationToken cancellationToken = default)
-    {
-        if (cancellationToken.IsCancellationRequested)
-        {
-            return new ControlMainThreadAwaitable(ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken), disposable: null);
-        }
-
-        if (control.IsDisposed)
-        {
-            return new ControlMainThreadAwaitable(ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(_preCancelledToken), disposable: null);
-        }
-
-        CancellationToken disposedCancellationToken = ControlIsDisposedCancellationFactory.Instance.GetOrCreateCancellationToken(control);
-        CancellationTokenSource? cancellationTokenSource = null;
-        if (cancellationToken.CanBeCanceled)
-        {
-            cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(disposedCancellationToken, cancellationToken);
-            disposedCancellationToken = cancellationTokenSource.Token;
-        }
-
-        JoinableTaskFactory.MainThreadAwaitable mainThreadAwaiter = ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(disposedCancellationToken);
-        return new ControlMainThreadAwaitable(mainThreadAwaiter, cancellationTokenSource);
-    }
 #pragma warning restore VSTHRD004 // Await SwitchToMainThreadAsync
 
-    public readonly struct ControlMainThreadAwaitable
-    {
-        private readonly JoinableTaskFactory.MainThreadAwaitable _awaitable;
-        private readonly IDisposable? _disposable;
-
-        internal ControlMainThreadAwaitable(JoinableTaskFactory.MainThreadAwaitable awaitable, IDisposable? disposable)
+        public readonly struct ControlMainThreadAwaitable
         {
-            _awaitable = awaitable;
-            _disposable = disposable;
-        }
+            private readonly JoinableTaskFactory.MainThreadAwaitable _awaitable;
+            private readonly IDisposable? _disposable;
 
-        public ControlMainThreadAwaiter GetAwaiter()
-        {
-            return new ControlMainThreadAwaiter(_awaitable.GetAwaiter(), _disposable);
-        }
-    }
-
-    public readonly struct ControlMainThreadAwaiter : INotifyCompletion
-    {
-        private readonly JoinableTaskFactory.MainThreadAwaiter _awaiter;
-        private readonly IDisposable? _disposable;
-
-        internal ControlMainThreadAwaiter(JoinableTaskFactory.MainThreadAwaiter awaiter, IDisposable? disposable)
-        {
-            _awaiter = awaiter;
-            _disposable = disposable;
-        }
-
-        public bool IsCompleted => _awaiter.IsCompleted;
-
-        public void OnCompleted(Action continuation) => _awaiter.OnCompleted(continuation);
-
-        public void GetResult()
-        {
-            try
+            internal ControlMainThreadAwaitable(JoinableTaskFactory.MainThreadAwaitable awaitable, IDisposable? disposable)
             {
-                _awaiter.GetResult();
+                _awaitable = awaitable;
+                _disposable = disposable;
             }
-            finally
+
+            public ControlMainThreadAwaiter GetAwaiter()
             {
-                _disposable?.Dispose();
+                return new ControlMainThreadAwaiter(_awaitable.GetAwaiter(), _disposable);
             }
         }
-    }
 
-    private sealed class ControlIsDisposedCancellationFactory : IsDisposedCancellationFactory<Control>
-    {
-        public static readonly ControlIsDisposedCancellationFactory Instance = new();
-
-        protected override bool IsDisposed(Control component) => component.IsDisposed;
-    }
-
-    private sealed class ToolStripItemDisposedCancellationFactory : IsDisposedCancellationFactory<ToolStripItem>
-    {
-        public static readonly ToolStripItemDisposedCancellationFactory Instance = new();
-
-        protected override bool IsDisposed(ToolStripItem component) => component.IsDisposed;
-    }
-
-    private abstract class IsDisposedCancellationFactory<T>
-        where T : class, IComponent
-    {
-        private readonly ConditionalWeakTable<IComponent, StrongBox<CancellationToken>>.CreateValueCallback _disposedCancellationTokenFactory;
-
-        protected IsDisposedCancellationFactory()
+        public readonly struct ControlMainThreadAwaiter : INotifyCompletion
         {
-            _disposedCancellationTokenFactory = control =>
+            private readonly JoinableTaskFactory.MainThreadAwaiter _awaiter;
+            private readonly IDisposable? _disposable;
+
+            internal ControlMainThreadAwaiter(JoinableTaskFactory.MainThreadAwaiter awaiter, IDisposable? disposable)
             {
-                if (IsDisposed((T)control))
+                _awaiter = awaiter;
+                _disposable = disposable;
+            }
+
+            public bool IsCompleted => _awaiter.IsCompleted;
+
+            public void OnCompleted(Action continuation) => _awaiter.OnCompleted(continuation);
+
+            public void GetResult()
+            {
+                try
                 {
-                    return new StrongBox<CancellationToken>(_preCancelledToken);
+                    _awaiter.GetResult();
                 }
-
-                CancellationTokenSource cts = new();
-
-                // Get a copy of the CancellationToken before the source can be disposed. After the source is cancelled
-                // and disposed, the CancellationToken will continue to behave properly, but
-                // CancellationTokenSource.Token will start to throw an ObjectDisposedException.
-                CancellationToken token = cts.Token;
-
-                control.Disposed += delegate
+                finally
                 {
-                    CancelAndDispose(cts);
+                    _disposable?.Dispose();
+                }
+            }
+        }
+
+        private sealed class ControlIsDisposedCancellationFactory : IsDisposedCancellationFactory<Control>
+        {
+            public static readonly ControlIsDisposedCancellationFactory Instance = new();
+
+            protected override bool IsDisposed(Control component) => component.IsDisposed;
+        }
+
+        private sealed class ToolStripItemDisposedCancellationFactory : IsDisposedCancellationFactory<ToolStripItem>
+        {
+            public static readonly ToolStripItemDisposedCancellationFactory Instance = new();
+
+            protected override bool IsDisposed(ToolStripItem component) => component.IsDisposed;
+        }
+
+        private abstract class IsDisposedCancellationFactory<T>
+            where T : class, IComponent
+        {
+            private readonly ConditionalWeakTable<IComponent, StrongBox<CancellationToken>>.CreateValueCallback _disposedCancellationTokenFactory;
+
+            protected IsDisposedCancellationFactory()
+            {
+                _disposedCancellationTokenFactory = control =>
+                {
+                    if (IsDisposed((T)control))
+                    {
+                        return new StrongBox<CancellationToken>(_preCancelledToken);
+                    }
+
+                    CancellationTokenSource cts = new();
+
+                    // Get a copy of the CancellationToken before the source can be disposed. After the source is cancelled
+                    // and disposed, the CancellationToken will continue to behave properly, but
+                    // CancellationTokenSource.Token will start to throw an ObjectDisposedException.
+                    CancellationToken token = cts.Token;
+
+                    control.Disposed += delegate
+                    {
+                        CancelAndDispose(cts);
+                    };
+
+                    if (IsDisposed((T)control))
+                    {
+                        // Handle control disposed on another thread while registering event handler
+                        CancelAndDispose(cts);
+                    }
+
+                    return new StrongBox<CancellationToken>(token);
                 };
+            }
 
-                if (IsDisposed((T)control))
+            public CancellationToken GetOrCreateCancellationToken(T component)
+            {
+                return _controlDisposed.GetValue(component, _disposedCancellationTokenFactory).Value;
+            }
+
+            protected abstract bool IsDisposed(T component);
+
+            private static void CancelAndDispose(CancellationTokenSource cancellationTokenSource)
+            {
+                try
                 {
-                    // Handle control disposed on another thread while registering event handler
-                    CancelAndDispose(cts);
+                    cancellationTokenSource.Cancel();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // This can occur in race conditions
                 }
 
-                return new StrongBox<CancellationToken>(token);
-            };
-        }
-
-        public CancellationToken GetOrCreateCancellationToken(T component)
-        {
-            return _controlDisposed.GetValue(component, _disposedCancellationTokenFactory).Value;
-        }
-
-        protected abstract bool IsDisposed(T component);
-
-        private static void CancelAndDispose(CancellationTokenSource cancellationTokenSource)
-        {
-            try
-            {
-                cancellationTokenSource.Cancel();
+                cancellationTokenSource.Dispose();
             }
-            catch (ObjectDisposedException)
-            {
-                // This can occur in race conditions
-            }
-
-            cancellationTokenSource.Dispose();
         }
     }
 }

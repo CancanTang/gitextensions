@@ -3,11 +3,11 @@
   <?include Config.wxi?>
   <Product Id="*" UpgradeCode="$(var.UpgradeCode)" Name="$(var.ProductName) $(var.Version)" Manufacturer="$(var.Manufacturer)" Version="$(var.NumericVersion)" Language="1033">
     <?if $(var.Platform) = x64 ?>
-    <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
+      <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
     <?elseif $(var.Platform) = arm64 ?>
-    <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
+      <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
     <?else ?>
-    <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
+      <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
     <?endif ?>
     <Package InstallerVersion="500" Compressed="yes" Description="$(var.ProductName)" />
     <Media Id="1" Cabinet="media1.cab" EmbedCab="yes" />
@@ -106,6 +106,17 @@
       <Component Id="EnvDTE.dll" Guid="*">
         <File Source="$(var.ArtifactsPublishPath)\EnvDTE.dll" />
       </Component>
+      <!--
+      <Component Id="EasyHook.dll" Guid="*">
+        <File Source="$(var.ArtifactsPublishPath)\EasyHook.dll" />
+      </Component>
+      <Component Id="EasyHook32.dll" Guid="*">
+        <File Source="$(var.ArtifactsPublishPath)\EasyHook32.dll" />
+      </Component>
+      <Component Id="EasyHook64.dll" Guid="*">
+        <File Source="$(var.ArtifactsPublishPath)\EasyHook64.dll" />
+      </Component>
+      -->
       <Component Id="ExCSS.dll" Guid="*">
         <File Source="$(var.ArtifactsPublishPath)\ExCSS.dll" />
       </Component>
@@ -151,6 +162,9 @@
       <Component Id="Microsoft.ApplicationInsights.dll" Guid="*">
         <File Source="$(var.ArtifactsPublishPath)\Microsoft.ApplicationInsights.dll" />
       </Component>
+      <Component Id="Microsoft.Bcl.AsyncInterfaces.dll" Guid="*">
+        <File Source="$(var.ArtifactsPublishPath)\Microsoft.Bcl.AsyncInterfaces.dll" />
+      </Component>
       <Component Id="Microsoft.Toolkit.HighPerformance.dll" Guid="*">
         <File Source="$(var.ArtifactsPublishPath)\Microsoft.Toolkit.HighPerformance.dll" />
       </Component>
@@ -188,11 +202,11 @@
       <Component Id="SmartFormat.dll" Guid="*">
         <File Source="$(var.ArtifactsPublishPath)\SmartFormat.dll" />
       </Component>
+      <Component Id="SmartFormat.ZString.dll" Guid="*">
+        <File Source="$(var.ArtifactsPublishPath)\SmartFormat.ZString.dll" />
+      </Component>
       <Component Id="SpellChecker.dll" Guid="*">
         <File Source="$(var.ArtifactsPublishPath)\SpellChecker.dll" />
-      </Component>
-      <Component Id="StrongOf.dll" Guid="*">
-        <File Source="$(var.ArtifactsPublishPath)\BenjaminAbt.StrongOf.dll" />
       </Component>
       <Component Id="System.ComponentModel.Composition.dll" Guid="*">
         <File Source="$(var.ArtifactsPublishPath)\System.ComponentModel.Composition.dll" />
@@ -221,9 +235,6 @@
       <Component Id="TestableIO.System.IO.Abstractions.Wrappers.dll" Guid="*">
         <File Source="$(var.ArtifactsPublishPath)\TestableIO.System.IO.Abstractions.Wrappers.dll" />
       </Component>
-      <Component Id="Testably.Abstractions.FileSystem.Interface.dll" Guid="*">
-        <File Source="$(var.ArtifactsPublishPath)\Testably.Abstractions.FileSystem.Interface.dll" />
-      </Component>
       <Component Id="System.Reactive.dll" Guid="*">
         <File Source="$(var.ArtifactsPublishPath)\System.Reactive.dll" />
       </Component>
@@ -232,9 +243,6 @@
       </Component>
       <Component Id="System.Reactive.Linq.dll" Guid="*">
         <File Source="$(var.ArtifactsPublishPath)\System.Reactive.Linq.dll" />
-      </Component>
-      <Component Id="ZString.dll" Guid="*">
-        <File Source="$(var.ArtifactsPublishPath)\ZString.dll" />
       </Component>
       <!-- Shell extensions -->
       <?define ShellExCLSID = "{3C16B20A-BA16-4156-916F-0A375ECFFE24}"?>
@@ -311,14 +319,11 @@
       <Component Id="Themes.invariant.css" Guid="*">
         <File Source="$(var.ArtifactsPublishPath)\Themes\invariant.css" />
       </Component>
-      <Component Id="Themes.light_plus.css" Guid="*">
-        <File Source="$(var.ArtifactsPublishPath)\Themes\light+.css" />
+      <Component Id="Themes.bright.css" Guid="*">
+        <File Source="$(var.ArtifactsPublishPath)\Themes\bright.css" />
       </Component>
-      <Component Id="Themes.dark.css" Guid="*">
-        <File Source="$(var.ArtifactsPublishPath)\Themes\dark.css" />
-      </Component>
-      <Component Id="Themes.dark_plus.css" Guid="*">
-        <File Source="$(var.ArtifactsPublishPath)\Themes\dark+.css" />
+      <Component Id="Themes.highcontrast_dark.css" Guid="*">
+        <File Source="$(var.ArtifactsPublishPath)\Themes\highcontrast_dark.css" />
       </Component>
     </DirectoryRef>
     <DirectoryRef Id="PluginsDir">
@@ -609,9 +614,8 @@
     <ComponentGroup Id="Component.Themes">
       <ComponentRef Id="Themes.README.md" />
       <ComponentRef Id="Themes.invariant.css" />
-      <ComponentRef Id="Themes.light_plus.css" />
-      <ComponentRef Id="Themes.dark.css" />
-      <ComponentRef Id="Themes.dark_plus.css" />
+      <ComponentRef Id="Themes.bright.css" />
+      <ComponentRef Id="Themes.highcontrast_dark.css" />
     </ComponentGroup>
     <ComponentGroup Id="Component.Translation">
       <ComponentRef Id="English.gif" />
@@ -621,9 +625,7 @@
     <ComponentGroup Id="Component.PluginResources" />
     <DirectoryRef Id="ProgramMenuFolder">
       <Component Id="GitExtensions.newstartmenu" Guid="*">
-        <Shortcut Id="GitExtensions.newstartmenu" Name="$(var.ProductName)" Description="$(var.ProductName)" Icon="gitextensions.ico" Target="[INSTALLDIR]GitExtensions.exe" WorkingDirectory="INSTALLDIR">
-          <ShortcutProperty Key="System.AppUserModel.ID" Value="$(var.InstallName)" />
-        </Shortcut>
+        <Shortcut Id="GitExtensions.newstartmenu" Name="$(var.ProductName)" Description="$(var.ProductName)" Icon="gitextensions.ico" Target="[INSTALLDIR]GitExtensions.exe" WorkingDirectory="INSTALLDIR" />
         <RegistryValue Root="HKCU" Key="$(var.InstalledRegKey)" Name="GitExtensions.newstartmenu" Value="" Type="string" KeyPath="yes" />
       </Component>
     </DirectoryRef>
@@ -652,6 +654,11 @@
       <ComponentRef Id="BugReporter.exe" />
       <ComponentRef Id="BugReporter.runtimeconfig.json" />
       <ComponentRef Id="ConEmuWinForms.dll" />
+      <!--
+      <ComponentRef Id="EasyHook.dll" />
+      <ComponentRef Id="EasyHook32.dll" />
+      <ComponentRef Id="EasyHook64.dll" />
+      -->
       <ComponentRef Id="EnvDTE.dll" />
       <ComponentRef Id="ExCSS.dll" />
       <ComponentRef Id="Git.hub.dll" />
@@ -668,6 +675,7 @@
       <ComponentRef Id="ICSharpCode.TextEditor.dll" />
       <ComponentRef Id="Microsoft.AI.DependencyCollector.dll" />
       <ComponentRef Id="Microsoft.ApplicationInsights.dll" />
+      <ComponentRef Id="Microsoft.Bcl.AsyncInterfaces.dll" />
       <ComponentRef Id="Microsoft.Toolkit.HighPerformance.dll" />
       <ComponentRef Id="Microsoft.VisualStudio.Composition.dll" />
       <ComponentRef Id="Microsoft.VisualStudio.Composition.NetFxAttributes.dll" />
@@ -680,8 +688,8 @@
       <ComponentRef Id="ResourceManager.dll" />
       <ComponentRef Id="RestSharp.dll" />
       <ComponentRef Id="SmartFormat.dll" />
+      <ComponentRef Id="SmartFormat.ZString.dll" />
       <ComponentRef Id="SpellChecker.dll" />
-      <ComponentRef Id="StrongOf.dll" />
       <ComponentRef Id="System.ComponentModel.Composition.dll" />
       <ComponentRef Id="System.Composition.AttributedModel.dll" />
       <ComponentRef Id="System.Composition.Convention.dll" />
@@ -691,11 +699,9 @@
       <ComponentRef Id="System.IO.Abstractions.dll" />
       <ComponentRef Id="TestableIO.System.IO.Abstractions.dll" />
       <ComponentRef Id="TestableIO.System.IO.Abstractions.Wrappers.dll" />
-      <ComponentRef Id="Testably.Abstractions.FileSystem.Interface.dll" />
       <ComponentRef Id="System.Reactive.dll" />
       <ComponentRef Id="System.Reactive.Interfaces.dll" />
       <ComponentRef Id="System.Reactive.Linq.dll" />
-      <ComponentRef Id="ZString.dll" />
       <!-- end application build artifacts -->
       <ComponentRef Id="gitextensions.ico" />
       <ComponentRef Id="gitex.cmd" />

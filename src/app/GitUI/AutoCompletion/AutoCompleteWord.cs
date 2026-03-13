@@ -1,58 +1,59 @@
-﻿namespace GitUI.AutoCompletion;
-
-public class AutoCompleteWord : IEquatable<AutoCompleteWord?>
+namespace GitUI.AutoCompletion
 {
-    public string Word { get; }
-    private readonly string _camelHumps;
-
-    public AutoCompleteWord(string word)
+    public class AutoCompleteWord : IEquatable<AutoCompleteWord?>
     {
-        Word = word;
-        _camelHumps = string.Join("", Word.Where(char.IsUpper));
-    }
+        public string Word { get; }
+        private readonly string _camelHumps;
 
-    public bool Matches(string typedWord)
-    {
-        return Word.StartsWith(typedWord, StringComparison.OrdinalIgnoreCase) || (typedWord.All(char.IsUpper) && _camelHumps.StartsWith(typedWord));
-    }
-
-    public bool Equals(AutoCompleteWord? other)
-    {
-        if (other is null)
+        public AutoCompleteWord(string word)
         {
-            return false;
+            Word = word;
+            _camelHumps = string.Join("", Word.Where(char.IsUpper));
         }
 
-        if (ReferenceEquals(this, other))
+        public bool Matches(string typedWord)
         {
-            return true;
+            return Word.StartsWith(typedWord, StringComparison.OrdinalIgnoreCase) || (typedWord.All(char.IsUpper) && _camelHumps.StartsWith(typedWord));
         }
 
-        return string.Equals(Word, other.Word);
-    }
-
-    public override bool Equals(object obj)
-    {
-        if (obj is null)
+        public bool Equals(AutoCompleteWord? other)
         {
-            return false;
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return string.Equals(Word, other.Word);
         }
 
-        if (ReferenceEquals(this, obj))
+        public override bool Equals(object obj)
         {
-            return true;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((AutoCompleteWord)obj);
         }
 
-        if (obj.GetType() != GetType())
+        public override int GetHashCode()
         {
-            return false;
+            return Word is not null ? Word.GetHashCode() : 0;
         }
-
-        return Equals((AutoCompleteWord)obj);
-    }
-
-    public override int GetHashCode()
-    {
-        return Word is not null ? Word.GetHashCode() : 0;
     }
 }

@@ -31,7 +31,7 @@ internal sealed class GraphCache
     internal void AdjustCapacity(int capacity)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(capacity, 1);
-        Capacity = Math.Max(Capacity, capacity);
+        Capacity = capacity;
     }
 
     internal void Allocate(int width, int height)
@@ -41,10 +41,17 @@ internal sealed class GraphCache
             return;
         }
 
-        GraphBitmap?.Dispose();
-        GraphBitmap = null;
-        GraphBitmapGraphics?.Dispose();
-        GraphBitmapGraphics = null;
+        if (GraphBitmap is not null)
+        {
+            GraphBitmap.Dispose();
+            GraphBitmap = null;
+        }
+
+        if (GraphBitmapGraphics is not null)
+        {
+            GraphBitmapGraphics.Dispose();
+            GraphBitmapGraphics = null;
+        }
 
         GraphBitmap = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
         GraphBitmapGraphics = Graphics.FromImage(GraphBitmap);

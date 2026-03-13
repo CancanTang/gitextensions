@@ -1,43 +1,44 @@
 ﻿using GitCommands;
 using GitExtensions.Extensibility.Settings;
 
-namespace GitUI.CommandsDialogs.SettingsDialog;
-
-public class GitSettingsGroup : GroupSettingsPage
+namespace GitUI.CommandsDialogs.SettingsDialog
 {
-    public GitSettingsGroup()
-        : base("Git")
+    public class GitSettingsGroup : GroupSettingsPage
     {
+        public GitSettingsGroup()
+            : base("Git")
+        {
+        }
+
+        public static SettingsPageReference GetPageReference()
+        {
+            return new SettingsPageReferenceByType(typeof(GitSettingsGroup));
+        }
     }
 
-    public static SettingsPageReference GetPageReference()
+    public class GitExtensionsSettingsGroup : GroupSettingsPage
     {
-        return new SettingsPageReferenceByType(typeof(GitSettingsGroup));
-    }
-}
+        public GitExtensionsSettingsGroup()
+            : base(AppSettings.ApplicationName)
+        {
+        }
 
-public class GitExtensionsSettingsGroup : GroupSettingsPage
-{
-    public GitExtensionsSettingsGroup()
-        : base(AppSettings.ApplicationName)
-    {
-    }
-
-    public static SettingsPageReference GetPageReference()
-    {
-        return new SettingsPageReferenceByType(typeof(GitExtensionsSettingsGroup));
-    }
-}
-
-public class PluginsSettingsGroup : GroupSettingsPage
-{
-    public PluginsSettingsGroup()
-        : base("Plugins")
-    {
+        public static SettingsPageReference GetPageReference()
+        {
+            return new SettingsPageReferenceByType(typeof(GitExtensionsSettingsGroup));
+        }
     }
 
-    public static SettingsPageReference GetPageReference()
+    public class PluginsSettingsGroup : GroupSettingsPage
     {
-        return new SettingsPageReferenceByType(typeof(PluginsSettingsGroup));
+        public PluginsSettingsGroup()
+            : base("Plugins")
+        {
+        }
+
+        public static SettingsPageReference GetPageReference()
+        {
+            return new SettingsPageReferenceByType(typeof(PluginsSettingsGroup));
+        }
     }
 }

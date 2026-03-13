@@ -1,45 +1,46 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
-namespace GitCommands.Remotes;
-
-public partial class GitHostingRemoteParser : RemoteParser
+namespace GitCommands.Remotes
 {
-    [GeneratedRegex(@"^(ssh://)?git(?:@|://)(?<hosting>([^.]+\.)+[^.]+)[:/](?<owner>[^/]+)/(?<repo>[\w_\.\-]+)(?:.git)?")]
-    private static partial Regex GitHostingSshUrlRegex { get; }
-
-    [GeneratedRegex(@"^https?://(?:[^@:]*?)?(?::[^/@:]*?)?@?(?<hosting>([^./]+\.)+[^./]+)/(?<owner>[^/]+)/(?<repo>[\w_\.\-]+)(?:.git)?$")]
-    private static partial Regex GitHostingHttpsUrlRegex { get; }
-
-    private static readonly Regex[] _gitHostingRegexes = [GitHostingHttpsUrlRegex, GitHostingSshUrlRegex];
-
-    /// <summary>
-    /// Gets if an url is the one of a git hosted repository.
-    /// </summary>
-    /// <param name="remoteUrl">the url of a git repository.</param>
-    /// <returns>
-    /// true, if the url has been succefully parsed.
-    /// false otherwise.
-    /// </returns>
-    public bool IsValidRemoteUrl(string remoteUrl)
-        => TryExtractGitHostingDataFromRemoteUrl(remoteUrl, out _, out _, out _);
-
-    public bool TryExtractGitHostingDataFromRemoteUrl(string remoteUrl, [NotNullWhen(returnValue: true)] out string? gitHosting, [NotNullWhen(returnValue: true)] out string? owner, [NotNullWhen(returnValue: true)] out string? repository)
+    public partial class GitHostingRemoteParser : RemoteParser
     {
-        owner = null;
-        repository = null;
-        gitHosting = null;
+        [GeneratedRegex(@"^(ssh://)?git(?:@|://)(?<hosting>([^.]+\.)+[^.]+)[:/](?<owner>[^/]+)/(?<repo>[\w_\.\-]+)(?:.git)?")]
+        private static partial Regex GitHostingSshUrlRegex();
 
-        Match m = MatchRegExes(remoteUrl, _gitHostingRegexes);
+        [GeneratedRegex(@"^https?://(?:[^@:]*?)?(?::[^/@:]*?)?@?(?<hosting>([^./]+\.)+[^./]+)/(?<owner>[^/]+)/(?<repo>[\w_\.\-]+)(?:.git)?$")]
+        private static partial Regex GitHostingHttpsUrlRegex();
 
-        if (m is null || !m.Success)
+        private static readonly Regex[] _gitHostingRegexes = [GitHostingHttpsUrlRegex(), GitHostingSshUrlRegex()];
+
+        /// <summary>
+        /// Gets if an url is the one of a git hosted repository.
+        /// </summary>
+        /// <param name="remoteUrl">the url of a git repository.</param>
+        /// <returns>
+        /// true, if the url has been succefully parsed.
+        /// false otherwise.
+        /// </returns>
+        public bool IsValidRemoteUrl(string remoteUrl)
+            => TryExtractGitHostingDataFromRemoteUrl(remoteUrl, out _, out _, out _);
+
+        public bool TryExtractGitHostingDataFromRemoteUrl(string remoteUrl, [NotNullWhen(returnValue: true)] out string? gitHosting, [NotNullWhen(returnValue: true)] out string? owner, [NotNullWhen(returnValue: true)] out string? repository)
         {
-            return false;
-        }
+            owner = null;
+            repository = null;
+            gitHosting = null;
 
-        gitHosting = m.Groups["hosting"].Value;
-        owner = m.Groups["owner"].Value;
-        repository = m.Groups["repo"].Value.Replace(".git", "");
-        return true;
+            Match m = MatchRegExes(remoteUrl, _gitHostingRegexes);
+
+            if (m is null || !m.Success)
+            {
+                return false;
+            }
+
+            gitHosting = m.Groups["hosting"].Value;
+            owner = m.Groups["owner"].Value;
+            repository = m.Groups["repo"].Value.Replace(".git", "");
+            return true;
+        }
     }
 }

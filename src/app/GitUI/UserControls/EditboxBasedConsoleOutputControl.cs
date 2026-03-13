@@ -4,357 +4,278 @@ using GitCommands;
 using GitCommands.Git.Extensions;
 using GitCommands.Logging;
 using GitExtensions.Extensibility;
-using GitExtUtils;
-using GitExtUtils.GitUI.Theming;
-using GitUI.Theming;
-using Microsoft;
 using Timer = System.Windows.Forms.Timer;
 
-namespace GitUI.UserControls;
-
-/// <summary>
-/// Uses an edit box and process output streams redirection.
-/// </summary>
-public sealed class EditboxBasedConsoleOutputControl : ConsoleOutputControl
+namespace GitUI.UserControls
 {
-    private readonly RichTextBox _editbox;
-
-    private int _exitcode;
-
-    private Process? _process;
-
-    private Action? _logProcessKilled;
-
-    private ProcessOutputThrottle? _outputThrottle;
-
-    private StreamWriter? _input;
-
-    public EditboxBasedConsoleOutputControl()
+    /// <summary>
+    /// Uses an edit box and process output streams redirection.
+    /// </summary>
+    public sealed class EditboxBasedConsoleOutputControl : ConsoleOutputControl
     {
-        _editbox = new RichTextBox
-        {
-            BackColor = Application.IsDarkModeEnabled ? AppColor.EditorBackground.GetThemeColor() : SystemColors.Info,
-            BorderStyle = BorderStyle.FixedSingle,
-            Dock = DockStyle.Fill,
-            Font = AppSettings.MonospaceFont,
-            ReadOnly = true
-        };
-        _editbox.LinkClicked += editbox_LinkClicked;
-        Controls.Add(_editbox);
+        private readonly RichTextBox _editbox;
 
-        _outputThrottle = new ProcessOutputThrottle(AppendMessage);
+        private int _exitcode;
 
-        void AppendMessage(string text)
+        private Process? _process;
+
+        private ProcessOutputThrottle? _outputThrottle;
+
+        public EditboxBasedConsoleOutputControl()
         {
-            DebugHelpers.Assert(text is not null, "text is not null");
-            if (IsDisposed)
+            _editbox = new RichTextBox
+            {
+                BackColor = SystemColors.Window,
+                BorderStyle = BorderStyle.FixedSingle,
+                Dock = DockStyle.Fill,
+                ReadOnly = true
+            };
+            Controls.Add(_editbox);
+
+            _outputThrottle = new ProcessOutputThrottle(AppendMessage);
+
+            void AppendMessage(string text)
+            {
+                DebugHelpers.Assert(text is not null, "text is not null");
+                if (IsDisposed)
+                {
+                    return;
+                }
+
+                DebugHelpers.Assert(!InvokeRequired, "!InvokeRequired");
+
+                _editbox.Visible = true;
+                _editbox.Text += text;
+                _editbox.SelectionStart = _editbox.Text.Length;
+                _editbox.ScrollToCaret();
+            }
+        }
+
+        public override int ExitCode => _exitcode;
+
+        public override bool IsDisplayingFullProcessOutput => false;
+
+        public override void AppendMessageFreeThreaded(string text)
+        {
+            _outputThrottle?.Append(text);
+        }
+
+        public override void KillProcess()
+        {
+            if (InvokeRequired)
+            {
+                throw new InvalidOperationException("This operation is to be executed on the home thread.");
+            }
+
+            if (_process is null)
             {
                 return;
             }
 
-            DebugHelpers.Assert(!InvokeRequired, "!InvokeRequired");
-
-            _editbox.Visible = true;
-            _editbox.Text += text;
-            _editbox.SelectionStart = _editbox.Text.Length;
-            _editbox.ScrollToCaret();
-        }
-    }
-
-    public override int ExitCode => _exitcode;
-
-    public override bool IsDisplayingFullProcessOutput => false;
-
-    public override void AppendMessageFreeThreaded(string text)
-    {
-        _outputThrottle?.Append(text);
-    }
-
-    public override void AppendInput(string text)
-    {
-        Validates.NotNull(_input);
-        _input.Write(text);
-    }
-
-    public override void KillProcess()
-    {
-        if (InvokeRequired)
-        {
-            throw new InvalidOperationException("This operation is to be executed on the home thread.");
-        }
-
-        if (_process is null)
-        {
-            return;
-        }
-
-        _logProcessKilled();
-
-        try
-        {
-            _process.TerminateTree();
-        }
-        catch (Exception ex)
-        {
-            Trace.WriteLine(ex);
-        }
-
-        _process.Dispose();
-        _process = null;
-        _input?.Dispose();
-        _input = null;
-        FireProcessExited();
-    }
-
-    public override void Reset()
-    {
-        _outputThrottle?.Clear();
-        _editbox.Text = "";
-        _editbox.Visible = false;
-    }
-
-    public override void StartProcess(string command, string arguments, string workDir, Dictionary<string, string> envVariables)
-    {
-        ProcessOperation operation = CommandLog.LogProcessStart(command, arguments, workDir);
-
-        try
-        {
-            EnvironmentConfiguration.SetEnvironmentVariables();
-
-            KillProcess();
-
-            _logProcessKilled = () => operation.LogProcessEnd(new Exception("Process killed"));
-
-            // process used to execute external commands
-            Encoding outputEncoding = GitModule.SystemEncoding;
-            ProcessStartInfo startInfo = new()
+            try
             {
-                UseShellExecute = false,
-                ErrorDialog = false,
-                CreateNoWindow = !AppSettings.ShowGitCommandLine,
-                RedirectStandardInput = true,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                StandardOutputEncoding = outputEncoding,
-                StandardErrorEncoding = outputEncoding,
-                FileName = command,
-                Arguments = arguments,
-                WorkingDirectory = workDir
-            };
-
-            foreach ((string name, string value) in envVariables)
+                _process.TerminateTree();
+            }
+            catch (Exception ex)
             {
-                startInfo.EnvironmentVariables.Add(name, value);
+                Trace.WriteLine(ex);
             }
 
-            _process = new() { StartInfo = startInfo, EnableRaisingEvents = true };
-
-            AsyncStreamReader? outputReader = null;
-            AsyncStreamReader? errorReader = null;
-
-            _process.Exited += delegate
-            {
-                ThreadHelper.FileAndForget(async () =>
-                    {
-                        if (_process is null)
-                        {
-                            await this.SwitchToMainThreadAsync();
-                            operation.LogProcessEnd(new Exception("Process instance is null in Exited event"));
-                            return;
-                        }
-
-                        // The process is exited already, but this command waits also until all output is received.
-                        // Only WaitForExit when someone is connected to the exited event. For some reason a
-                        // null reference is thrown sometimes when staging/unstaging in the commit dialog when
-                        // we wait for exit, probably a timing issue...
-                        try
-                        {
-                            // WaitForExit[Async] blocks here for unknown reason if the process has already exited
-                            if (!_process.HasExited)
-                            {
-                                await _process.WaitForExitAsync();
-                            }
-
-                            _logProcessKilled = null;
-
-                            if (_process is null)
-                            {
-                                // The process has been killed meanwhile.
-                                return;
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            await this.SwitchToMainThreadAsync();
-                            operation.LogProcessEnd(ex);
-                        }
-
-                        _exitcode = _process.ExitCode;
-
-                        using CancellationTokenSource eofTimeoutTokenSource = new(millisecondsDelay: 5000);
-
-                        if (outputReader is not null)
-                        {
-                            await outputReader.WaitUntilEofAsync(eofTimeoutTokenSource.Token);
-                            outputReader.Dispose();
-                        }
-
-                        if (errorReader is not null)
-                        {
-                            await errorReader.WaitUntilEofAsync(eofTimeoutTokenSource.Token);
-                            errorReader.Dispose();
-                        }
-
-                        await this.SwitchToMainThreadAsync();
-                        operation.LogProcessEnd(_exitcode);
-                        _process.Dispose();
-                        _process = null;
-                        await _input.DisposeAsync();
-                        _input = null;
-                        _outputThrottle?.Stop(flush: true);
-                        FireProcessExited();
-                    });
-            };
-
-            _process.Start();
-            operation.SetProcessId(_process.Id);
-            _input = _process.StandardInput;
-            outputReader = new AsyncStreamReader(_process.StandardOutput, ForwardOutput);
-            errorReader = new AsyncStreamReader(_process.StandardError, ForwardOutput);
-        }
-        catch (Exception ex)
-        {
-            operation.LogProcessEnd(ex);
-            ex.Data.Add("command", command);
-            ex.Data.Add("arguments", arguments);
-            throw;
+            _process = null;
+            FireProcessExited();
         }
 
-        return;
-
-        void ForwardOutput(string output)
+        public override void Reset()
         {
-            output = output.Replace("\r\n", "\n");
+            _outputThrottle?.Clear();
+            _editbox.Text = "";
+            _editbox.Visible = false;
+        }
 
-            for (int startIndex = 0; startIndex < output.Length;)
+        public override void StartProcess(string command, string arguments, string workDir, Dictionary<string, string> envVariables)
+        {
+            ProcessOperation operation = CommandLog.LogProcessStart(command, arguments, workDir);
+
+            try
             {
-                int nextLineEnd = output.IndexOfAny(Delimiters.LineFeedAndCarriageReturn, startIndex) + 1;
-                if (nextLineEnd == 0)
+                EnvironmentConfiguration.SetEnvironmentVariables();
+
+                bool ssh = UseSsh(arguments);
+
+                KillProcess();
+
+                // process used to execute external commands
+                Encoding outputEncoding = GitModule.SystemEncoding;
+                ProcessStartInfo startInfo = new()
                 {
-                    nextLineEnd = output.Length;
+                    UseShellExecute = false,
+                    ErrorDialog = false,
+                    CreateNoWindow = !ssh && !AppSettings.ShowGitCommandLine,
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    StandardOutputEncoding = outputEncoding,
+                    StandardErrorEncoding = outputEncoding,
+                    FileName = command,
+                    Arguments = arguments,
+                    WorkingDirectory = workDir
+                };
+
+                foreach ((string name, string value) in envVariables)
+                {
+                    startInfo.EnvironmentVariables.Add(name, value);
                 }
 
-                FireDataReceived(new TextEventArgs(output[startIndex..nextLineEnd]));
-                startIndex = nextLineEnd;
-            }
-        }
-    }
+                Process process = new() { StartInfo = startInfo, EnableRaisingEvents = true };
 
-    protected override void Dispose(bool disposing)
-    {
-        KillProcess();
-        if (disposing)
-        {
-            _outputThrottle?.Dispose();
-            _outputThrottle = null;
-            _process?.Dispose();
-            _process = null;
-            _input?.Dispose();
-            _input = null;
-        }
-
-        base.Dispose(disposing);
-    }
-
-    private void editbox_LinkClicked(object? sender, LinkClickedEventArgs e)
-    {
-        try
-        {
-            OsShellUtil.OpenUrlInDefaultBrowser(e.LinkText);
-        }
-        catch (Exception ex)
-        {
-            MessageBoxes.ShowError(this, ex.Message);
-        }
-    }
-
-    #region ProcessOutputThrottle
-
-    private sealed class ProcessOutputThrottle : IDisposable
-    {
-        private readonly Lock _textToAddLock = new();
-        private readonly StringBuilder _textToAdd = new();
-        private readonly Timer _timer;
-        private readonly Action<string> _doOutput;
-
-        /// <param name="doOutput">Will be called on the UI thread.</param>
-        public ProcessOutputThrottle(Action<string> doOutput)
-        {
-            _doOutput = doOutput;
-
-            _timer = new Timer { Interval = 1 };
-            _timer.Tick += delegate { FlushOutput(); };
-            _timer.Start();
-        }
-
-        public void Stop(bool flush)
-        {
-            if (flush)
-            {
-                FlushOutput();
-            }
-
-            _timer.Stop();
-        }
-
-        /// <remarks>Can be called on any thread.</remarks>
-        public void Append(string text)
-        {
-            lock (_textToAddLock)
-            {
-                _textToAdd.Append(text);
-            }
-        }
-
-        public void FlushOutput()
-        {
-            _timer.Stop();
-            _timer.Interval = 100;
-            _timer.Start();
-
-            string textToAdd = "";
-            lock (_textToAddLock)
-            {
-                if (_textToAdd.Length > 0)
+                process.OutputDataReceived += (sender, args) => FireDataReceived(new TextEventArgs((args.Data ?? "") + '\n'));
+                process.ErrorDataReceived += (sender, args) => FireDataReceived(new TextEventArgs((args.Data ?? "") + '\n'));
+                process.Exited += delegate
                 {
-                    textToAdd = _textToAdd.ToString();
+                    this.InvokeAndForget(
+                        () =>
+                        {
+                            if (_process is null)
+                            {
+                                operation.LogProcessEnd(new Exception("Process instance is null in Exited event"));
+                                return;
+                            }
+
+                            // The process is exited already, but this command waits also until all output is received.
+                            // Only WaitForExit when someone is connected to the exited event. For some reason a
+                            // null reference is thrown sometimes when staging/unstaging in the commit dialog when
+                            // we wait for exit, probably a timing issue...
+                            try
+                            {
+                                _process.WaitForExit();
+                            }
+                            catch (Exception ex)
+                            {
+                                operation.LogProcessEnd(ex);
+                            }
+
+                            _exitcode = _process.ExitCode;
+                            operation.LogProcessEnd(_exitcode);
+                            _process = null;
+                            _outputThrottle?.FlushOutput();
+                            FireProcessExited();
+                            _outputThrottle?.Stop(flush: true);
+                        });
+                };
+
+                process.Start();
+                operation.SetProcessId(process.Id);
+                _process = process;
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+            }
+            catch (Exception ex)
+            {
+                operation.LogProcessEnd(ex);
+                ex.Data.Add("command", command);
+                ex.Data.Add("arguments", arguments);
+                throw;
+            }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            KillProcess();
+            if (disposing && _outputThrottle is not null)
+            {
+                _outputThrottle.Dispose();
+                _outputThrottle = null;
+            }
+
+            base.Dispose(disposing);
+        }
+
+        private static bool UseSsh(string arguments)
+        {
+            return arguments.Contains("plink")
+                || (!GitSshHelpers.IsPlink && DoArgumentsRequireSsh());
+
+            bool DoArgumentsRequireSsh()
+            {
+                return (arguments.Contains('@') && arguments.Contains("://")) ||
+                       (arguments.Contains('@') && arguments.Contains(':')) ||
+                       arguments.Contains("ssh://") ||
+                       arguments.Contains("http://") ||
+                       arguments.Contains("git://") ||
+                       arguments.Contains("push") ||
+                       arguments.Contains("remote") ||
+                       arguments.Contains("fetch") ||
+                       arguments.Contains("pull");
+            }
+        }
+
+        #region ProcessOutputThrottle
+
+        private sealed class ProcessOutputThrottle : IDisposable
+        {
+            private readonly StringBuilder _textToAdd = new();
+            private readonly Timer _timer;
+            private readonly Action<string> _doOutput;
+
+            /// <param name="doOutput">Will be called on the UI thread.</param>
+            public ProcessOutputThrottle(Action<string> doOutput)
+            {
+                _doOutput = doOutput;
+
+                _timer = new Timer { Interval = 600, Enabled = true };
+                _timer.Tick += delegate { FlushOutput(); };
+            }
+
+            public void Stop(bool flush)
+            {
+                _timer.Stop();
+
+                if (flush)
+                {
+                    FlushOutput();
+                }
+            }
+
+            /// <remarks>Can be called on any thread.</remarks>
+            public void Append(string text)
+            {
+                lock (_textToAdd)
+                {
+                    _textToAdd.Append(text);
+                }
+            }
+
+            public void FlushOutput()
+            {
+                lock (_textToAdd)
+                {
+                    if (_textToAdd.Length > 0)
+                    {
+                        _doOutput?.Invoke(_textToAdd.ToString());
+                    }
+
                     _textToAdd.Clear();
                 }
             }
 
-            if (textToAdd.Length > 0)
+            public void Clear()
             {
-                _doOutput?.Invoke(textToAdd);
+                lock (_textToAdd)
+                {
+                    _textToAdd.Clear();
+                }
+            }
+
+            public void Dispose()
+            {
+                Stop(flush: false);
+
+                // clear will lock, to prevent outputting to disposed object
+                Clear();
+                _timer.Dispose();
             }
         }
 
-        public void Clear()
-        {
-            lock (_textToAddLock)
-            {
-                _textToAdd.Clear();
-            }
-        }
-
-        public void Dispose()
-        {
-            Stop(flush: false);
-
-            // clear will lock, to prevent outputting to disposed object
-            Clear();
-            _timer.Dispose();
-        }
+        #endregion
     }
-
-    #endregion
 }

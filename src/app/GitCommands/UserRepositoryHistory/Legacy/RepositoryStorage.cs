@@ -1,72 +1,73 @@
-﻿namespace GitCommands.UserRepositoryHistory.Legacy;
-
-/// <summary>
-/// Provides the ability to persist and retrieve collections of user's git repositories.
-/// </summary>
-public interface IRepositoryStorage
+namespace GitCommands.UserRepositoryHistory.Legacy
 {
     /// <summary>
-    /// Loads a collection of categorised user's git repositories (legacy).
+    /// Provides the ability to persist and retrieve collections of user's git repositories.
     /// </summary>
-    /// <returns>A collection of categorised user's git repositories.</returns>
-    IReadOnlyList<RepositoryCategory> Load();
-
-    /// <summary>
-    /// Removes the legacy categorised user's git repositories history
-    /// after it has been migrated to the new format.
-    /// </summary>
-    void Save();
-}
-
-/// <summary>
-/// Persists and retrieves collections of user's git repositories.
-/// </summary>
-public sealed class RepositoryStorage : IRepositoryStorage
-{
-    private const string KeyHistory = "repositories";
-    private const string KeyHistoryBackup = "repositories-backup";
-    private readonly IRepositorySerialiser<RepositoryCategory> _repositoryCategorySerialiser;
-
-    public RepositoryStorage(IRepositorySerialiser<RepositoryCategory> repositoryCategorySerialiser)
+    public interface IRepositoryStorage
     {
-        _repositoryCategorySerialiser = repositoryCategorySerialiser;
-    }
+        /// <summary>
+        /// Loads a collection of categorised user's git repositories (legacy).
+        /// </summary>
+        /// <returns>A collection of categorised user's git repositories.</returns>
+        IReadOnlyList<RepositoryCategory> Load();
 
-    public RepositoryStorage()
-        : this(new RepositoryCategoryXmlSerialiser())
-    {
+        /// <summary>
+        /// Removes the legacy categorised user's git repositories history
+        /// after it has been migrated to the new format.
+        /// </summary>
+        void Save();
     }
 
     /// <summary>
-    /// Loads a collection of categorised user's git repositories (legacy).
+    /// Persists and retrieves collections of user's git repositories.
     /// </summary>
-    /// <returns>A collection of categorised user's git repositories.</returns>
-    public IReadOnlyList<RepositoryCategory> Load()
+    public sealed class RepositoryStorage : IRepositoryStorage
     {
-        string? legacySetting = AppSettings.GetString(KeyHistory, null);
-        if (string.IsNullOrWhiteSpace(legacySetting))
+        private const string KeyHistory = "repositories";
+        private const string KeyHistoryBackup = "repositories-backup";
+        private readonly IRepositorySerialiser<RepositoryCategory> _repositoryCategorySerialiser;
+
+        public RepositoryStorage(IRepositorySerialiser<RepositoryCategory> repositoryCategorySerialiser)
         {
-            return [];
+            _repositoryCategorySerialiser = repositoryCategorySerialiser;
         }
 
-        // backup the original setting
-        AppSettings.SetString(KeyHistoryBackup, legacySetting);
-
-        IReadOnlyList<RepositoryCategory> history = _repositoryCategorySerialiser.Deserialize(legacySetting);
-        if (history is null)
+        public RepositoryStorage()
+            : this(new RepositoryCategoryXmlSerialiser())
         {
-            return [];
         }
 
-        return history;
-    }
+        /// <summary>
+        /// Loads a collection of categorised user's git repositories (legacy).
+        /// </summary>
+        /// <returns>A collection of categorised user's git repositories.</returns>
+        public IReadOnlyList<RepositoryCategory> Load()
+        {
+            string? legacySetting = AppSettings.GetString(KeyHistory, null);
+            if (string.IsNullOrWhiteSpace(legacySetting))
+            {
+                return Array.Empty<RepositoryCategory>();
+            }
 
-    /// <summary>
-    /// Removes the legacy collection of user's git repositories.
-    /// </summary>
-    public void Save()
-    {
-        // remove the legacy setting
-        AppSettings.SetString(KeyHistory, "");
+            // backup the original setting
+            AppSettings.SetString(KeyHistoryBackup, legacySetting);
+
+            IReadOnlyList<RepositoryCategory> history = _repositoryCategorySerialiser.Deserialize(legacySetting);
+            if (history is null)
+            {
+                return Array.Empty<RepositoryCategory>();
+            }
+
+            return history;
+        }
+
+        /// <summary>
+        /// Removes the legacy collection of user's git repositories.
+        /// </summary>
+        public void Save()
+        {
+            // remove the legacy setting
+            AppSettings.SetString(KeyHistory, "");
+        }
     }
 }

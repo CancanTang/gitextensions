@@ -1,60 +1,61 @@
 using GitExtensions.Extensibility.Git;
 
-namespace GitUI.HelperDialogs;
-
-public partial class FormSelectMultipleBranches : GitExtensionsForm
+namespace GitUI.HelperDialogs
 {
-    // only for translation
-    private FormSelectMultipleBranches()
-        : base(true)
+    public partial class FormSelectMultipleBranches : GitExtensionsForm
     {
-        InitializeComponent();
-        InitializeComplete();
-    }
-
-    public FormSelectMultipleBranches(IReadOnlyList<IGitRef> branchesToSelect)
-    {
-        InitializeComponent();
-        InitializeComplete();
-
-        if (branchesToSelect.Count > 350)
+        // only for translation
+        private FormSelectMultipleBranches()
+            : base(true)
         {
-            Branches.MultiColumn = true;
+            InitializeComponent();
+            InitializeComplete();
         }
 
-        Branches.DisplayMember = nameof(IGitRef.Name);
-        Branches.Items.AddRange(branchesToSelect.ToArray());
-    }
-
-    public void SelectBranch(string name)
-    {
-        int index = 0;
-        foreach (object item in Branches.Items)
+        public FormSelectMultipleBranches(IReadOnlyList<IGitRef> branchesToSelect)
         {
-            if (item is IGitRef branch && branch.Name == name)
+            InitializeComponent();
+            InitializeComplete();
+
+            if (branchesToSelect.Count > 350)
             {
-                Branches.SetItemChecked(index, true);
-                return;
+                Branches.MultiColumn = true;
             }
 
-            index++;
+            Branches.DisplayMember = nameof(IGitRef.Name);
+            Branches.Items.AddRange(branchesToSelect.ToArray());
         }
-    }
 
-    public IReadOnlyList<IGitRef> GetSelectedBranches()
-    {
-        List<IGitRef> branches = [];
-
-        foreach (IGitRef head in Branches.CheckedItems)
+        public void SelectBranch(string name)
         {
-            branches.Add(head);
+            int index = 0;
+            foreach (object item in Branches.Items)
+            {
+                if (item is IGitRef branch && branch.Name == name)
+                {
+                    Branches.SetItemChecked(index, true);
+                    return;
+                }
+
+                index++;
+            }
         }
 
-        return branches;
-    }
+        public IReadOnlyList<IGitRef> GetSelectedBranches()
+        {
+            List<IGitRef> branches = [];
 
-    private void okButton_Click(object sender, EventArgs e)
-    {
-        Close();
+            foreach (IGitRef head in Branches.CheckedItems)
+            {
+                branches.Add(head);
+            }
+
+            return branches;
+        }
+
+        private void okButton_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
     }
 }

@@ -1,27 +1,28 @@
 ﻿using Newtonsoft.Json.Linq;
 using RestSharp;
 
-namespace GitExtensions.Plugins.Bitbucket;
-
-internal class GetBranchesRequest : BitbucketRequestBase<JObject>
+namespace GitExtensions.Plugins.Bitbucket
 {
-    private readonly Repository _repo;
-
-    public GetBranchesRequest(Repository repo, Settings settings)
-        : base(settings)
+    internal class GetBranchesRequest : BitbucketRequestBase<JObject>
     {
-        _repo = repo;
-    }
+        private readonly Repository _repo;
 
-    protected override object? RequestBody => null;
+        public GetBranchesRequest(Repository repo, Settings settings)
+            : base(settings)
+        {
+            _repo = repo;
+        }
 
-    protected override Method RequestMethod => Method.GET;
+        protected override object? RequestBody => null;
 
-    protected override string ApiUrl => string.Format("/rest/api/1.0/projects/{0}/repos/{1}/branches?limit=1000",
-        _repo.ProjectKey, _repo.RepoName);
+        protected override Method RequestMethod => Method.GET;
 
-    protected override JObject ParseResponse(JObject json)
-    {
-        return json;
+        protected override string ApiUrl => string.Format("/rest/api/1.0/projects/{0}/repos/{1}/branches?limit=1000",
+            _repo.ProjectKey, _repo.RepoName);
+
+        protected override JObject ParseResponse(JObject json)
+        {
+            return json;
+        }
     }
 }

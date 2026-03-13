@@ -1,9 +1,10 @@
-﻿namespace GitCommands;
-
-public enum ShorteningRecentRepoPathStrategy
+﻿namespace GitCommands
 {
-    // DO NOT RENAME THESE -- doing so will break user preferences
-    None,
-    MostSignDir,
-    MiddleDots
+    public enum ShorteningRecentRepoPathStrategy
+    {
+        // DO NOT RENAME THESE -- doing so will break user preferences
+        None,
+        MostSignDir,
+        MiddleDots
+    }
 }

@@ -42,10 +42,9 @@ internal class RepositoryHistoryUIService : IRepositoryHistoryUIService
         _invalidRepositoryRemover = invalidRepositoryRemover;
     }
 
-    private void AddRecentRepositories(ToolStripDropDownItem menuItemContainer, Repository repo, string? caption, int number, bool anchored = false)
+    private void AddRecentRepositories(ToolStripDropDownItem menuItemContainer, Repository repo, string? caption, bool anchored = false)
     {
-        string numberString = number switch { < 10 => $"&{number}", 10 => "1&0", _ => $"{number}" };
-        ToolStripMenuItem item = new($"{numberString}: {caption}")
+        ToolStripMenuItem item = new(caption)
         {
             DisplayStyle = ToolStripItemDisplayStyle.ImageAndText
         };
@@ -123,7 +122,7 @@ internal class RepositoryHistoryUIService : IRepositoryHistoryUIService
 
         foreach (IGrouping<string, RecentRepoInfo> repo in pinnedRepos.Union(allRecentRepos).GroupBy(k => k.Repo.Category).OrderBy(k => k.Key))
         {
-            AddFavouriteRepositories(repo.Key, [.. repo]);
+            AddFavouriteRepositories(repo.Key, repo.ToList());
         }
 
         void AddFavouriteRepositories(string? category, IList<RecentRepoInfo> repos)
@@ -140,10 +139,9 @@ internal class RepositoryHistoryUIService : IRepositoryHistoryUIService
             }
 
             menuItemCategory.DropDown.SuspendLayout();
-            int number = 0;
             foreach (RecentRepoInfo r in repos)
             {
-                AddRecentRepositories(menuItemCategory, r.Repo, r.Caption, ++number);
+                AddRecentRepositories(menuItemCategory, r.Repo, r.Caption);
             }
 
             menuItemCategory.DropDown.ResumeLayout();
@@ -168,10 +166,9 @@ internal class RepositoryHistoryUIService : IRepositoryHistoryUIService
 
         splitter.SplitRecentRepos(repositoryHistory, pinnedRepos, allRecentRepos);
 
-        int number = 0;
         foreach (RecentRepoInfo repo in pinnedRepos)
         {
-            AddRecentRepositories(container, repo.Repo, repo.Caption, ++number, repo.Anchored);
+            AddRecentRepositories(container, repo.Repo, repo.Caption, repo.Anchored);
         }
 
         if (allRecentRepos.Count > 0)
@@ -183,7 +180,7 @@ internal class RepositoryHistoryUIService : IRepositoryHistoryUIService
 
             foreach (RecentRepoInfo repo in allRecentRepos)
             {
-                AddRecentRepositories(container, repo.Repo, repo.Caption, ++number, repo.Anchored);
+                AddRecentRepositories(container, repo.Repo, repo.Caption, repo.Anchored);
             }
         }
     }
@@ -200,8 +197,8 @@ internal class RepositoryHistoryUIService : IRepositoryHistoryUIService
             _service = service;
         }
 
-        internal void AddRecentRepositories(ToolStripDropDownItem menuItemContainer, Repository repo, string? caption, int number)
-            => _service.AddRecentRepositories(menuItemContainer, repo, caption, number);
+        internal void AddRecentRepositories(ToolStripDropDownItem menuItemContainer, Repository repo, string? caption)
+            => _service.AddRecentRepositories(menuItemContainer, repo, caption);
 
         internal void PopulateFavouriteRepositoriesMenu(ToolStripDropDownItem container, in IList<Repository> repositoryHistory)
             => _service.PopulateFavouriteRepositoriesMenu(container, repositoryHistory);

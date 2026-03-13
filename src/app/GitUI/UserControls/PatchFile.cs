@@ -1,53 +1,54 @@
 ﻿using System.Diagnostics;
 using GitExtensions.Extensibility.Git;
 
-namespace GitUI;
-
-[DebuggerDisplay("PatchFile( {" + nameof(Subject) + "} )")]
-public sealed class PatchFile
+namespace GitUI
 {
-    public string? FullName { get; set; }
-
-    public string? Action { get; set; }
-    public string? Name { get; set; }
-    public ObjectId? ObjectId { get; set; }
-
-    public string? Author { get; set; }
-
-    public string? Subject { get; set; }
-
-    public string? Date { get; set; }
-
-    public bool IsNext { get; set; }
-
-    public bool IsSkipped { get; set; }
-    public bool IsApplied { get; set; }
-
-    public string Status
+    [DebuggerDisplay("PatchFile( {" + nameof(Subject) + "} )")]
+    public sealed class PatchFile
     {
-        get
+        public string? FullName { get; set; }
+
+        public string? Action { get; set; }
+        public string? Name { get; set; }
+        public ObjectId? ObjectId { get; set; }
+
+        public string? Author { get; set; }
+
+        public string? Subject { get; set; }
+
+        public string? Date { get; set; }
+
+        public bool IsNext { get; set; }
+
+        public bool IsSkipped { get; set; }
+        public bool IsApplied { get; set; }
+
+        public string Status
         {
-            if (IsSkipped)
+            get
             {
-                return "Skipped";
-            }
+                if (IsSkipped)
+                {
+                    return "Skipped";
+                }
 
-            if (IsApplied)
-            {
-                return "Applied";
-            }
+                if (IsApplied)
+                {
+                    return "Applied";
+                }
 
-            if (IsNext)
-            {
-                return "Applying...";
-            }
+                if (IsNext)
+                {
+                    return "Applying...";
+                }
 
-            if (!string.IsNullOrEmpty(FullName) && !File.Exists(FullName))
-            {
-                return "Applied";
-            }
+                if (!string.IsNullOrEmpty(FullName) && !File.Exists(FullName))
+                {
+                    return "Applied";
+                }
 
-            return "";
+                return "";
+            }
         }
     }
 }

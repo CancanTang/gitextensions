@@ -1,65 +1,66 @@
-﻿namespace GitUI.UserControls.RevisionGrid;
-
-public sealed partial class RevisionDataGridView
+﻿namespace GitUI.UserControls.RevisionGrid
 {
-    /// <summary>
-    /// Coordinates background update executions. Requested reruns only "queue up" upto one.
-    /// </summary>
-    private class BackgroundUpdater
+    public sealed partial class RevisionDataGridView
     {
-        private readonly Func<Task> _operation;
-        private readonly int _cooldownMilliseconds;
-        private readonly Lock _lock = new();
-        private readonly TaskManager _taskManager;
-
-        private volatile bool _executing;
-        private volatile bool _rerunRequested;
-
-        public BackgroundUpdater(TaskManager taskManager, Func<Task> operation, int cooldownMilliseconds)
+        /// <summary>
+        /// Coordinates background update executions. Requested reruns only "queue up" upto one.
+        /// </summary>
+        private class BackgroundUpdater
         {
-            _taskManager = taskManager ?? throw new ArgumentNullException(nameof(taskManager));
-            _operation = operation ?? throw new ArgumentNullException(nameof(operation));
-            _cooldownMilliseconds = cooldownMilliseconds;
-        }
+            private readonly Func<Task> _operation;
+            private readonly int _cooldownMilliseconds;
+            private readonly object _sync = new();
+            private readonly TaskManager _taskManager;
 
-        public void ScheduleExecution()
-        {
-            lock (_lock)
+            private volatile bool _executing;
+            private volatile bool _rerunRequested;
+
+            public BackgroundUpdater(TaskManager taskManager, Func<Task> operation, int cooldownMilliseconds)
             {
-                if (!_executing)
-                {
-                    // if not running, start it
-                    _executing = true;
-                    _taskManager.FileAndForget(WrappedOperationAsync);
-                }
-                else
-                {
-                    // if currently running make sure it runs again
-                    _rerunRequested = true;
-                }
+                _taskManager = taskManager ?? throw new ArgumentNullException(nameof(taskManager));
+                _operation = operation ?? throw new ArgumentNullException(nameof(operation));
+                _cooldownMilliseconds = cooldownMilliseconds;
             }
-        }
 
-        private async Task WrappedOperationAsync()
-        {
-            try
+            public void ScheduleExecution()
             {
-                await _operation();
-            }
-            finally
-            {
-                await Task.Delay(_cooldownMilliseconds);
-
-                lock (_lock)
+                lock (_sync)
                 {
-                    if (_rerunRequested)
+                    if (!_executing)
                     {
+                        // if not running, start it
+                        _executing = true;
                         _taskManager.FileAndForget(WrappedOperationAsync);
-                        _rerunRequested = false;
                     }
                     else
                     {
-                        _executing = false;
+                        // if currently running make sure it runs again
+                        _rerunRequested = true;
+                    }
+                }
+            }
+
+            private async Task WrappedOperationAsync()
+            {
+                try
+                {
+                    await _operation();
+                }
+                finally
+                {
+                    await Task.Delay(_cooldownMilliseconds);
+
+                    lock (_sync)
+                    {
+                        if (_rerunRequested)
+                        {
+                            _taskManager.FileAndForget(WrappedOperationAsync);
+                            _rerunRequested = false;
+                        }
+                        else
+                        {
+                            _executing = false;
+                        }
                     }
                 }
             }

@@ -1,15 +1,16 @@
-﻿namespace GitUI.UserControls;
-
-public class ListViewGroupHitInfo
+﻿namespace GitUI.UserControls
 {
-    public ListViewGroupHitInfo(ListViewGroup @group, bool isCollapseButton, Point location)
+    public class ListViewGroupHitInfo
     {
-        Group = @group;
-        IsCollapseButton = isCollapseButton;
-        Location = location;
-    }
+        public ListViewGroupHitInfo(ListViewGroup @group, bool isCollapseButton, Point location)
+        {
+            Group = @group;
+            IsCollapseButton = isCollapseButton;
+            Location = location;
+        }
 
-    public ListViewGroup Group { get; }
-    public bool IsCollapseButton { get; }
-    public Point Location { get; }
+        public ListViewGroup Group { get; }
+        public bool IsCollapseButton { get; }
+        public Point Location { get; }
+    }
 }

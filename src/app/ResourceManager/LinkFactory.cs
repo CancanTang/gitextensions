@@ -1,175 +1,181 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
-using GitCommands;
 using GitCommands.Git;
 using GitExtensions.Extensibility.Git;
 
-namespace ResourceManager;
-
-public interface ILinkFactory
+namespace ResourceManager
 {
-    string CreateLink(string? caption, string uri);
-
-    string CreateTagLink(string tag);
-
-    string CreateBranchLink(string noPrefixBranch);
-
-    string CreateCommitLink(ObjectId objectId, string? linkText = null, bool preserveGuidInLinkText = false);
-
-    string CreateShowAllLink(string what);
-
-    void ExecuteLink(string? linkUri, Action<CommandEventArgs>? handleInternalLink = null, Action<string?>? showAll = null);
-}
-
-public sealed class LinkFactory : ILinkFactory
-{
-    private const string InternalScheme = "gitext";
-    private const string ShowAll = "showall";
-
-    public string CreateLink(string? caption, string uri)
+    public interface ILinkFactory
     {
-        string htmlUri = WebUtility.HtmlEncode(uri);
+        string CreateLink(string? caption, string uri);
 
-        string htmlLink = "<a href=" + htmlUri.Quote("'") + ">" + WebUtility.HtmlEncode(caption) + "</a>";
-        return htmlLink;
+        string CreateTagLink(string tag);
+
+        string CreateBranchLink(string noPrefixBranch);
+
+        string CreateCommitLink(ObjectId objectId, string? linkText = null, bool preserveGuidInLinkText = false);
+
+        string CreateShowAllLink(string what);
+
+        void ExecuteLink(string? linkUri, Action<CommandEventArgs>? handleInternalLink = null, Action<string?>? showAll = null);
     }
 
-    public string CreateTagLink(string tag)
+    public sealed class LinkFactory : ILinkFactory
     {
-        if (tag != "…")
+        private const string InternalScheme = "gitext";
+        private const string ShowAll = "showall";
+
+        public string CreateLink(string? caption, string uri)
         {
-            return CreateLink(tag, $"{InternalScheme}://gototag/" + tag);
+            string htmlUri = WebUtility.HtmlEncode(uri);
+
+            string htmlLink = "<a href=" + htmlUri.Quote("'") + ">" + WebUtility.HtmlEncode(caption) + "</a>";
+            return htmlLink;
         }
 
-        return WebUtility.HtmlEncode(tag);
-    }
-
-    public string CreateBranchLink(string noPrefixBranch)
-    {
-        if (noPrefixBranch != "…")
+        public string CreateTagLink(string tag)
         {
-            string linkTarget = DetachedHeadParser.IsDetachedHead(noPrefixBranch) ? "HEAD" : noPrefixBranch;
-            return CreateLink(noPrefixBranch, $"{InternalScheme}://gotobranch/{linkTarget}");
+            if (tag != "…")
+            {
+                return CreateLink(tag, $"{InternalScheme}://gototag/" + tag);
+            }
+
+            return WebUtility.HtmlEncode(tag);
         }
 
-        return WebUtility.HtmlEncode(noPrefixBranch);
-    }
-
-    public string CreateCommitLink(ObjectId objectId, string? linkText = null, bool preserveGuidInLinkText = false)
-    {
-        if (linkText is null)
+        public string CreateBranchLink(string noPrefixBranch)
         {
-            if (objectId == ObjectId.WorkTreeId)
+            if (noPrefixBranch != "…")
             {
-                linkText = TranslatedStrings.Workspace;
+                string linkTarget = DetachedHeadParser.IsDetachedHead(noPrefixBranch) ? "HEAD" : noPrefixBranch;
+                return CreateLink(noPrefixBranch, $"{InternalScheme}://gotobranch/{linkTarget}");
             }
-            else if (objectId == ObjectId.IndexId)
-            {
-                linkText = TranslatedStrings.Index;
-            }
-            else if (preserveGuidInLinkText)
-            {
-                linkText = objectId.ToString();
-            }
-            else
-            {
-                linkText = objectId.ToShortString();
-            }
+
+            return WebUtility.HtmlEncode(noPrefixBranch);
         }
 
-        return CreateLink(linkText, $"{InternalScheme}://gotocommit/" + objectId);
-    }
-
-    public string CreateShowAllLink(string what)
-        => CreateLink($"[ {TranslatedStrings.ShowAll} ]", $"{InternalScheme}://{ShowAll}/{what}");
-
-    public void ExecuteLink(string? linkUri, Action<CommandEventArgs>? handleInternalLink = null, Action<string?>? showAll = null)
-    {
-        if (!TryParseLink(linkUri, out Uri? uri))
+        public string CreateCommitLink(ObjectId objectId, string? linkText = null, bool preserveGuidInLinkText = false)
         {
-            return;
+            if (linkText is null)
+            {
+                if (objectId == ObjectId.WorkTreeId)
+                {
+                    linkText = TranslatedStrings.Workspace;
+                }
+                else if (objectId == ObjectId.IndexId)
+                {
+                    linkText = TranslatedStrings.Index;
+                }
+                else if (preserveGuidInLinkText)
+                {
+                    linkText = objectId.ToString();
+                }
+                else
+                {
+                    linkText = objectId.ToShortString();
+                }
+            }
+
+            return CreateLink(linkText, $"{InternalScheme}://gotocommit/" + objectId);
         }
 
-        if (ParseInternalScheme(uri, out CommandEventArgs? commandEventArgs))
+        public string CreateShowAllLink(string what)
+            => CreateLink($"[ {TranslatedStrings.ShowAll} ]", $"{InternalScheme}://{ShowAll}/{what}");
+
+        public void ExecuteLink(string? linkUri, Action<CommandEventArgs>? handleInternalLink = null, Action<string?>? showAll = null)
         {
-            if (commandEventArgs.Command == ShowAll)
+            if (!TryParseLink(linkUri, out Uri? uri))
             {
-                if (showAll is null)
+                return;
+            }
+
+            if (ParseInternalScheme(uri, out CommandEventArgs? commandEventArgs))
+            {
+                if (commandEventArgs.Command == ShowAll)
+                {
+                    if (showAll is null)
+                    {
+                        throw new InvalidOperationException($"unexpected internal link: {linkUri}");
+                    }
+
+                    showAll(commandEventArgs.Data);
+                    return;
+                }
+
+                if (handleInternalLink is null)
                 {
                     throw new InvalidOperationException($"unexpected internal link: {linkUri}");
                 }
 
-                showAll(commandEventArgs.Data);
+                handleInternalLink(commandEventArgs);
                 return;
             }
 
-            if (handleInternalLink is null)
+            using Process process = new()
             {
-                throw new InvalidOperationException($"unexpected internal link: {linkUri}");
-            }
-
-            handleInternalLink(commandEventArgs);
-            return;
+                EnableRaisingEvents = false,
+                StartInfo = { FileName = uri.AbsoluteUri, UseShellExecute = true },
+            };
+            process.Start();
         }
 
-        OsShellUtil.OpenUrlInDefaultBrowser(uri.AbsoluteUri);
-    }
-
-    private static bool ParseInternalScheme(Uri? uri, [NotNullWhen(returnValue: true)] out CommandEventArgs? commandEventArgs)
-    {
-        if (uri?.Scheme == InternalScheme)
+        private static bool ParseInternalScheme(Uri? uri, [NotNullWhen(returnValue: true)] out CommandEventArgs? commandEventArgs)
         {
-            commandEventArgs = new CommandEventArgs(uri.Host, uri.AbsolutePath.TrimStart('/'));
-            return true;
-        }
-
-        commandEventArgs = null;
-        return false;
-    }
-
-    private static bool TryParseLink(string? linkUri, [NotNullWhen(returnValue: true)] out Uri? uri)
-    {
-        if (string.IsNullOrWhiteSpace(linkUri))
-        {
-            uri = null;
-            return false;
-        }
-
-        string uriCandidate = linkUri;
-        while (true)
-        {
-            if (Uri.TryCreate(uriCandidate, UriKind.Absolute, out uri))
+            if (uri?.Scheme == InternalScheme)
             {
+                commandEventArgs = new CommandEventArgs(uri.Host, uri.AbsolutePath.TrimStart('/'));
                 return true;
             }
 
-            int idx = uriCandidate.IndexOf('#');
-            if (idx == -1)
+            commandEventArgs = null;
+            return false;
+        }
+
+        private static bool TryParseLink(string? linkUri, [NotNullWhen(returnValue: true)] out Uri? uri)
+        {
+            if (string.IsNullOrWhiteSpace(linkUri))
             {
-                break;
+                uri = null;
+                return false;
             }
 
-            uriCandidate = uriCandidate[(idx + 1)..];
+            string uriCandidate = linkUri;
+            while (true)
+            {
+                if (Uri.TryCreate(uriCandidate, UriKind.Absolute, out uri))
+                {
+                    return true;
+                }
+
+                int idx = uriCandidate.IndexOf('#');
+                if (idx == -1)
+                {
+                    break;
+                }
+
+                uriCandidate = uriCandidate[(idx + 1)..];
+            }
+
+            return false;
         }
 
-        return false;
-    }
+        internal TestAccessor GetTestAccessor() => new(this);
 
-    internal TestAccessor GetTestAccessor() => new(this);
-
-    internal readonly struct TestAccessor
-    {
-        private readonly LinkFactory _linkFactory;
-
-        public TestAccessor(LinkFactory linkFactory)
+        internal struct TestAccessor
         {
-            _linkFactory = linkFactory;
+            private readonly LinkFactory _linkFactory;
+
+            public TestAccessor(LinkFactory linkFactory)
+            {
+                _linkFactory = linkFactory;
+            }
+
+            public bool ParseInternalScheme(Uri uri, [NotNullWhen(returnValue: true)] out CommandEventArgs? commandEventArgs)
+                => LinkFactory.ParseInternalScheme(uri, out commandEventArgs);
+
+            public bool TryParseLink(string? linkUri, [NotNullWhen(returnValue: true)] out Uri? uri)
+                => LinkFactory.TryParseLink(linkUri, out uri);
         }
-
-        public readonly bool ParseInternalScheme(Uri uri, [NotNullWhen(returnValue: true)] out CommandEventArgs? commandEventArgs)
-            => LinkFactory.ParseInternalScheme(uri, out commandEventArgs);
-
-        public readonly bool TryParseLink(string? linkUri, [NotNullWhen(returnValue: true)] out Uri? uri)
-            => LinkFactory.TryParseLink(linkUri, out uri);
     }
 }

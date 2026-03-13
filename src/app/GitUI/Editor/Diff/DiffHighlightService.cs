@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using GitCommands;
-using GitCommands.Git;
 using GitExtensions.Extensibility.Git;
 using GitExtUtils;
 using GitExtUtils.GitUI.Theming;
@@ -46,14 +45,14 @@ public abstract class DiffHighlightService : TextHighlightService
 
         // https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---color-moved-wsltmodesgt
         // Disable by default, document that this can be enabled.
-        SetIfUnsetInGit(key: "diff.colormovedws", value: "no");
+        SetIfUnsetInGit(key: "diff.colorMovedWS", value: "no");
 
         // https://git-scm.com/docs/git-diff#Documentation/git-diff.txt-diffwordRegex
         // Set to "minimal" diff unless configured.
-        SetIfUnsetInGit(key: "diff.wordregex", value: "\"[a-z0-9_]+|.\"");
+        SetIfUnsetInGit(key: "diff.wordRegex", value: "\"[a-z0-9_]+|.\"");
 
         // dimmed-zebra highlights borders better than the default "zebra"
-        SetIfUnsetInGit(key: "diff.colormoved", value: "dimmed-zebra");
+        SetIfUnsetInGit(key: "diff.colorMoved", value: "dimmed-zebra");
 
         // Use reverse color to follow GE theme
         string reverse = AppSettings.ReverseGitColoring.Value ? "reverse" : "";
@@ -67,34 +66,34 @@ public abstract class DiffHighlightService : TextHighlightService
             GitVersion supportsBrightColors = new("2.26.0.0");
             if (module.GitVersion >= supportsBrightColors)
             {
-                SetIfUnsetInGit(key: "color.diff.oldmoved", value: "black brightmagenta");
-                SetIfUnsetInGit(key: "color.diff.newmoved", value: "black brightblue");
-                SetIfUnsetInGit(key: "color.diff.oldmovedalternative", value: "black brightcyan");
-                SetIfUnsetInGit(key: "color.diff.newmovedalternative", value: "black brightyellow");
+                SetIfUnsetInGit(key: "color.diff.oldMoved", value: "black brightmagenta");
+                SetIfUnsetInGit(key: "color.diff.newMoved", value: "black brightblue");
+                SetIfUnsetInGit(key: "color.diff.oldMovedAlternative", value: "black brightcyan");
+                SetIfUnsetInGit(key: "color.diff.newMovedAlternative", value: "black brightyellow");
             }
             else
             {
-                SetIfUnsetInGit(key: "color.diff.oldmoved", value: "reverse bold magenta");
-                SetIfUnsetInGit(key: "color.diff.newmoved", value: "reverse bold blue");
-                SetIfUnsetInGit(key: "color.diff.oldmovedalternative", value: "reverse bold cyan");
-                SetIfUnsetInGit(key: "color.diff.newmovedalternative", value: "reverse bold yellow");
+                SetIfUnsetInGit(key: "color.diff.oldMoved", value: "reverse bold magenta");
+                SetIfUnsetInGit(key: "color.diff.newMoved", value: "reverse bold blue");
+                SetIfUnsetInGit(key: "color.diff.oldMovedAlternative", value: "reverse bold cyan");
+                SetIfUnsetInGit(key: "color.diff.newMovedAlternative", value: "reverse bold yellow");
             }
         }
 
         // Set dimmed colors, default is gray dimmed/italic
-        SetIfUnsetInGit(key: "color.diff.oldmoveddimmed", value: $"magenta dim {reverse}");
-        SetIfUnsetInGit(key: "color.diff.newmoveddimmed", value: $"blue dim {reverse}");
-        SetIfUnsetInGit(key: "color.diff.oldmovedalternativedimmed", value: $"cyan dim {reverse}");
-        SetIfUnsetInGit(key: "color.diff.newmovedalternativedimmed", value: $"yellow dim {reverse}");
+        SetIfUnsetInGit(key: "color.diff.oldMovedDimmed", value: $"magenta dim {reverse}");
+        SetIfUnsetInGit(key: "color.diff.newMovedDimmed", value: $"blue dim {reverse}");
+        SetIfUnsetInGit(key: "color.diff.oldMovedAlternativeDimmed", value: $"cyan dim {reverse}");
+        SetIfUnsetInGit(key: "color.diff.newMovedAlternativeDimmed", value: $"yellow dim {reverse}");
 
         // range-diff
         if (command == "range-diff")
         {
             // No override for contextBold, contextDimmed
-            SetIfUnsetInGit(key: "color.diff.oldbold", value: $"brightred {reverse}");
-            SetIfUnsetInGit(key: "color.diff.newbold", value: $"brightgreen {reverse}");
-            SetIfUnsetInGit(key: "color.diff.olddimmed", value: $"red dim {reverse}");
-            SetIfUnsetInGit(key: "color.diff.newdimmed", value: $"green dim {reverse}");
+            SetIfUnsetInGit(key: "color.diff.oldBold", value: $"brightred {reverse}");
+            SetIfUnsetInGit(key: "color.diff.newBold", value: $"brightgreen {reverse}");
+            SetIfUnsetInGit(key: "color.diff.oldDimmed", value: $"red dim {reverse}");
+            SetIfUnsetInGit(key: "color.diff.newDimmed", value: $"green dim {reverse}");
         }
 
         return commandConfiguration;
@@ -187,7 +186,7 @@ public abstract class DiffHighlightService : TextHighlightService
     {
         int index = 0;
         DiffLineInfo[] diffLines = [.. _diffLinesInfo.DiffLines.Values.OrderBy(l => l.LineNumInDiff)];
-        const int diffContentOffset = 1; // in order to skip the prefixes '-' / '+' (this is only for normal patch format)
+        const int diffContentOffset = 1; // in order to skip the prefixes '-' / '+'
         bool dimBackground = !_useGitColoring || AppSettings.ReverseGitColoring.Value;
 
         // Process the next blocks of removed / added diffLines and mark in-line differences
@@ -234,7 +233,6 @@ public abstract class DiffHighlightService : TextHighlightService
     private static List<ISegment> GetBlockOfLines(DiffLineInfo[] diffLines, DiffLineType diffLineType, ref int index, bool found)
     {
         List<ISegment> result = [];
-        int gapLines = 0;
 
         for (; index < diffLines.Length; ++index)
         {
@@ -247,20 +245,11 @@ public abstract class DiffHighlightService : TextHighlightService
                     continue;
                 }
 
-                const int maxGapLines = 5;
-                if (diffLine?.LineType == DiffLineType.Context && gapLines < maxGapLines)
-                {
-                    // A gap context diffLines, the block can be extended
-                    ++gapLines;
-                    continue;
-                }
-
                 // Block ended, no more to add (next start search here)
                 break;
             }
 
             ArgumentNullException.ThrowIfNull(diffLine.LineSegment);
-            gapLines = 0;
             if (diffLine.IsMovedLine)
             {
                 // Ignore this line, seem to be moved
@@ -277,8 +266,8 @@ public abstract class DiffHighlightService : TextHighlightService
 
     internal static void AddDifferenceMarkers(List<TextMarker> markers, Func<ISegment, string> getText, ISegment lineRemoved, ISegment lineAdded, int beginOffset, bool dimBackground)
     {
-        ReadOnlySpan<char> textRemoved = LimitLength(getText(lineRemoved).AsSpan());
-        ReadOnlySpan<char> textAdded = LimitLength(getText(lineAdded).AsSpan());
+        ReadOnlySpan<char> textRemoved = getText(lineRemoved).AsSpan();
+        ReadOnlySpan<char> textAdded = getText(lineAdded).AsSpan();
         int offsetRemoved = lineRemoved.Offset + beginOffset;
         int offsetAdded = lineAdded.Offset + beginOffset;
         (int lengthIdenticalAtStart, int lengthIdenticalAtEnd) = AddDifferenceMarkers(markers, textRemoved, textAdded, offsetRemoved, offsetAdded, dimBackground);
@@ -293,14 +282,6 @@ public abstract class DiffHighlightService : TextHighlightService
         {
             markers.Add(CreateDimmedMarker(offsetRemoved + textRemoved.Length - lengthIdenticalAtEnd, lengthIdenticalAtEnd, isRemoved: true, dimBackground));
             markers.Add(CreateDimmedMarker(offsetAdded + textAdded.Length - lengthIdenticalAtEnd, lengthIdenticalAtEnd, isRemoved: false, dimBackground));
-        }
-
-        return;
-
-        static ReadOnlySpan<char> LimitLength(ReadOnlySpan<char> text)
-        {
-            const int maxLength = 2000;
-            return text.Length <= maxLength ? text : text[..maxLength];
         }
     }
 
@@ -410,14 +391,8 @@ public abstract class DiffHighlightService : TextHighlightService
     private static TextMarker CreateDimmedMarker(int offset, int length, bool isRemoved, bool dimBackground)
         => dimBackground
             ? CreateTextMarker(offset, length, ColorHelper.DimColor(ColorHelper.DimColor(isRemoved ? _removedBackColor : _addedBackColor)))
-            : new(offset, length, TextMarkerType.SolidBlock, AppColor.EditorBackground.GetThemeColor(), ColorHelper.DimColor(isRemoved ? _removedForeColor : _addedForeColor));
+            : new(offset, length, TextMarkerType.SolidBlock, SystemColors.Window, ColorHelper.DimColor(isRemoved ? _removedForeColor : _addedForeColor));
 
     private static TextMarker CreateTextMarker(int offset, int length, Color color)
         => new(offset, length, TextMarkerType.SolidBlock, color, ColorHelper.GetForeColorForBackColor(color));
-
-    internal class TestAccessor
-    {
-        internal static List<ISegment> GetBlockOfLines(DiffLineInfo[] diffLines, DiffLineType diffLineType, ref int index, bool found)
-            => DiffHighlightService.GetBlockOfLines(diffLines, diffLineType, ref index, found);
-    }
 }

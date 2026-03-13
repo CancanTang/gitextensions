@@ -1,130 +1,138 @@
-﻿namespace GitExtUtils.GitUI.Theming;
-
-/// <summary>
-/// A set of values for .Net system colors and GitExtensions app-specific colors.
-/// </summary>
-public class Theme : IThemeSerializationData
+﻿namespace GitExtUtils.GitUI.Theming
 {
-    private static Theme? _default;
-
-    private readonly IReadOnlyDictionary<AppColor, Color> _appColorValues;
-    private readonly IReadOnlyDictionary<KnownColor, Color> _sysColorValues;
-
-    IReadOnlyDictionary<AppColor, Color> IThemeSerializationData.AppColorValues => _appColorValues;
-    IReadOnlyDictionary<KnownColor, Color> IThemeSerializationData.SysColorValues => _sysColorValues;
-
-    public static Theme Default => _default ??= CreateDefaultTheme();
-
-    public Theme(
-        IReadOnlyDictionary<AppColor, Color> appColors,
-        IReadOnlyDictionary<KnownColor, Color> sysColors,
-        ThemeId id)
+    /// <summary>
+    /// A set of values for .Net system colors and GitExtensions app-specific colors.
+    /// </summary>
+    public class Theme : IThemeSerializationData
     {
-        Id = id;
-        _appColorValues = appColors;
-        _sysColorValues = sysColors;
-    }
+        private static readonly IReadOnlyDictionary<KnownColor, KnownColor> Duplicates =
+            new Dictionary<KnownColor, KnownColor>
+            {
+                [KnownColor.ButtonFace] = KnownColor.Control,
+                [KnownColor.ButtonShadow] = KnownColor.ControlDark,
+                [KnownColor.ButtonHighlight] = KnownColor.ControlLight
+            };
 
-    public ThemeId Id { get; }
+        private static Theme? _default;
 
-    /// <summary>
-    /// Get the Windows SystemColorMode for this theme, based on the background color.
-    /// </summary>
-    public SystemColorMode SystemColorMode
-        => new HslColor(GetColor(AppColor.PanelBackground)).L < 0.5
-            ? SystemColorMode.Dark
-            : SystemColorMode.Classic;
+        private readonly IReadOnlyDictionary<AppColor, Color> _appColorValues;
+        private readonly IReadOnlyDictionary<KnownColor, Color> _sysColorValues;
 
-    /// <summary>
-    /// Get GitExtensions app-specific color value as defined by this instance. If not defined,
-    /// returns <see cref="Color.Empty"/>.
-    /// </summary>
-    public Color GetColor(AppColor name) =>
-        _appColorValues.TryGetValue(name, out Color result)
-            ? result
-            : Color.Empty;
+        IReadOnlyDictionary<AppColor, Color> IThemeSerializationData.AppColorValues => _appColorValues;
+        IReadOnlyDictionary<KnownColor, Color> IThemeSerializationData.SysColorValues => _sysColorValues;
 
-    /// <summary>
-    /// Get .Net system color value as defined by this instance.
-    /// </summary>
-    private Color GetSysColor(KnownColor name) =>
-        _sysColorValues.TryGetValue(name, out Color result)
-            ? result
-            : Color.Empty;
+        public static Theme Default => _default ??= CreateDefaultTheme();
 
-    /// <summary>
-    /// GitExtension app-specific color identifiers.
-    /// </summary>
-    public static IReadOnlyCollection<AppColor> AppColorNames { get; } =
-        Enum.GetValues<AppColor>();
-
-    /// <summary>
-    /// .Net system color identifiers.
-    /// </summary>
-    private static IReadOnlyCollection<KnownColor> SysColorNames { get; } =
-        [.. Enum.GetValues<KnownColor>().Where(c => IsSystemColor(c))];
-
-    /// <summary>
-    /// Get .Net system color value as defined by this instance. If not defined, returns
-    /// <see cref="Color.Empty"/>.
-    /// </summary>
-    public Color GetColor(KnownColor name)
-    {
-        if (!IsSystemColor(name))
+        public Theme(
+            IReadOnlyDictionary<AppColor, Color> appColors,
+            IReadOnlyDictionary<KnownColor, Color> sysColors,
+            ThemeId id)
         {
-            throw new ArgumentException($"{name} is not system color");
+            Id = id;
+            _appColorValues = appColors;
+            _sysColorValues = sysColors;
         }
 
-        return GetSysColor(name);
-    }
+        public ThemeId Id { get; }
 
-    /// <summary>
-    /// Get .Net system color value as defined by this instance. If not defined, returns
-    /// actual .Net <see cref="SystemColors"/> color.
-    /// </summary>
-    public Color GetNonEmptyColor(KnownColor name)
-    {
-        Color result = GetColor(name);
-        if (result == Color.Empty)
+        /// <summary>
+        /// Get GitExtensions app-specific color value as defined by this instance. If not defined,
+        /// returns <see cref="Color.Empty"/>.
+        /// </summary>
+        public Color GetColor(AppColor name) =>
+            _appColorValues.TryGetValue(name, out Color result)
+                ? result
+                : Color.Empty;
+
+        /// <summary>
+        /// Get .Net system color value as defined by this instance.
+        /// </summary>
+        private Color GetSysColor(KnownColor name) =>
+            _sysColorValues.TryGetValue(name, out Color result)
+                ? result
+                : Color.Empty;
+
+        /// <summary>
+        /// GitExtension app-specific color identifiers.
+        /// </summary>
+        public static IReadOnlyCollection<AppColor> AppColorNames { get; } =
+            new HashSet<AppColor>(Enum.GetValues(typeof(AppColor)).Cast<AppColor>());
+
+        /// <summary>
+        /// .Net system color identifiers.
+        /// </summary>
+        private static IReadOnlyCollection<KnownColor> SysColorNames { get; } =
+            new HashSet<KnownColor>(
+                Enum.GetValues(typeof(KnownColor))
+                    .Cast<KnownColor>()
+                    .Where(c => IsSystemColor(c) && !Duplicates.ContainsKey(c)));
+
+        /// <summary>
+        /// Get .Net system color value as defined by this instance. If not defined, returns
+        /// <see cref="Color.Empty"/>.
+        /// </summary>
+        public Color GetColor(KnownColor name)
         {
-            return Color.FromKnownColor(name);
+            if (!IsSystemColor(name))
+            {
+                throw new ArgumentException($"{name} is not system color");
+            }
+
+            KnownColor actualName = Duplicates.TryGetValue(name, out KnownColor duplicate)
+                ? duplicate
+                : name;
+
+            return GetSysColor(actualName);
         }
 
-        return result;
-    }
+        /// <summary>
+        /// Get .Net system color value as defined by this instance. If not defined, returns
+        /// actual .Net <see cref="SystemColors"/> color.
+        /// </summary>
+        public Color GetNonEmptyColor(KnownColor name)
+        {
+            Color result = GetColor(name);
+            if (result == Color.Empty)
+            {
+                return Color.FromKnownColor(name);
+            }
 
-    public static Theme CreateDefaultTheme(string[]? variations = null)
-    {
-        Dictionary<AppColor, Color> appColors = AppColorNames.ToDictionary(name => name, name => AppColorDefaults.GetBy(name, variations));
-        Dictionary<KnownColor, Color> sysColors = SysColorNames.ToDictionary(name => name, GetFixedColor);
-        return new Theme(appColors, sysColors, ThemeId.DefaultLight);
-    }
+            return result;
+        }
 
-    /// <summary>
-    /// Get .Net system color value as defined by system.
-    /// The value is converted to fixed RGB as opposed to <see cref="SystemColors"/> color
-    /// which takes value from theme colors table which may change.
-    ///
-    /// This method is needed because we trick .Net to assume modified <see cref="SystemColors"/>
-    /// values to apply custom color scheme to GitExtensions, but still need access to values as
-    /// before our modifications.
-    ///
-    /// This method should only be called before our modifications to .Net system colors.
-    /// </summary>
-    private static Color GetFixedColor(KnownColor systemColor) =>
-        Color.FromArgb(Color.FromKnownColor(systemColor).ToArgb());
+        public static Theme CreateDefaultTheme(string[]? variations = null)
+        {
+            Dictionary<AppColor, Color> appColors = AppColorNames.ToDictionary(name => name, name => AppColorDefaults.GetBy(name, variations));
+            Dictionary<KnownColor, Color> sysColors = SysColorNames.ToDictionary(name => name, GetFixedColor);
+            return new Theme(appColors, sysColors, ThemeId.Default);
+        }
 
-    /// <summary>
-    /// Whether <see cref="KnownColor"/> represents Windows theme - defined color,
-    /// produces same result as <see cref="Color.IsSystemColor"/> without the need to
-    /// create <see cref="Color"/> instance.
-    /// </summary>
-    private static bool IsSystemColor(KnownColor name) =>
-        name is (< KnownColor.Transparent or > KnownColor.YellowGreen);
+        /// <summary>
+        /// Get .Net system color value as defined by system.
+        /// The value is converted to fixed RGB as opposed to <see cref="SystemColors"/> color
+        /// which takes value from theme colors table which may change.
+        ///
+        /// This method is needed because we trick .Net to assume modified <see cref="SystemColors"/>
+        /// values to apply custom color scheme to GitExtensions, but still need access to values as
+        /// before our modifications.
+        ///
+        /// This method should only be called before our modifications to .Net system colors.
+        /// </summary>
+        private static Color GetFixedColor(KnownColor systemColor) =>
+            Color.FromArgb(Color.FromKnownColor(systemColor).ToArgb());
 
-    internal static class TestAccessor
-    {
-        public static IReadOnlyCollection<KnownColor> SysColorNames =>
-            Theme.SysColorNames;
+        /// <summary>
+        /// Whether <see cref="KnownColor"/> represents Windows theme - defined color,
+        /// produces same result as <see cref="Color.IsSystemColor"/> without the need to
+        /// create <see cref="Color"/> instance.
+        /// </summary>
+        private static bool IsSystemColor(KnownColor name) =>
+            name is (< KnownColor.Transparent or > KnownColor.YellowGreen);
+
+        internal static class TestAccessor
+        {
+            public static IReadOnlyCollection<KnownColor> SysColorNames =>
+                Theme.SysColorNames;
+        }
     }
 }

@@ -1,32 +1,33 @@
 ﻿using System.ComponentModel;
 
-namespace GitUI.Design;
-
-internal class PropertySorter : ExpandableObjectConverter
+namespace GitUI.Design
 {
-    public override bool GetPropertiesSupported(ITypeDescriptorContext context)
+    internal class PropertySorter : ExpandableObjectConverter
     {
-        return true;
-    }
-
-    public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object value, Attribute[] attributes)
-    {
-        PropertyDescriptorCollection pdc = TypeDescriptor.GetProperties(value, attributes);
-        List<(string name, int order)> orderedProperties = [];
-        foreach (PropertyDescriptor pd in pdc)
+        public override bool GetPropertiesSupported(ITypeDescriptorContext context)
         {
-            Attribute attribute = pd.Attributes[typeof(PropertyOrderAttribute)];
-            if (attribute is not null)
-            {
-                PropertyOrderAttribute poa = (PropertyOrderAttribute)attribute;
-                orderedProperties.Add((pd.Name, poa.Order));
-            }
-            else
-            {
-                orderedProperties.Add((pd.Name, 100));
-            }
+            return true;
         }
 
-        return pdc.Sort([.. orderedProperties.OrderBy(p => p.order).Select(p => p.name)]);
+        public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object value, Attribute[] attributes)
+        {
+            PropertyDescriptorCollection pdc = TypeDescriptor.GetProperties(value, attributes);
+            List<(string name, int order)> orderedProperties = [];
+            foreach (PropertyDescriptor pd in pdc)
+            {
+                Attribute attribute = pd.Attributes[typeof(PropertyOrderAttribute)];
+                if (attribute is not null)
+                {
+                    PropertyOrderAttribute poa = (PropertyOrderAttribute)attribute;
+                    orderedProperties.Add((pd.Name, poa.Order));
+                }
+                else
+                {
+                    orderedProperties.Add((pd.Name, 100));
+                }
+            }
+
+            return pdc.Sort(orderedProperties.OrderBy(p => p.order).Select(p => p.name).ToArray());
+        }
     }
 }

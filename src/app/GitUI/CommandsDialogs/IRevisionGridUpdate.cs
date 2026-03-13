@@ -1,10 +1,9 @@
-﻿#nullable enable
+﻿using GitExtensions.Extensibility.Git;
 
-using GitExtensions.Extensibility.Git;
-
-namespace GitUI.CommandsDialogs;
-
-public interface IRevisionGridUpdate
+namespace GitUI.CommandDialogs
 {
-    bool SetSelectedRevision(ObjectId? commitId, bool toggleSelection = false, bool updateNavigationHistory = true);
+    public interface IRevisionGridUpdate
+    {
+        bool SetSelectedRevision(ObjectId? objectId, bool toggleSelection = false, bool updateNavigationHistory = true);
+    }
 }

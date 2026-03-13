@@ -3,105 +3,106 @@ using GitCommands;
 using GitExtensions.Extensibility.Git;
 using GitUI.Properties;
 
-namespace GitUI.LeftPanel;
-
-[DebuggerDisplay("(Tag) FullPath = {FullPath}, Hash = {ObjectId}, Visible: {Visible}")]
-internal sealed class StashNode : BaseRevisionNode
+namespace GitUI.LeftPanel
 {
-    public StashNode(Tree tree, in ObjectId? objectId, string reflogSelector, string subject, bool visible)
-        : base(tree, reflogSelector.RemovePrefix("refs/"), visible)
+    [DebuggerDisplay("(Tag) FullPath = {FullPath}, Hash = {ObjectId}, Visible: {Visible}")]
+    internal sealed class StashNode : BaseRevisionNode
     {
-        ObjectId = objectId;
-        DisplayName = $"{reflogSelector.RemovePrefix(GitRefName.RefsStashPrefix)}: {subject}";
-        ReflogSelector = reflogSelector;
-    }
-
-    public string DisplayName { get; }
-    public string ReflogSelector { get; }
-
-    internal override void OnSelected()
-    {
-        if (Tree.IgnoreSelectionChangedEvent)
+        public StashNode(Tree tree, in ObjectId? objectId, string reflogSelector, string subject, bool visible)
+            : base(tree, reflogSelector.RemovePrefix("refs/"), visible)
         {
-            return;
+            ObjectId = objectId;
+            DisplayName = $"{reflogSelector.RemovePrefix(GitRefName.RefsStashPrefix)}: {subject}";
+            ReflogSelector = reflogSelector;
         }
 
-        base.OnSelected();
-        SelectRevision();
-    }
+        public string DisplayName { get; }
+        public string ReflogSelector { get; }
 
-    internal override void OnDoubleClick()
-    {
-        OpenStash(TreeViewNode.TreeView);
-    }
-
-    internal bool OpenStash(IWin32Window owner)
-    {
-        return UICommands.StartStashDialog(owner, manageStashes: true, ReflogSelector);
-    }
-
-    public void ApplyStash(IWin32Window owner)
-    {
-        UICommands.StashApply(owner, ReflogSelector);
-    }
-
-    public void PopStash(IWin32Window owner)
-    {
-        UICommands.StashPop(owner, ReflogSelector);
-    }
-
-    public void DropStash(IWin32Window owner)
-    {
-        using (new WaitCursorScope())
+        internal override void OnSelected()
         {
-            TaskDialogButton result;
-            if (AppSettings.DontConfirmStashDrop)
+            if (Tree.IgnoreSelectionChangedEvent)
             {
-                result = TaskDialogButton.Yes;
+                return;
             }
-            else
+
+            base.OnSelected();
+            SelectRevision();
+        }
+
+        internal override void OnDoubleClick()
+        {
+            OpenStash(TreeViewNode.TreeView);
+        }
+
+        internal bool OpenStash(IWin32Window owner)
+        {
+            return UICommands.StartStashDialog(owner, manageStashes: true, ReflogSelector);
+        }
+
+        public void ApplyStash(IWin32Window owner)
+        {
+            UICommands.StashApply(owner, ReflogSelector);
+        }
+
+        public void PopStash(IWin32Window owner)
+        {
+            UICommands.StashPop(owner, ReflogSelector);
+        }
+
+        public void DropStash(IWin32Window owner)
+        {
+            using (new WaitCursorScope())
             {
-                TaskDialogPage page = new()
+                TaskDialogButton result;
+                if (AppSettings.DontConfirmStashDrop)
                 {
-                    Text = TranslatedStrings.AreYouSure,
-                    Caption = TranslatedStrings.StashDropConfirmTitle,
-                    Heading = TranslatedStrings.CannotBeUndone,
-                    Buttons = { TaskDialogButton.Yes, TaskDialogButton.No },
-                    Icon = TaskDialogIcon.Information,
-                    Verification = new TaskDialogVerificationCheckBox
+                    result = TaskDialogButton.Yes;
+                }
+                else
+                {
+                    TaskDialogPage page = new()
                     {
-                        Text = TranslatedStrings.DontShowAgain
-                    },
-                    SizeToContent = true
-                };
+                        Text = TranslatedStrings.AreYouSure,
+                        Caption = TranslatedStrings.StashDropConfirmTitle,
+                        Heading = TranslatedStrings.CannotBeUndone,
+                        Buttons = { TaskDialogButton.Yes, TaskDialogButton.No },
+                        Icon = TaskDialogIcon.Information,
+                        Verification = new TaskDialogVerificationCheckBox
+                        {
+                            Text = TranslatedStrings.DontShowAgain
+                        },
+                        SizeToContent = true
+                    };
 
-                result = TaskDialog.ShowDialog(owner, page);
+                    result = TaskDialog.ShowDialog(owner, page);
 
-                if (page.Verification.Checked)
+                    if (page.Verification.Checked)
+                    {
+                        AppSettings.DontConfirmStashDrop = true;
+                    }
+                }
+
+                if (result == TaskDialogButton.Yes)
                 {
-                    AppSettings.DontConfirmStashDrop = true;
+                    UICommands.StashDrop(owner, ReflogSelector);
                 }
             }
-
-            if (result == TaskDialogButton.Yes)
-            {
-                UICommands.StashDrop(owner, ReflogSelector);
-            }
         }
-    }
 
-    public override void ApplyStyle()
-    {
-        base.ApplyStyle();
+        public override void ApplyStyle()
+        {
+            base.ApplyStyle();
 
-        TreeViewNode.ImageKey = TreeViewNode.SelectedImageKey =
-            Visible
-                ? nameof(Images.Stash)
-                : nameof(Images.EyeClosed);
-    }
+            TreeViewNode.ImageKey = TreeViewNode.SelectedImageKey =
+                Visible
+                    ? nameof(Images.Stash)
+                    : nameof(Images.EyeClosed);
+        }
 
-    protected override string DisplayText()
-    {
-        return DisplayName;
+        protected override string DisplayText()
+        {
+            return DisplayName;
+        }
     }
 }

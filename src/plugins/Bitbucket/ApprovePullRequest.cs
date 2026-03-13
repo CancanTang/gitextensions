@@ -1,27 +1,28 @@
 ﻿using Newtonsoft.Json.Linq;
 using RestSharp;
 
-namespace GitExtensions.Plugins.Bitbucket;
-
-internal class ApprovePullRequest : BitbucketRequestBase<JObject>
+namespace GitExtensions.Plugins.Bitbucket
 {
-    private readonly MergeRequestInfo _info;
-
-    public ApprovePullRequest(Settings settings, MergeRequestInfo info)
-        : base(settings)
+    internal class ApprovePullRequest : BitbucketRequestBase<JObject>
     {
-        _info = info;
-    }
+        private readonly MergeRequestInfo _info;
 
-    protected override object? RequestBody => null;
+        public ApprovePullRequest(Settings settings, MergeRequestInfo info)
+            : base(settings)
+        {
+            _info = info;
+        }
 
-    protected override Method RequestMethod => Method.POST;
+        protected override object? RequestBody => null;
 
-    protected override string ApiUrl => string.Format("rest/api/1.0/projects/{0}/repos/{1}/pull-requests/{2}/approve",
-        _info.ProjectKey, _info.TargetRepo, _info.Id);
+        protected override Method RequestMethod => Method.POST;
 
-    protected override JObject ParseResponse(JObject json)
-    {
-        return json;
+        protected override string ApiUrl => string.Format("rest/api/1.0/projects/{0}/repos/{1}/pull-requests/{2}/approve",
+            _info.ProjectKey, _info.TargetRepo, _info.Id);
+
+        protected override JObject ParseResponse(JObject json)
+        {
+            return json;
+        }
     }
 }

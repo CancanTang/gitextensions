@@ -1,93 +1,97 @@
-﻿namespace GitCommands.UserRepositoryHistory;
-
-/// <summary>
-/// Provides the ability to persist and retrieve collections of user's git repositories.
-/// </summary>
-public interface IRepositoryStorage
+namespace GitCommands.UserRepositoryHistory
 {
     /// <summary>
-    /// Loads a collection of user's git repositories.
+    /// Provides the ability to persist and retrieve collections of user's git repositories.
     /// </summary>
-    /// <param name="key">A setting key which contains the persisted collection.</param>
-    /// <returns>A collection of user's git repositories.</returns>
-    IReadOnlyList<Repository> Load(string key);
-
-    /// <summary>
-    /// Persists the given collection of user's git repositories.
-    /// </summary>
-    /// <param name="key">A setting key which contains the persisted collection.</param>
-    /// <param name="repositories">A collection of user's git repositories.</param>
-    void Save(string key, IEnumerable<Repository> repositories);
-}
-
-/// <summary>
-/// Persists and retrieves collections of user's git repositories.
-/// </summary>
-public sealed class RepositoryStorage : IRepositoryStorage
-{
-    private readonly IRepositorySerialiser<Repository> _repositorySerialiser;
-
-    public RepositoryStorage(IRepositorySerialiser<Repository> repositorySerialiser)
+    public interface IRepositoryStorage
     {
-        _repositorySerialiser = repositorySerialiser;
-    }
+        /// <summary>
+        /// Loads a collection of user's git repositories.
+        /// </summary>
+        /// <param name="key">A setting key which contains the persisted collection.</param>
+        /// <returns>A collection of user's git repositories.</returns>
+        IReadOnlyList<Repository> Load(string key);
 
-    public RepositoryStorage()
-        : this(new RepositoryXmlSerialiser())
-    {
+        /// <summary>
+        /// Persists the given collection of user's git repositories.
+        /// </summary>
+        /// <param name="key">A setting key which contains the persisted collection.</param>
+        /// <param name="repositories">A collection of user's git repositories.</param>
+        void Save(string key, IEnumerable<Repository> repositories);
     }
 
     /// <summary>
-    /// Loads a collection of user's git repositories.
+    /// Persists and retrieves collections of user's git repositories.
     /// </summary>
-    /// <param name="key">A setting key which contains the persisted collection.</param>
-    /// <returns>A collection of user's git repositories, if successful;
-    /// otherwise an empty list, if the setting does not exist or the persisted value cannot be deserialised.</returns>
-    /// <exception cref="ArgumentException"><paramref name="key"/> is <see langword="null"/> or <see cref="string.Empty"/>.</exception>
-    public IReadOnlyList<Repository> Load(string key)
+    public sealed class RepositoryStorage : IRepositoryStorage
     {
-        if (string.IsNullOrWhiteSpace(key))
+        private readonly IRepositorySerialiser<Repository> _repositorySerialiser;
+
+        public RepositoryStorage(IRepositorySerialiser<Repository> repositorySerialiser)
         {
-            throw new ArgumentException("RepositoryStorage: Load no path.", nameof(key));
+            _repositorySerialiser = repositorySerialiser;
         }
 
-        string? setting = AppSettings.GetString(key, null);
-        if (setting is null)
+        public RepositoryStorage()
+            : this(new RepositoryXmlSerialiser())
         {
-            return [];
         }
 
-        IReadOnlyList<Repository> history = _repositorySerialiser.Deserialize(setting);
-        if (history is null)
+        /// <summary>
+        /// Loads a collection of user's git repositories.
+        /// </summary>
+        /// <param name="key">A setting key which contains the persisted collection.</param>
+        /// <returns>A collection of user's git repositories, if successful;
+        /// otherwise an empty list, if the setting does not exist or the persisted value cannot be deserialised.</returns>
+        /// <exception cref="ArgumentException"><paramref name="key"/> is <see langword="null"/> or <see cref="string.Empty"/>.</exception>
+        public IReadOnlyList<Repository> Load(string key)
         {
-            return [];
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentException(nameof(key));
+            }
+
+            string? setting = AppSettings.GetString(key, null);
+            if (setting is null)
+            {
+                return Array.Empty<Repository>();
+            }
+
+            IReadOnlyList<Repository> history = _repositorySerialiser.Deserialize(setting);
+            if (history is null)
+            {
+                return Array.Empty<Repository>();
+            }
+
+            return history;
         }
 
-        return history;
-    }
-
-    /// <summary>
-    /// Persists the given collection of user's git repositories.
-    /// </summary>
-    /// <param name="key">A setting key which contains the persisted collection.</param>
-    /// <param name="repositories">A collection of user's git repositories.</param>
-    /// <exception cref="ArgumentException"><paramref name="key"/> is <see langword="null"/> or <see cref="string.Empty"/>.</exception>
-    /// <exception cref="ArgumentNullException"><paramref name="repositories"/> is <see langword="null"/>.</exception>
-    public void Save(string key, IEnumerable<Repository> repositories)
-    {
-        if (string.IsNullOrWhiteSpace(key))
+        /// <summary>
+        /// Persists the given collection of user's git repositories.
+        /// </summary>
+        /// <param name="key">A setting key which contains the persisted collection.</param>
+        /// <param name="repositories">A collection of user's git repositories.</param>
+        /// <exception cref="ArgumentException"><paramref name="key"/> is <see langword="null"/> or <see cref="string.Empty"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="repositories"/> is <see langword="null"/>.</exception>
+        public void Save(string key, IEnumerable<Repository> repositories)
         {
-            throw new ArgumentException("RepositoryStorage: Save no path.", nameof(key));
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentException(nameof(key));
+            }
+
+            if (repositories is null)
+            {
+                throw new ArgumentNullException(nameof(repositories));
+            }
+
+            string xml = _repositorySerialiser.Serialize(repositories);
+            if (xml is null)
+            {
+                return;
+            }
+
+            AppSettings.SetString(key, xml);
         }
-
-        ArgumentNullException.ThrowIfNull(repositories);
-
-        string xml = _repositorySerialiser.Serialize(repositories);
-        if (xml is null)
-        {
-            return;
-        }
-
-        AppSettings.SetString(key, xml);
     }
 }

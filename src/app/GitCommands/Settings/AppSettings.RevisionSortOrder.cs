@@ -1,9 +1,10 @@
-﻿namespace GitCommands;
-
-public enum RevisionSortOrder
+﻿namespace GitCommands
 {
-    // DO NOT RENAME THESE -- doing so will break user preferences
-    GitDefault,
-    AuthorDate,
-    Topology
+    public enum RevisionSortOrder
+    {
+        // DO NOT RENAME THESE -- doing so will break user preferences
+        GitDefault,
+        AuthorDate,
+        Topology
+    }
 }

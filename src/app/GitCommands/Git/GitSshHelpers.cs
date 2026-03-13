@@ -1,14 +1,15 @@
-namespace GitCommands;
-
-public static class GitSshHelpers
+namespace GitCommands
 {
-    /// <summary>Sets the git SSH command path.</summary>
-    public static void SetGitSshEnvironmentVariable(string path)
+    public static class GitSshHelpers
     {
-        // Git will use the embedded OpenSSH ssh.exe if empty/unset
-        Environment.SetEnvironmentVariable("GIT_SSH", path?.Length is > 0 ? path : null, EnvironmentVariableTarget.Process);
-    }
+        /// <summary>Sets the git SSH command path.</summary>
+        public static void SetGitSshEnvironmentVariable(string path)
+        {
+            // Git will use the embedded OpenSSH ssh.exe if empty/unset
+            Environment.SetEnvironmentVariable("GIT_SSH", path, EnvironmentVariableTarget.Process);
+        }
 
-    // Note that variants like TortoisePlink.exe are supported too
-    public static bool IsPlink => AppSettings.SshPath.EndsWith("plink.exe", StringComparison.CurrentCultureIgnoreCase);
+        // Note that variants like TortoisePlink.exe are supported too
+        public static bool IsPlink => AppSettings.SshPath.EndsWith("plink.exe", StringComparison.CurrentCultureIgnoreCase);
+    }
 }

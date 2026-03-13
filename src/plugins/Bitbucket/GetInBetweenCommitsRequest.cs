@@ -1,42 +1,43 @@
 ﻿using Newtonsoft.Json.Linq;
 using RestSharp;
 
-namespace GitExtensions.Plugins.Bitbucket;
-
-internal class GetInBetweenCommitsRequest : BitbucketRequestBase<List<Commit>>
+namespace GitExtensions.Plugins.Bitbucket
 {
-    private readonly Repository _sourceRepo;
-    private readonly Repository _targetRepo;
-    private readonly Commit _sourceCommit;
-    private readonly Commit _targetCommit;
-
-    public GetInBetweenCommitsRequest(Repository sourceRepo, Repository targetRepo,
-        Commit sourceCommit, Commit targetCommit, Settings settings)
-        : base(settings)
+    internal class GetInBetweenCommitsRequest : BitbucketRequestBase<List<Commit>>
     {
-        _sourceRepo = sourceRepo;
-        _targetRepo = targetRepo;
-        _sourceCommit = sourceCommit;
-        _targetCommit = targetCommit;
-    }
+        private readonly Repository _sourceRepo;
+        private readonly Repository _targetRepo;
+        private readonly Commit _sourceCommit;
+        private readonly Commit _targetCommit;
 
-    protected override object? RequestBody => null;
-
-    protected override Method RequestMethod => Method.GET;
-
-    protected override string ApiUrl => string.Format(
-        "/projects/{0}/repos/{1}/commits?until={2}&since={3}&secondaryRepositoryId={4}&start=0&limit=10",
-        _sourceRepo.ProjectKey, _sourceRepo.RepoName,
-        _sourceCommit.Hash, _targetCommit.Hash, _targetRepo.Id);
-
-    protected override List<Commit> ParseResponse(JObject json)
-    {
-        List<Commit> result = [];
-        foreach (JObject commit in json["values"].Cast<JObject>())
+        public GetInBetweenCommitsRequest(Repository sourceRepo, Repository targetRepo,
+            Commit sourceCommit, Commit targetCommit, Settings settings)
+            : base(settings)
         {
-            result.Add(Commit.Parse(commit));
+            _sourceRepo = sourceRepo;
+            _targetRepo = targetRepo;
+            _sourceCommit = sourceCommit;
+            _targetCommit = targetCommit;
         }
 
-        return result;
+        protected override object? RequestBody => null;
+
+        protected override Method RequestMethod => Method.GET;
+
+        protected override string ApiUrl => string.Format(
+            "/projects/{0}/repos/{1}/commits?until={2}&since={3}&secondaryRepositoryId={4}&start=0&limit=10",
+            _sourceRepo.ProjectKey, _sourceRepo.RepoName,
+            _sourceCommit.Hash, _targetCommit.Hash, _targetRepo.Id);
+
+        protected override List<Commit> ParseResponse(JObject json)
+        {
+            List<Commit> result = [];
+            foreach (JObject commit in json["values"])
+            {
+                result.Add(Commit.Parse(commit));
+            }
+
+            return result;
+        }
     }
 }

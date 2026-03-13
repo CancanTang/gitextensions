@@ -5,138 +5,141 @@ using GitUI;
 using GitUI.CommandsDialogs;
 using GitUI.LeftPanel;
 
-namespace GitExtensions.UITests.CommandsDialogs;
-
-[Apartment(ApartmentState.STA)]
-[NonParallelizable]
-public class FormBrowse_LeftPanelTests
+namespace GitExtensions.UITests.CommandsDialogs
 {
-    private const string RemoteName = "remote1";
-
-    // Track the original setting value
-    private bool _originalShowAuthorAvatarColumn;
-    private bool _showAvailableDiffTools;
-
-    // Created once for each test
-    private ReferenceRepository _remoteReferenceRepository;
-    private ReferenceRepository _referenceRepository;
-    private GitUICommands _commands;
-
-    [OneTimeSetUp]
-    public void SetUpFixture()
+    [Apartment(ApartmentState.STA)]
+    [NonParallelizable]
+    public class FormBrowse_LeftPanelTests
     {
-        // Remember the current settings...
-        _originalShowAuthorAvatarColumn = AppSettings.ShowAuthorAvatarColumn;
-        _showAvailableDiffTools = AppSettings.ShowAvailableDiffTools;
+        private const string RemoteName = "remote1";
 
-        // Stop loading custom diff tools
-        AppSettings.ShowAvailableDiffTools = false;
+        // Created once for the fixture
+        private ReferenceRepository _remoteReferenceRepository;
 
-        // We don't want avatars during tests, otherwise we will be attempting to download them from gravatar....
-        AppSettings.ShowAuthorAvatarColumn = false;
+        // Track the original setting value
+        private bool _originalShowAuthorAvatarColumn;
+        private bool _showAvailableDiffTools;
 
-        AppSettings.RepoObjectsTreeShowTags = true;
-        AppSettings.RepoObjectsTreeShowStashes = true;
-    }
+        // Created once for each test
+        private ReferenceRepository _referenceRepository;
+        private GitUICommands _commands;
 
-    [OneTimeTearDown]
-    public void OneTimeTearDown()
-    {
-        AppSettings.ShowAuthorAvatarColumn = _originalShowAuthorAvatarColumn;
-        AppSettings.ShowAvailableDiffTools = _showAvailableDiffTools;
-    }
-
-    [SetUp]
-    public void SetUp()
-    {
-        _remoteReferenceRepository = new ReferenceRepository();
-
-        _referenceRepository = new ReferenceRepository();
-
-        _referenceRepository.Module.AddRemote(RemoteName, _remoteReferenceRepository.Module.WorkingDir);
-        _referenceRepository.Fetch(RemoteName);
-
-        _commands = new GitUICommands(GlobalServiceContainer.CreateDefaultMockServiceContainer(), _referenceRepository.Module);
-
-        _referenceRepository.CreateCommit("Commit1", "Commit1");
-        _referenceRepository.CreateBranch("Branch1", _referenceRepository.CommitHash);
-        _referenceRepository.CreateTag("Branch1", _referenceRepository.CommitHash);
-        _referenceRepository.CreateCommit("Commit2", "Commit2");
-        _referenceRepository.CreateBranch("Branch2", _referenceRepository.CommitHash);
-
-        _referenceRepository.CreateCommit("head commit");
-    }
-
-    [TearDown]
-    public void TearDown()
-    {
-        _remoteReferenceRepository.Dispose();
-        _referenceRepository.Dispose();
-    }
-
-    [Test]
-    public void Branch_and_tag_context_menu_should_show_Sort_By_entry()
-    {
-        RunRepoObjectsTreeTest(contextMenu =>
+        [OneTimeSetUp]
+        public void SetUpFixture()
         {
-            contextMenu.Items.Count.Should().BeGreaterThan(5);
+            // Remember the current settings...
+            _originalShowAuthorAvatarColumn = AppSettings.ShowAuthorAvatarColumn;
+            _showAvailableDiffTools = AppSettings.ShowAvailableDiffTools;
 
-            int count = contextMenu.Items.Count;
+            // Stop loading custom diff tools
+            AppSettings.ShowAvailableDiffTools = false;
 
-            // Assert items from bottom to the top
-            ToolStripItem item = contextMenu.Items[--count];
-            item.Text.Should().Be("Run script");
-            item.Enabled.Should().BeFalse("because this test includes no user scripts");
+            // We don't want avatars during tests, otherwise we will be attempting to download them from gravatar....
+            AppSettings.ShowAuthorAvatarColumn = false;
 
-            contextMenu.Items[--count].Should().BeOfType<ToolStripSeparator>()
-                .Which.Enabled.Should().BeFalse("because this test includes no user scripts");
+            AppSettings.RepoObjectsTreeShowTags = true;
+            AppSettings.RepoObjectsTreeShowStashes = true;
+        }
 
-            item = contextMenu.Items[--count];
-            item.Text.Should().Be(TranslatedStrings.SortOrder);
-            item.Enabled.Should().BeFalse("because sort order in this test is default");
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            AppSettings.ShowAuthorAvatarColumn = _originalShowAuthorAvatarColumn;
+            AppSettings.ShowAvailableDiffTools = _showAvailableDiffTools;
 
-            item = contextMenu.Items[--count];
-            item.Text.Should().Be(TranslatedStrings.SortBy);
-            item.Enabled.Should().BeTrue("because tags and branches are sortable");
+            _remoteReferenceRepository.Dispose();
+        }
 
-            contextMenu.Items[--count].Should().BeOfType<ToolStripSeparator>();
-        });
-    }
+        [SetUp]
+        public void SetUp()
+        {
+            ReferenceRepository.ResetRepo(ref _remoteReferenceRepository);
 
-    private void RunRepoObjectsTreeTest(Action<ContextMenuStrip> testDriver)
-    {
-        string branchName = _referenceRepository.Module.GetCurrentBranchName();
+            // we will be modifying .git/config and need to completely reset each time
+            _referenceRepository = new ReferenceRepository();
 
-        RunFormTest(
-            async form =>
+            _referenceRepository.Module.AddRemote(RemoteName, _remoteReferenceRepository.Module.WorkingDir);
+            _referenceRepository.Fetch(RemoteName);
+
+            _commands = new GitUICommands(GlobalServiceContainer.CreateDefaultMockServiceContainer(), _referenceRepository.Module);
+
+            _referenceRepository.CreateCommit("Commit1", "Commit1");
+            _referenceRepository.CreateBranch("Branch1", _referenceRepository.CommitHash);
+            _referenceRepository.CreateTag("Branch1", _referenceRepository.CommitHash);
+            _referenceRepository.CreateCommit("Commit2", "Commit2");
+            _referenceRepository.CreateBranch("Branch2", _referenceRepository.CommitHash);
+
+            _referenceRepository.CreateCommit("head commit");
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            _referenceRepository.Dispose();
+        }
+
+        [Test]
+        public void Branch_and_tag_context_menu_should_show_Sort_By_entry()
+        {
+            RunRepoObjectsTreeTest(contextMenu =>
             {
-                await AsyncTestHelper.JoinPendingOperationsAsync(AsyncTestHelper.UnexpectedTimeout);
+                contextMenu.Items.Count.Should().BeGreaterThan(5);
 
-                RepoObjectsTree.TestAccessor ta = form.GetTestAccessor().RepoObjectsTree.GetTestAccessor();
+                int count = contextMenu.Items.Count;
 
-                // We are running several tests one after another to speed up the test execution
-                // as we don't need to re-create the host form
+                // Assert items from bottom to the top
+                ToolStripItem item = contextMenu.Items[--count];
+                item.Text.Should().Be("Run script");
+                item.Enabled.Should().BeFalse("because this test includes no user scripts");
 
-                ContextMenuStrip contextMenu = ta.ContextMenu;
+                contextMenu.Items[--count].Should().BeOfType<ToolStripSeparator>()
+                    .Which.Enabled.Should().BeFalse("because this test includes no user scripts");
 
-                ta.SelectNode<LocalBranchNode>([TranslatedStrings.Branches, branchName]);
-                ta.OpenContextMenu();
-                testDriver(contextMenu);
+                item = contextMenu.Items[--count];
+                item.Text.Should().Be(TranslatedStrings.SortOrder);
+                item.Enabled.Should().BeFalse("because sort order in this test is default");
 
-                ta.SelectNode<RemoteBranchNode>([TranslatedStrings.Remotes, RemoteName, branchName]);
-                ta.OpenContextMenu();
-                testDriver(contextMenu);
+                item = contextMenu.Items[--count];
+                item.Text.Should().Be(TranslatedStrings.SortBy);
+                item.Enabled.Should().BeTrue("because tags and branches are sortable");
 
-                ta.SelectNode<TagNode>([TranslatedStrings.Tags, "Branch1"]);
-                ta.OpenContextMenu();
-                testDriver(contextMenu);
+                contextMenu.Items[--count].Should().BeOfType<ToolStripSeparator>();
             });
-    }
+        }
 
-    private void RunFormTest(Func<FormBrowse, Task> testDriverAsync)
-    {
-        UITest.RunForm(
-            showForm: () => _commands.StartBrowseDialog(owner: null).Should().BeTrue(),
-            testDriverAsync);
+        private void RunRepoObjectsTreeTest(Action<ContextMenuStrip> testDriver)
+        {
+            RunFormTest(
+                async form =>
+                {
+                    await AsyncTestHelper.JoinPendingOperationsAsync(AsyncTestHelper.UnexpectedTimeout);
+
+                    RepoObjectsTree.TestAccessor ta = form.GetTestAccessor().RepoObjectsTree.GetTestAccessor();
+
+                    // We are running several tests one after another to speed up the test execution
+                    // as we don't need to re-create the host form
+
+                    ContextMenuStrip contextMenu = ta.ContextMenu;
+
+                    ta.SelectNode<LocalBranchNode>(new[] { TranslatedStrings.Branches, "master" });
+                    ta.OpenContextMenu();
+                    testDriver(contextMenu);
+
+                    ta.SelectNode<RemoteBranchNode>(new[] { TranslatedStrings.Remotes, RemoteName, "master" });
+                    ta.OpenContextMenu();
+                    testDriver(contextMenu);
+
+                    ta.SelectNode<TagNode>(new[] { TranslatedStrings.Tags, "Branch1" });
+                    ta.OpenContextMenu();
+                    testDriver(contextMenu);
+                });
+        }
+
+        private void RunFormTest(Func<FormBrowse, Task> testDriverAsync)
+        {
+            UITest.RunForm(
+                showForm: () => _commands.StartBrowseDialog(owner: null).Should().BeTrue(),
+                testDriverAsync);
+        }
     }
 }

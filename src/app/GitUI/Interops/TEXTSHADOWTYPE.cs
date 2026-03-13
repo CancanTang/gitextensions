@@ -1,11 +1,12 @@
-﻿namespace System;
-
-internal static partial class NativeMethods
+﻿namespace System
 {
-    public enum TEXTSHADOWTYPE : int
+    internal static partial class NativeMethods
     {
-        None = 0,
-        Single = 1,
-        Continuous = 2,
+        public enum TEXTSHADOWTYPE : int
+        {
+            None = 0,
+            Single = 1,
+            Continuous = 2,
+        }
     }
 }

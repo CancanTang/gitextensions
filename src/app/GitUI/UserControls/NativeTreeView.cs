@@ -1,19 +1,15 @@
-﻿namespace GitUI.UserControls;
-
-public class NativeTreeView : TreeView
+﻿namespace GitUI.UserControls
 {
-    public NativeTreeView()
+    public class NativeTreeView : TreeView
     {
-        DoubleBuffered = true;
-    }
-
-    protected override void CreateHandle()
-    {
-        base.CreateHandle();
-        if (!Application.IsDarkModeEnabled)
+        public NativeTreeView()
         {
-            // explorer style selection painting in left panel
-            // Not needed in dark mode, this is the same for "DarkMode_Explorer"
+            DoubleBuffered = true;
+        }
+
+        protected override void CreateHandle()
+        {
+            base.CreateHandle();
             NativeMethods.SetWindowTheme(Handle, "explorer", null);
         }
     }

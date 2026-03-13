@@ -3,75 +3,76 @@ using GitUI.UserControls.RevisionGrid;
 using GitUIPluginInterfaces;
 using Microsoft.VisualStudio.Threading;
 
-namespace GitUI.LeftPanel;
-
-internal sealed class StashTree : BaseRevisionTree
+namespace GitUI.LeftPanel
 {
-    public StashTree(TreeNode treeNode, IGitUICommandsSource uiCommands, ICheckRefs refsSource)
-        : base(treeNode, uiCommands, refsSource)
+    internal sealed class StashTree : BaseRevisionTree
     {
-    }
-
-    internal void Refresh(Lazy<IReadOnlyCollection<GitRevision>> getStashRevs)
-    {
-        if (!IsAttached)
+        public StashTree(TreeNode treeNode, IGitUICommandsSource uiCommands, ICheckRefs refsSource)
+            : base(treeNode, uiCommands, refsSource)
         {
-            return;
         }
 
-        ReloadNodesDetached((_, cancellationToken) => LoadNodesAsync(getStashRevs, cancellationToken), getRefs: null);
-    }
-
-    private async Task<Nodes> LoadNodesAsync(Lazy<IReadOnlyCollection<GitRevision>> getStashRevs, CancellationToken token)
-    {
-        await TaskScheduler.Default;
-        token.ThrowIfCancellationRequested();
-
-        return FillStashTree(getStashRevs.Value, token);
-    }
-
-    private Nodes FillStashTree(IReadOnlyCollection<GitRevision> stashes, CancellationToken token)
-    {
-        Nodes nodes = new(this);
-        Dictionary<string, BaseRevisionNode> pathToNodes = [];
-
-        foreach (GitRevision stash in stashes)
+        internal void Refresh(Lazy<IReadOnlyCollection<GitRevision>> getStashRevs)
         {
+            if (!IsAttached)
+            {
+                return;
+            }
+
+            ReloadNodesDetached((cancellationToken, _) => LoadNodesAsync(cancellationToken, getStashRevs), getRefs: null);
+        }
+
+        private async Task<Nodes> LoadNodesAsync(CancellationToken token, Lazy<IReadOnlyCollection<GitRevision>> getStashRevs)
+        {
+            await TaskScheduler.Default;
             token.ThrowIfCancellationRequested();
 
-            // Visibility is set after the grid is loaded
-            StashNode node = new(this, stash.ObjectId, stash.ReflogSelector, stash.Subject, visible: false);
-            Node? parent = node.CreateRootNode(pathToNodes, (tree, parentPath) => new BasePathNode(tree, parentPath));
+            return FillStashTree(getStashRevs.Value, token);
+        }
 
-            if (parent is not null)
+        private Nodes FillStashTree(IReadOnlyCollection<GitRevision> stashes, CancellationToken token)
+        {
+            Nodes nodes = new(this);
+            Dictionary<string, BaseRevisionNode> pathToNodes = [];
+
+            foreach (GitRevision stash in stashes)
             {
-                nodes.AddNode(parent);
+                token.ThrowIfCancellationRequested();
+
+                // Visibility is set after the grid is loaded
+                StashNode node = new(this, stash.ObjectId, stash.ReflogSelector, stash.Subject, visible: false);
+                Node? parent = node.CreateRootNode(pathToNodes, (tree, parentPath) => new BasePathNode(tree, parentPath));
+
+                if (parent is not null)
+                {
+                    nodes.AddNode(parent);
+                }
+            }
+
+            return nodes;
+        }
+
+        protected override void PostFillTreeViewNode(bool firstTime)
+        {
+            if (firstTime)
+            {
+                TreeViewNode.Collapse();
             }
         }
 
-        return nodes;
-    }
-
-    protected override void PostFillTreeViewNode(bool firstTime)
-    {
-        if (firstTime)
+        public void StashAll(IWin32Window owner)
         {
-            TreeViewNode.Collapse();
+            UICommands.StashSave(owner, AppSettings.IncludeUntrackedFilesInManualStash);
         }
-    }
 
-    public void StashAll(IWin32Window owner)
-    {
-        UICommands.StashSave(owner, AppSettings.IncludeUntrackedFilesInManualStash);
-    }
+        public void StashStaged(IWin32Window owner)
+        {
+            UICommands.StashStaged(owner);
+        }
 
-    public void StashStaged(IWin32Window owner)
-    {
-        UICommands.StashStaged(owner);
-    }
-
-    public void OpenStash(IWin32Window owner)
-    {
-        UICommands.StartStashDialog(owner, manageStashes: true);
+        public void OpenStash(IWin32Window owner)
+        {
+            UICommands.StartStashDialog(owner, manageStashes: true);
+        }
     }
 }

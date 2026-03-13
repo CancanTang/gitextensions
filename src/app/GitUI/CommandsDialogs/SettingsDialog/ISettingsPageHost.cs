@@ -1,42 +1,43 @@
 ﻿using GitExtensions.Extensibility.Settings;
 
-namespace GitUI.CommandsDialogs.SettingsDialog;
-
-public interface ISettingsPageHost
+namespace GitUI.CommandsDialogs.SettingsDialog
 {
-    void GotoPage(SettingsPageReference settingsPageReference);
-
-    /// <summary>
-    /// needed by ChecklistSettingsPage (TODO: needed here?).
-    /// </summary>
-    void SaveAll();
-
-    /// <summary>
-    /// needed by ChecklistSettingsPage (TODO: needed here?).
-    /// </summary>
-    void LoadAll();
-
-    CheckSettingsLogic CheckSettingsLogic { get; }
-}
-
-public class SettingsPageHostMock : ISettingsPageHost
-{
-    public SettingsPageHostMock(CheckSettingsLogic checkSettingsLogic)
+    public interface ISettingsPageHost
     {
-        CheckSettingsLogic = checkSettingsLogic;
+        void GotoPage(SettingsPageReference settingsPageReference);
+
+        /// <summary>
+        /// needed by ChecklistSettingsPage (TODO: needed here?).
+        /// </summary>
+        void SaveAll();
+
+        /// <summary>
+        /// needed by ChecklistSettingsPage (TODO: needed here?).
+        /// </summary>
+        void LoadAll();
+
+        CheckSettingsLogic CheckSettingsLogic { get; }
     }
 
-    public void GotoPage(SettingsPageReference settingsPageReference)
+    public class SettingsPageHostMock : ISettingsPageHost
     {
-    }
+        public SettingsPageHostMock(CheckSettingsLogic checkSettingsLogic)
+        {
+            CheckSettingsLogic = checkSettingsLogic;
+        }
 
-    public void SaveAll()
-    {
-    }
+        public void GotoPage(SettingsPageReference settingsPageReference)
+        {
+        }
 
-    public void LoadAll()
-    {
-    }
+        public void SaveAll()
+        {
+        }
 
-    public CheckSettingsLogic CheckSettingsLogic { get; }
+        public void LoadAll()
+        {
+        }
+
+        public CheckSettingsLogic CheckSettingsLogic { get; }
+    }
 }

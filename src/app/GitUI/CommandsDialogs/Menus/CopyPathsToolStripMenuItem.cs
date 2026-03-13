@@ -2,71 +2,71 @@
 using GitExtensions.Extensibility.Git;
 using GitExtUtils;
 
-namespace GitUI.CommandsDialogs.Menus;
-
-internal partial class CopyPathsToolStripMenuItem : ToolStripMenuItemEx
+namespace GitUI.CommandsDialogs.Menus
 {
-    private Func<IEnumerable<string?>> _getSelectedFilePaths;
-
-    public CopyPathsToolStripMenuItem()
+    internal partial class CopyPathsToolStripMenuItem : ToolStripMenuItemEx
     {
-        InitializeComponent();
+        private Func<IEnumerable<string?>> _getSelectedFilePaths;
 
-        copyFullPathsNativeToolStripMenuItem.Font = new(copyFullPathsNativeToolStripMenuItem.Font, FontStyle.Bold);
-    }
-
-    public CopyPathsToolStripMenuItem Initialize(Func<IGitUICommands> getUICommands, Func<IEnumerable<string?>> getSelectedFilePaths)
-    {
-        Initialize(getUICommands);
-        _getSelectedFilePaths = getSelectedFilePaths;
-        return this;
-    }
-
-    private void CopyPathsToClipboard(string prefixDir, Func<string, string> convertPath)
-    {
-        IEnumerable<string?> selectedFilePaths
-            = (_getSelectedFilePaths ?? throw new InvalidOperationException("The menu is not initialized."))();
-        string filePaths = GetFilePaths(selectedFilePaths, prefixDir, convertPath);
-        if (!string.IsNullOrWhiteSpace(filePaths))
+        public CopyPathsToolStripMenuItem()
         {
-            ClipboardUtil.TrySetText(filePaths);
+            InitializeComponent();
+
+            copyFullPathsNativeToolStripMenuItem.Font = new(copyFullPathsNativeToolStripMenuItem.Font, FontStyle.Bold);
         }
-    }
 
-    private static string GetFilePaths(IEnumerable<string?> selectedFilePaths, string prefixDir, Func<string, string> convertPath)
-    {
-        return selectedFilePaths
-            .Where(path => path is not null)
-            .Distinct()
-            .Select(path => prefixDir.Length == 0 && path.Length == 0 ? "." : convertPath(Path.Combine(prefixDir, path)))
-            .Join(Environment.NewLine);
-    }
+        public CopyPathsToolStripMenuItem Initialize(Func<IGitUICommands> getUICommands, Func<IEnumerable<string?>> getSelectedFilePaths)
+        {
+            Initialize(getUICommands);
+            _getSelectedFilePaths = getSelectedFilePaths;
+            return this;
+        }
 
-    private void CopyFullPathsNativeToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        // The command can be invoked via the keyboard, and the parent is null
-        GetCurrentParent()?.Hide();
+        private void CopyPathsToClipboard(string prefixDir, Func<string, string> convertPath)
+        {
+            IEnumerable<string?> selectedFilePaths
+                = (_getSelectedFilePaths ?? throw new InvalidOperationException("The menu is not initialized."))();
+            string filePaths = GetFilePaths(selectedFilePaths, prefixDir, convertPath);
+            if (!string.IsNullOrWhiteSpace(filePaths))
+            {
+                ClipboardUtil.TrySetText(filePaths);
+            }
+        }
 
-        CopyPathsToClipboard(Module.WorkingDir, PathUtil.ToNativePath);
-    }
+        private static string GetFilePaths(IEnumerable<string?> selectedFilePaths, string prefixDir, Func<string, string> convertPath)
+        {
+            return selectedFilePaths
+                .Where(path => !string.IsNullOrEmpty(path))
+                .Select(path => convertPath(Path.Combine(prefixDir, path)))
+                .Join(Environment.NewLine);
+        }
 
-    private void CopyFullPathsCygwinToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        CopyPathsToClipboard(Module.WorkingDir, PathUtil.ToCygwinPath);
-    }
+        private void CopyFullPathsNativeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // The command can be invoked via the keyboard, and the parent is null
+            GetCurrentParent()?.Hide();
 
-    private void CopyFullPathsWslToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        CopyPathsToClipboard(Module.WorkingDir, PathUtil.ToWslPath);
-    }
+            CopyPathsToClipboard(Module.WorkingDir, PathUtil.ToNativePath);
+        }
 
-    private void CopyRelativePathsNativeToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        CopyPathsToClipboard(prefixDir: "", PathUtil.ToNativePath);
-    }
+        private void CopyFullPathsCygwinToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CopyPathsToClipboard(Module.WorkingDir, PathUtil.ToCygwinPath);
+        }
 
-    private void CopyRelativePathsPosixToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        CopyPathsToClipboard(prefixDir: "", PathUtil.ToPosixPath);
+        private void CopyFullPathsWslToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CopyPathsToClipboard(Module.WorkingDir, PathUtil.ToWslPath);
+        }
+
+        private void CopyRelativePathsNativeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CopyPathsToClipboard(prefixDir: "", PathUtil.ToNativePath);
+        }
+
+        private void CopyRelativePathsPosixToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CopyPathsToClipboard(prefixDir: "", PathUtil.ToPosixPath);
+        }
     }
 }

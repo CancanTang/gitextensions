@@ -1,45 +1,46 @@
 ﻿using System.Text;
 
-namespace GitExtUtils;
-
-public static class StringBuilderExtensions
+namespace GitExtUtils
 {
-    private static readonly char[] _whiteSpaceChars = [' ', '\r', '\n', '\t'];
-
-    public static StringBuilder AppendQuoted(this StringBuilder builder, string s)
+    public static class StringBuilderExtensions
     {
-        if (NeedsEscaping())
-        {
-            builder.Append('"').Append(s).Append('"');
-        }
-        else
-        {
-            builder.Append(s);
-        }
+        private static readonly char[] _whiteSpaceChars = { ' ', '\r', '\n', '\t' };
 
-        return builder;
-
-        bool NeedsEscaping()
+        public static StringBuilder AppendQuoted(this StringBuilder builder, string s)
         {
-            if (string.IsNullOrWhiteSpace(s))
+            if (NeedsEscaping())
             {
-                // Quote empty or white space strings
+                builder.Append('"').Append(s).Append('"');
+            }
+            else
+            {
+                builder.Append(s);
+            }
+
+            return builder;
+
+            bool NeedsEscaping()
+            {
+                if (string.IsNullOrWhiteSpace(s))
+                {
+                    // Quote empty or white space strings
+                    return true;
+                }
+
+                if (s.IndexOfAny(_whiteSpaceChars) == -1)
+                {
+                    // Doesn't contain any white space
+                    return false;
+                }
+
+                if (s.Length > 1 && s[0] == '"' && s[^1] == '"')
+                {
+                    // String is already quoted
+                    return false;
+                }
+
                 return true;
             }
-
-            if (s.IndexOfAny(_whiteSpaceChars) == -1)
-            {
-                // Doesn't contain any white space
-                return false;
-            }
-
-            if (s.Length > 1 && s[0] == '"' && s[^1] == '"')
-            {
-                // String is already quoted
-                return false;
-            }
-
-            return true;
         }
     }
 }

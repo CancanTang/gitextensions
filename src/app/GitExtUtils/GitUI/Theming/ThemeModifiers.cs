@@ -1,7 +1,8 @@
-﻿namespace GitExtUtils.GitUI.Theming;
-
-public static class ThemeVariations
+﻿namespace GitExtUtils.GitUI.Theming
 {
-    public const string Colorblind = "colorblind";
-    public static readonly string[] None = [];
+    public static class ThemeVariations
+    {
+        public const string Colorblind = "colorblind";
+        public static readonly string[] None = Array.Empty<string>();
+    }
 }

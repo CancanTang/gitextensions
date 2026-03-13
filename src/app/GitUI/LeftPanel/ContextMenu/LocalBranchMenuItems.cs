@@ -3,33 +3,34 @@ using GitExtensions.Extensibility.Translations;
 using GitUI.LeftPanel.Interfaces;
 using ResourceManager;
 
-namespace GitUI.LeftPanel.ContextMenu;
-
-internal class LocalBranchMenuItems<TNode> : MenuItemsGenerator<TNode>
-    where TNode : class, INode
+namespace GitUI.LeftPanel.ContextMenu
 {
-    /// <summary>Keys of local branch menu items applying to the currently checked out branch.
-    /// See <see cref="LocalBranchNode.IsCurrent"/> and <see cref="MenuItemsGenerator{TNode}"/>.</summary>
-    internal static MenuItemKey[] CurrentBranchItemKeys = [MenuItemKey.GitRefCreateBranch, MenuItemKey.Rename];
-
-    public LocalBranchMenuItems(IMenuItemFactory menuItemFactory) : base(menuItemFactory)
+    internal class LocalBranchMenuItems<TNode> : MenuItemsGenerator<TNode>
+        where TNode : class, INode
     {
-        new LocalBranchMenuItemsStrings().ApplyTo(Strings);
-    }
-}
+        /// <summary>Keys of local branch menu items applying to the currently checked out branch.
+        /// See <see cref="LocalBranchNode.IsCurrent"/> and <see cref="MenuItemsGenerator{TNode}"/>.</summary>
+        internal static MenuItemKey[] CurrentBranchItemKeys = new[] { MenuItemKey.GitRefCreateBranch, MenuItemKey.Rename };
 
-public class LocalBranchMenuItemsStrings : Translate
-{
-    internal readonly TranslationString DeleteTooltip = new("Delete the branch, which must be fully merged in its upstream branch or in HEAD");
-
-    public LocalBranchMenuItemsStrings()
-    {
-        Translator.Translate(this, AppSettings.CurrentTranslation);
+        public LocalBranchMenuItems(IMenuItemFactory menuItemFactory) : base(menuItemFactory)
+        {
+            new LocalBranchMenuItemsStrings().ApplyTo(Strings);
+        }
     }
 
-    public void ApplyTo(MenuItemsStrings strings)
+    public class LocalBranchMenuItemsStrings : Translate
     {
-        new BranchMenuItemsStrings().ApplyTo(strings);
-        strings.Tooltips[MenuItemKey.Delete] = DeleteTooltip;
+        internal readonly TranslationString DeleteTooltip = new("Delete the branch, which must be fully merged in its upstream branch or in HEAD");
+
+        public LocalBranchMenuItemsStrings()
+        {
+            Translator.Translate(this, AppSettings.CurrentTranslation);
+        }
+
+        public void ApplyTo(MenuItemsStrings strings)
+        {
+            new BranchMenuItemsStrings().ApplyTo(strings);
+            strings.Tooltips[MenuItemKey.Delete] = DeleteTooltip;
+        }
     }
 }

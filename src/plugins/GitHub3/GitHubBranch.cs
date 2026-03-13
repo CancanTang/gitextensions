@@ -2,16 +2,17 @@
 using GitExtensions.Extensibility.Git;
 using GitExtensions.Extensibility.Plugins;
 
-namespace GitExtensions.Plugins.GitHub3;
-
-internal sealed class GitHubBranch : IHostedBranch
+namespace GitExtensions.Plugins.GitHub3
 {
-    public GitHubBranch(Branch branch)
+    internal sealed class GitHubBranch : IHostedBranch
     {
-        Name = branch.Name;
-        Sha = ObjectId.Parse(branch.Commit.Sha);
-    }
+        public GitHubBranch(Branch branch)
+        {
+            Name = branch.Name;
+            Sha = ObjectId.Parse(branch.Commit.Sha);
+        }
 
-    public string Name { get; }
-    public ObjectId Sha { get; }
+        public string Name { get; }
+        public ObjectId Sha { get; }
+    }
 }

@@ -57,10 +57,8 @@ public class DiffViewerLineNumberControl : AbstractMargin
 
         int fontHeight = textArea.TextView.FontHeight;
         ICSharpCode.TextEditor.Document.HighlightColor lineNumberPainterColor = textArea.Document.HighlightingStrategy.GetColorFor("LineNumbers");
-        ICSharpCode.TextEditor.Document.HighlightColor lineNumberCurrentPainterColor = textArea.Document.HighlightingStrategy.GetColorFor("LineNumberSelected");
         Brush fillBrush = textArea.Enabled ? BrushRegistry.GetBrush(lineNumberPainterColor.BackgroundColor) : SystemBrushes.InactiveBorder;
         Brush drawBrush = BrushRegistry.GetBrush(lineNumberPainterColor.Color);
-        Brush currentLineBrush = BrushRegistry.GetBrush(lineNumberCurrentPainterColor.Color);
 
         for (int y = 0; y < ((DrawingPosition.Height + textArea.TextView.VisibleLineDrawingRemainder) / fontHeight) + 1; ++y)
         {
@@ -110,24 +108,19 @@ public class DiffViewerLineNumberControl : AbstractMargin
                 g.FillRectangle(brush, new Rectangle(leftWidth, backgroundRectangle.Top, rightWidth, backgroundRectangle.Height));
             }
 
-            bool isCurrentLine = curLine == textArea.Caret.Line && MarkSelectedLine;
-            Brush lineBrush = isCurrentLine ? currentLineBrush : drawBrush;
-            Font font = isCurrentLine
-                ? lineNumberCurrentPainterColor.GetFont(TextEditorProperties.FontContainer)
-                : lineNumberPainterColor.GetFont(TextEditorProperties.FontContainer);
             if (diffLine.LeftLineNumber != DiffLineInfo.NotApplicableLineNum)
             {
                 g.DrawString(diffLine.LeftLineNumber.ToString(),
-                    font,
-                    lineBrush,
+                    lineNumberPainterColor.GetFont(TextEditorProperties.FontContainer),
+                    drawBrush,
                     new Point(_textHorizontalMargin, backgroundRectangle.Top));
             }
 
             if (diffLine.RightLineNumber != DiffLineInfo.NotApplicableLineNum)
             {
                 g.DrawString(diffLine.RightLineNumber.ToString(),
-                    font,
-                    lineBrush,
+                    lineNumberPainterColor.GetFont(TextEditorProperties.FontContainer),
+                    drawBrush,
                     new Point(leftWidth, backgroundRectangle.Top));
             }
         }
@@ -145,8 +138,6 @@ public class DiffViewerLineNumberControl : AbstractMargin
         _diffLines = _empty;
         MaxLineNumber = 0;
     }
-
-    public override bool IsVisible => _visible;
 
     public void SetVisibility(bool visible)
     {

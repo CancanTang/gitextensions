@@ -1,61 +1,62 @@
 ﻿using GitExtensions.Extensibility.Settings;
 using GitUIPluginInterfaces.BuildServerIntegration;
 
-namespace GitCommands.Settings;
-
-internal sealed class BuildServerSettings : IBuildServerSettings
+namespace GitCommands.Settings
 {
-    private const string BuildServerGroupName = "BuildServer";
-    private const string BuildServerTypeName = "Type";
-    private const string BuildServerIntegrationEnabledName = "EnableIntegration";
-    private readonly SettingsSource _settingsSource;
-
-    public BuildServerSettings(SettingsSource settingsSource)
+    internal sealed class BuildServerSettings : IBuildServerSettings
     {
-        _settingsSource = settingsSource;
-    }
+        private const string BuildServerGroupName = "BuildServer";
+        private const string BuildServerTypeName = "Type";
+        private const string BuildServerIntegrationEnabledName = "EnableIntegration";
+        private readonly SettingsSource _settingsSource;
 
-    public SettingsSource SettingsSource => new SettingsPath(_settingsSource, $"{BuildServerGroupName}.{ServerName}");
-
-    public string? ServerName
-    {
-        get => _settingsSource.GetString($"{BuildServerGroupName}.{BuildServerTypeName}", defaultValue: null);
-        set
+        public BuildServerSettings(SettingsSource settingsSource)
         {
-            if (ServerName == value)
-            {
-                return;
-            }
-
-            _settingsSource.SetString($"{BuildServerGroupName}.{BuildServerTypeName}", value);
+            _settingsSource = settingsSource;
         }
-    }
 
-    public bool? IntegrationEnabled
-    {
-        get => _settingsSource.GetBool($"{BuildServerGroupName}.{BuildServerIntegrationEnabledName}");
-        set
+        public SettingsSource SettingsSource => new SettingsPath(_settingsSource, $"{BuildServerGroupName}.{ServerName}");
+
+        public string? ServerName
         {
-            if (IntegrationEnabled == value)
+            get => _settingsSource.GetString($"{BuildServerGroupName}.{BuildServerTypeName}", defaultValue: null);
+            set
             {
-                return;
-            }
+                if (ServerName == value)
+                {
+                    return;
+                }
 
-            _settingsSource.SetBool($"{BuildServerGroupName}.{BuildServerIntegrationEnabledName}", value);
+                _settingsSource.SetString($"{BuildServerGroupName}.{BuildServerTypeName}", value);
+            }
         }
-    }
 
-    public bool? ShowBuildResultPage
-    {
-        get => _settingsSource.GetBool($"{BuildServerGroupName}.{nameof(ShowBuildResultPage)}");
-        set
+        public bool? IntegrationEnabled
         {
-            if (ShowBuildResultPage == value)
+            get => _settingsSource.GetBool($"{BuildServerGroupName}.{BuildServerIntegrationEnabledName}");
+            set
             {
-                return;
-            }
+                if (IntegrationEnabled == value)
+                {
+                    return;
+                }
 
-            _settingsSource.SetBool($"{BuildServerGroupName}.{nameof(ShowBuildResultPage)}", value);
+                _settingsSource.SetBool($"{BuildServerGroupName}.{BuildServerIntegrationEnabledName}", value);
+            }
+        }
+
+        public bool? ShowBuildResultPage
+        {
+            get => _settingsSource.GetBool($"{BuildServerGroupName}.{nameof(ShowBuildResultPage)}");
+            set
+            {
+                if (ShowBuildResultPage == value)
+                {
+                    return;
+                }
+
+                _settingsSource.SetBool($"{BuildServerGroupName}.{nameof(ShowBuildResultPage)}", value);
+            }
         }
     }
 }

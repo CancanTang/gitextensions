@@ -1,54 +1,55 @@
 ﻿using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 
-namespace GitExtUtils.GitUI.Theming;
-
-public abstract class BmpTransformation
+namespace GitExtUtils.GitUI.Theming
 {
-    private readonly Bitmap _bmp;
-    protected const int B = 0;
-    protected const int G = 1;
-    protected const int R = 2;
-    protected const int A = 3;
-
-    private const int BytesPerPixel = 4;
-    private const PixelFormat PixelFormat = System.Drawing.Imaging.PixelFormat.Format32bppArgb;
-
-    protected Rectangle Rect { get; }
-    protected byte[]? BgraValues { get; private set; }
-    protected bool ImageChanged { get; set; }
-
-    protected BmpTransformation(Bitmap bmp)
+    public abstract class BmpTransformation
     {
-        _bmp = bmp;
-        Rect = new Rectangle(location: default, size: bmp.Size);
-    }
+        private readonly Bitmap _bmp;
+        protected const int B = 0;
+        protected const int G = 1;
+        protected const int R = 2;
+        protected const int A = 3;
 
-    public void Execute()
-    {
-        BitmapData bmpData = _bmp.LockBits(Rect, ImageLockMode.ReadWrite, PixelFormat);
+        private const int BytesPerPixel = 4;
+        private const PixelFormat PixelFormat = System.Drawing.Imaging.PixelFormat.Format32bppArgb;
 
-        try
+        protected Rectangle Rect { get; }
+        protected byte[]? BgraValues { get; private set; }
+        protected bool ImageChanged { get; set; }
+
+        protected BmpTransformation(Bitmap bmp)
         {
-            int numBytes = bmpData.Stride * bmpData.Height;
-            BgraValues = new byte[numBytes];
-            Marshal.Copy(bmpData.Scan0, BgraValues, 0, numBytes);
+            _bmp = bmp;
+            Rect = new Rectangle(location: default, size: bmp.Size);
+        }
 
-            ExecuteRaw();
+        public void Execute()
+        {
+            BitmapData bmpData = _bmp.LockBits(Rect, ImageLockMode.ReadWrite, PixelFormat);
 
-            if (ImageChanged)
+            try
             {
-                Marshal.Copy(BgraValues, 0, bmpData.Scan0, numBytes);
+                int numBytes = bmpData.Stride * bmpData.Height;
+                BgraValues = new byte[numBytes];
+                Marshal.Copy(bmpData.Scan0, BgraValues, 0, numBytes);
+
+                ExecuteRaw();
+
+                if (ImageChanged)
+                {
+                    Marshal.Copy(BgraValues, 0, bmpData.Scan0, numBytes);
+                }
+            }
+            finally
+            {
+                _bmp.UnlockBits(bmpData);
             }
         }
-        finally
-        {
-            _bmp.UnlockBits(bmpData);
-        }
+
+        protected abstract void ExecuteRaw();
+
+        protected int GetLocation(int x, int y) =>
+            BytesPerPixel * ((Rect.Width * y) + x);
     }
-
-    protected abstract void ExecuteRaw();
-
-    protected int GetLocation(int x, int y) =>
-        BytesPerPixel * ((Rect.Width * y) + x);
 }

@@ -1,194 +1,195 @@
 ﻿using System.ComponentModel;
 using Newtonsoft.Json;
 
-namespace GitCommands.Settings;
-
-public static class Setting
+namespace GitCommands.Settings
 {
-    public static ISetting<string> Create(SettingsPath settingsSource, string name, string? defaultValue)
+    public static class Setting
     {
-        return new SettingOf<string>(settingsSource, name, defaultValue ?? string.Empty);
-    }
-
-    public static ISetting<T> Create<T>(SettingsPath settingsSource, string name, T defaultValue)
-        where T : struct
-    {
-        return new SettingOf<T>(settingsSource, name, defaultValue);
-    }
-
-    public static ISetting<T?> Create<T>(SettingsPath settingsSource, string name)
-        where T : struct
-    {
-        return new SettingOf<T?>(settingsSource, name);
-    }
-
-    private sealed class SettingOf<T> : ISetting<T>
-    {
-        /// <inheritdoc />
-        public event EventHandler? Updated;
-
-        public SettingOf(SettingsPath settingsSource, string name, T? defaultValue = default)
+        public static ISetting<string> Create(SettingsPath settingsSource, string name, string? defaultValue)
         {
-            SettingsSource = settingsSource;
-            Name = name;
-            Default = defaultValue;
+            return new SettingOf<string>(settingsSource, name, defaultValue ?? string.Empty);
         }
 
-        /// <inheritdoc />
-        public SettingsPath SettingsSource { get; }
-
-        /// <inheritdoc />
-        public string Name { get; }
-
-        /// <inheritdoc />
-        public T? Default { get; }
-
-        /// <inheritdoc />
-        public T? Value
+        public static ISetting<T> Create<T>(SettingsPath settingsSource, string name, T defaultValue)
+            where T : struct
         {
-            get
-            {
-                object storedValue = GetValue(Name);
-
-                if (default(T) is null)
-                {
-                    if (Type.GetTypeCode(typeof(T)) != TypeCode.String)
-                    {
-                        return (T?)storedValue!;
-                    }
-                }
-
-                if (storedValue is null)
-                {
-                    return Default;
-                }
-
-                return (T)storedValue;
-            }
-
-            set
-            {
-                object storedValue = GetValue(Name);
-
-                if (Type.GetTypeCode(typeof(T)) == TypeCode.String)
-                {
-                    if (storedValue?.Equals((object?)value ?? string.Empty) ?? false)
-                    {
-                        return;
-                    }
-                }
-                else
-                {
-                    if (storedValue?.Equals(value) ?? ((default(T) is null) && (value is null)))
-                    {
-                        return;
-                    }
-                }
-
-                if (Type.GetTypeCode(typeof(T)) == TypeCode.String)
-                {
-                    SetValue(Name, (object?)value ?? string.Empty);
-                }
-                else
-                {
-                    SetValue(Name, value);
-                }
-
-                Updated?.Invoke(this, EventArgs.Empty);
-            }
+            return new SettingOf<T>(settingsSource, name, defaultValue);
         }
 
-        /// <inheritdoc />
-        public bool IsUnset
+        public static ISetting<T?> Create<T>(SettingsPath settingsSource, string name)
+            where T : struct
         {
-            get
+            return new SettingOf<T?>(settingsSource, name);
+        }
+
+        private sealed class SettingOf<T> : ISetting<T>
+        {
+            /// <inheritdoc />
+            public event EventHandler? Updated;
+
+            public SettingOf(SettingsPath settingsSource, string name, T? defaultValue = default)
             {
-                if (default(T) is null)
+                SettingsSource = settingsSource;
+                Name = name;
+                Default = defaultValue;
+            }
+
+            /// <inheritdoc />
+            public SettingsPath SettingsSource { get; }
+
+            /// <inheritdoc />
+            public string Name { get; }
+
+            /// <inheritdoc />
+            public T? Default { get; }
+
+            /// <inheritdoc />
+            public T? Value
+            {
+                get
                 {
-                    if (Type.GetTypeCode(typeof(T)) != TypeCode.String)
+                    object storedValue = GetValue(Name);
+
+                    if (default(T) is null)
                     {
-                        return false;
+                        if (Type.GetTypeCode(typeof(T)) != TypeCode.String)
+                        {
+                            return (T?)storedValue!;
+                        }
                     }
+
+                    if (storedValue is null)
+                    {
+                        return Default;
+                    }
+
+                    return (T)storedValue;
                 }
 
-                object storedValue = GetValue(Name);
+                set
+                {
+                    object storedValue = GetValue(Name);
 
-                return storedValue is null;
+                    if (Type.GetTypeCode(typeof(T)) == TypeCode.String)
+                    {
+                        if (storedValue?.Equals((object?)value ?? string.Empty) ?? false)
+                        {
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        if (storedValue?.Equals(value) ?? ((default(T) is null) && (value is null)))
+                        {
+                            return;
+                        }
+                    }
+
+                    if (Type.GetTypeCode(typeof(T)) == TypeCode.String)
+                    {
+                        SetValue(Name, (object?)value ?? string.Empty);
+                    }
+                    else
+                    {
+                        SetValue(Name, value);
+                    }
+
+                    Updated?.Invoke(this, EventArgs.Empty);
+                }
             }
-        }
 
-        /// <inheritdoc />
-        public string FullPath => SettingsSource.PathFor(Name);
-
-        private object? GetValue(string name)
-        {
-            string? stringValue = SettingsSource.GetValue(name);
-            if (stringValue is null)
+            /// <inheritdoc />
+            public bool IsUnset
             {
-                return null;
+                get
+                {
+                    if (default(T) is null)
+                    {
+                        if (Type.GetTypeCode(typeof(T)) != TypeCode.String)
+                        {
+                            return false;
+                        }
+                    }
+
+                    object storedValue = GetValue(Name);
+
+                    return storedValue is null;
+                }
             }
 
-            Type type = typeof(T);
-            Type underlyingType = Nullable.GetUnderlyingType(type) ?? type;
+            /// <inheritdoc />
+            public string FullPath => SettingsSource.PathFor(Name);
 
-            switch (Type.GetTypeCode(underlyingType))
+            private object? GetValue(string name)
             {
-                case TypeCode.String:
-                    return stringValue;
-                case TypeCode.Object:
-                    try
-                    {
-                        return JsonConvert
-                            .DeserializeObject<T>(stringValue);
-                    }
-                    catch
-                    {
-                        return null;
-                    }
+                string? stringValue = SettingsSource.GetValue(name);
+                if (stringValue is null)
+                {
+                    return null;
+                }
 
-                default:
-                    TypeConverter converter = TypeDescriptor
-                        .GetConverter(underlyingType);
+                Type type = typeof(T);
+                Type underlyingType = Nullable.GetUnderlyingType(type) ?? type;
 
-                    try
-                    {
-                        return converter
-                            .ConvertFromInvariantString(stringValue);
-                    }
-                    catch
-                    {
-                        return null;
-                    }
+                switch (Type.GetTypeCode(underlyingType))
+                {
+                    case TypeCode.String:
+                        return stringValue;
+                    case TypeCode.Object:
+                        try
+                        {
+                            return JsonConvert
+                                .DeserializeObject<T>(stringValue);
+                        }
+                        catch
+                        {
+                            return null;
+                        }
+
+                    default:
+                        TypeConverter converter = TypeDescriptor
+                            .GetConverter(underlyingType);
+
+                        try
+                        {
+                            return converter
+                                .ConvertFromInvariantString(stringValue);
+                        }
+                        catch
+                        {
+                            return null;
+                        }
+                }
             }
-        }
 
-        private void SetValue(string name, object? value)
-        {
-            string? stringValue;
-
-            Type type = typeof(T);
-            Type underlyingType = Nullable
-                .GetUnderlyingType(type) ?? type;
-
-            switch (Type.GetTypeCode(underlyingType))
+            private void SetValue(string name, object? value)
             {
-                case TypeCode.String:
-                    stringValue = (string?)value;
-                    break;
-                case TypeCode.Object:
-                    stringValue = JsonConvert
-                        .SerializeObject(value);
-                    break;
-                default:
-                    TypeConverter converter = TypeDescriptor
-                        .GetConverter(underlyingType);
+                string? stringValue;
 
-                    stringValue = converter
-                        .ConvertToInvariantString(value);
-                    break;
+                Type type = typeof(T);
+                Type underlyingType = Nullable
+                    .GetUnderlyingType(type) ?? type;
+
+                switch (Type.GetTypeCode(underlyingType))
+                {
+                    case TypeCode.String:
+                        stringValue = (string?)value;
+                        break;
+                    case TypeCode.Object:
+                        stringValue = JsonConvert
+                            .SerializeObject(value);
+                        break;
+                    default:
+                        TypeConverter converter = TypeDescriptor
+                            .GetConverter(underlyingType);
+
+                        stringValue = converter
+                            .ConvertToInvariantString(value);
+                        break;
+                }
+
+                SettingsSource.SetValue(name, stringValue);
             }
-
-            SettingsSource.SetValue(name, stringValue);
         }
     }
 }

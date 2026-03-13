@@ -25,7 +25,7 @@
     </PackageReference>
 
     <!-- This is needed for eng\Publish.targets to resolve .NET references -->
-    <PackageReference Include="NETStandard.Library" GeneratePathProperty="true" VersionOverride="2.0.3">
+    <PackageReference Include="NETStandard.Library" GeneratePathProperty="true" VersionOverride="2.0.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="vswhere" GeneratePathProperty="true">
@@ -42,6 +42,11 @@
     <ProjectReference Include="..\GitUI\GitUI.csproj" />
     <ProjectReference Include="..\..\plugins\GitUIPluginInterfaces\GitUIPluginInterfaces.csproj" />
     <ProjectReference Include="..\ResourceManager\ResourceManager.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="AutoCompleteRegexes.txt" />
+    <EmbeddedResource Include="AutoCompleteRegexes.txt" />
   </ItemGroup>
 
 </Project>

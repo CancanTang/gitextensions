@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Text;
 using System.Text.RegularExpressions;
 using GitCommands;
@@ -16,7 +17,7 @@ public partial class DifftasticHighlightService : TextHighlightService
     private DiffLinesInfo _diffLinesInfo = new();
 
     [GeneratedRegex(@"^(\s*(?<matchStart>(?<lineNo>\d+)|(\.+)) )", RegexOptions.ExplicitCapture)]
-    private static partial Regex LineNoRegex { get; }
+    private static partial Regex LineNoRegex();
 
     public DifftasticHighlightService(ref string text, DiffViewerLineNumberControl lineNumbersControl, out int rightColumnStart)
     {
@@ -60,7 +61,7 @@ public partial class DifftasticHighlightService : TextHighlightService
 
             DiffLineType lineType = DiffLineType.Context;
 
-            Match matchLeft = LineNoRegex.Match(lineBuilder.ToString());
+            Match matchLeft = LineNoRegex().Match(lineBuilder.ToString());
             if (!matchLeft.Success)
             {
                 // This could also be a side-by-diff with zero context where ... are not printed
@@ -124,7 +125,7 @@ public partial class DifftasticHighlightService : TextHighlightService
             int rightStartOffset = halfColumn - leftLen;
             Match matchRight;
             if (lineBuilder.Length > rightStartOffset
-                && LineNoRegex.Match(lineBuilder.ToString()[rightStartOffset..]) is Match match
+                && LineNoRegex().Match(lineBuilder.ToString()[rightStartOffset..]) is Match match
                 && match.Success)
             {
                 matchRight = match;
@@ -138,7 +139,7 @@ public partial class DifftasticHighlightService : TextHighlightService
             {
                 // Lineno assumed in start of line
                 rightStartOffset = 0;
-                matchRight = LineNoRegex.Match(lineBuilder.ToString());
+                matchRight = LineNoRegex().Match(lineBuilder.ToString());
             }
 
             if (!matchRight.Success)

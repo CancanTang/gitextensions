@@ -10,7 +10,7 @@ namespace GitUI.Editor.Diff;
 public partial class DiffLineNumAnalyzer
 {
     [GeneratedRegex(@"\-(?<leftStart>\d{1,})\,{0,}(?<leftCount>\d{0,})\s\+(?<rightStart>\d{1,})\,{0,}(?<rightCount>\d{0,})", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture)]
-    private static partial Regex DiffRegex { get; }
+    private static partial Regex DiffRegex();
 
     public static DiffLinesInfo Analyze(string text, IReadOnlyList<TextMarker> allTextMarkers, bool isCombinedDiff, bool isGitWordDiff = false)
     {
@@ -40,7 +40,7 @@ public partial class DiffLineNumAnalyzer
             }
 
             Lazy<List<TextMarker>> textMarkers = new(()
-                => [.. allTextMarkers.Where(m => (m.Offset < textOffset + lineLength && m.EndOffset >= textOffset))]);
+                => allTextMarkers.Where(m => (m.Offset < textOffset + lineLength && m.EndOffset >= textOffset)).ToList());
 
             lineNumInDiff++;
             if (line.StartsWith("@@"))
@@ -53,7 +53,7 @@ public partial class DiffLineNumAnalyzer
                     LineType = DiffLineType.Header
                 };
 
-                Match lineNumbers = DiffRegex.Match(line);
+                Match lineNumbers = DiffRegex().Match(line);
                 leftLineNum = int.Parse(lineNumbers.Groups["leftStart"].Value);
                 rightLineNum = int.Parse(lineNumbers.Groups["rightStart"].Value);
 
@@ -171,7 +171,7 @@ public partial class DiffLineNumAnalyzer
         return ret;
 
         // git-diff colors moved lines in other than red green
-        // However, Git may mark trailing whitespaces (diff.colormovedws is ignored)
+        // However, Git may mark trailing whitespaces (diff.colorMovedWS is ignored)
         bool IsMovedLine(List<TextMarker> textMarkers, DiffLineInfo meta)
             => textMarkers.Count > 0
                 && !MarkerColorMatch(textMarkers[0], meta.LineType)

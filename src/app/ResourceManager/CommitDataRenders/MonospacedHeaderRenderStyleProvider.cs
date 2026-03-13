@@ -1,42 +1,43 @@
-﻿using GitCommands;
+using GitCommands;
 using GitExtensions.Extensibility.Extensions;
 
-namespace ResourceManager.CommitDataRenders;
-
-/// <summary>
-/// Renders commit information in a tabular format with data columns aligned with spaces.
-/// </summary>
-public sealed class MonospacedHeaderRenderStyleProvider : IHeaderRenderStyleProvider
+namespace ResourceManager.CommitDataRenders
 {
-    private readonly int _maxLength;
-
-    public MonospacedHeaderRenderStyleProvider()
+    /// <summary>
+    /// Renders commit information in a tabular format with data columns aligned with spaces.
+    /// </summary>
+    public sealed class MonospacedHeaderRenderStyleProvider : IHeaderRenderStyleProvider
     {
-        string[] strings =
-        [
-            TranslatedStrings.Author,
-            TranslatedStrings.AuthorDate,
-            TranslatedStrings.Committer,
-            TranslatedStrings.CommitDate,
-            TranslatedStrings.CommitHash,
-            TranslatedStrings.GetChildren(10), // assume text for plural case is longer
-            TranslatedStrings.GetParents(10)
-        ];
+        private readonly int _maxLength;
 
-        _maxLength = strings.Select(s => s.Length).Max() + 2;
-    }
-
-    public Font GetFont(Graphics g)
-    {
-        if (!AppSettings.Font.IsFixedWidth(g))
+        public MonospacedHeaderRenderStyleProvider()
         {
-            return new Font(FontFamily.GenericMonospace, AppSettings.Font.Size);
+            string[] strings = new[]
+            {
+                TranslatedStrings.Author,
+                TranslatedStrings.AuthorDate,
+                TranslatedStrings.Committer,
+                TranslatedStrings.CommitDate,
+                TranslatedStrings.CommitHash,
+                TranslatedStrings.GetChildren(10), // assume text for plural case is longer
+                TranslatedStrings.GetParents(10)
+            };
+
+            _maxLength = strings.Select(s => s.Length).Max() + 2;
         }
 
-        return AppSettings.Font;
+        public Font GetFont(Graphics g)
+        {
+            if (!AppSettings.Font.IsFixedWidth(g))
+            {
+                return new Font(FontFamily.GenericMonospace, AppSettings.Font.Size);
+            }
+
+            return AppSettings.Font;
+        }
+
+        public int GetMaxWidth() => _maxLength;
+
+        public IEnumerable<int> GetTabStops() => Enumerable.Empty<int>();
     }
-
-    public int GetMaxWidth() => _maxLength;
-
-    public IEnumerable<int> GetTabStops() => [];
 }

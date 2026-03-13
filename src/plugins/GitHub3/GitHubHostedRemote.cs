@@ -2,57 +2,58 @@ using System.Diagnostics;
 using GitExtensions.Extensibility.Plugins;
 using GitUIPluginInterfaces.RepositoryHosts;
 
-namespace GitExtensions.Plugins.GitHub3;
-
-[DebuggerDisplay("{Data}")]
-internal class GitHubHostedRemote : IHostedRemote
+namespace GitExtensions.Plugins.GitHub3
 {
-    private GitHubRepo? _repo;
-
-    public GitHubHostedRemote(string name, string owner, string remoteRepositoryName, string url)
+    [DebuggerDisplay("{Data}")]
+    internal class GitHubHostedRemote : IHostedRemote
     {
-        Name = name;
-        Owner = owner;
-        RemoteRepositoryName = remoteRepositoryName;
-        RemoteUrl = url;
-        CloneProtocol = url.IsUrlUsingHttp() ? GitProtocol.Https : GitProtocol.Ssh;
-    }
+        private GitHubRepo? _repo;
 
-    public IHostedRepository GetHostedRepository()
-    {
-        return _repo ??= new GitHubRepo(GitHub3Plugin.GitHub.getRepository(Owner, RemoteRepositoryName))
+        public GitHubHostedRemote(string name, string owner, string remoteRepositoryName, string url)
         {
-            CloneProtocol = CloneProtocol
-        };
-    }
+            Name = name;
+            Owner = owner;
+            RemoteRepositoryName = remoteRepositoryName;
+            RemoteUrl = url;
+            CloneProtocol = url.IsUrlUsingHttp() ? GitProtocol.Https : GitProtocol.Ssh;
+        }
 
-    /// <summary>
-    /// Local name of the remote, 'origin'
-    /// </summary>
-    public string Name { get; }
+        public IHostedRepository GetHostedRepository()
+        {
+            return _repo ??= new GitHubRepo(GitHub3Plugin.GitHub.getRepository(Owner, RemoteRepositoryName))
+            {
+                CloneProtocol = CloneProtocol
+            };
+        }
 
-    /// <summary>
-    /// Owner of the remote repository, in
-    /// git@github.com:mabako/Git.hub.git this is 'mabako'
-    /// </summary>
-    public string Owner { get; }
+        /// <summary>
+        /// Local name of the remote, 'origin'
+        /// </summary>
+        public string Name { get; }
 
-    /// <summary>
-    /// Name of the remote repository, in
-    /// git@github.com:mabako/Git.hub.git this is 'Git.hub'
-    /// </summary>
-    public string RemoteRepositoryName { get; }
+        /// <summary>
+        /// Owner of the remote repository, in
+        /// git@github.com:mabako/Git.hub.git this is 'mabako'
+        /// </summary>
+        public string Owner { get; }
 
-    public string RemoteUrl { get; }
+        /// <summary>
+        /// Name of the remote repository, in
+        /// git@github.com:mabako/Git.hub.git this is 'Git.hub'
+        /// </summary>
+        public string RemoteRepositoryName { get; }
 
-    public GitProtocol CloneProtocol { get; }
+        public string RemoteUrl { get; }
 
-    public string Data => Owner + "/" + RemoteRepositoryName;
-    public string DisplayData => Data;
-    public bool IsOwnedByMe => GitHubLoginInfo.Username == Owner;
+        public GitProtocol CloneProtocol { get; }
 
-    public string GetBlameUrl(string commitHash, string fileName, int lineIndex)
-    {
-        return $"{GitHub3Plugin.Instance.GitHubEndpoint}/{Data}/blame/{commitHash}/{fileName}#L{lineIndex}";
+        public string Data => Owner + "/" + RemoteRepositoryName;
+        public string DisplayData => Data;
+        public bool IsOwnedByMe => GitHubLoginInfo.Username == Owner;
+
+        public string GetBlameUrl(string commitHash, string fileName, int lineIndex)
+        {
+            return $"{GitHub3Plugin.Instance.GitHubEndpoint}/{Data}/blame/{commitHash}/{fileName}#L{lineIndex}";
+        }
     }
 }

@@ -1,12 +1,13 @@
-﻿namespace System;
-
-internal static partial class NativeMethods
+﻿namespace System
 {
-    public enum SB : int
+    internal static partial class NativeMethods
     {
-        HORZ = 0,
-        VERT = 1,
-        CTL = 2,
-        BOTH = 3,
+        public enum SB : int
+        {
+            HORZ = 0,
+            VERT = 1,
+            CTL = 2,
+            BOTH = 3,
+        }
     }
 }

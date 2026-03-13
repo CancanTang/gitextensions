@@ -4,84 +4,85 @@ using GitCommands.Git.Tag;
 using GitExtensions.Extensibility.Git;
 using NSubstitute;
 
-namespace GitCommandsTests.Git.Tag;
-
-[TestFixture]
-public class GitTagControllerTest
+namespace GitCommandsTests.Git.Tag
 {
-    private readonly string _workingDir = TestContext.CurrentContext.TestDirectory;
-    private string _tagMessageFile;
-    private IGitTagController _controller;
-    private IFileSystem _fileSystem;
-    private IGitUICommands _uiCommands;
-
-    [SetUp]
-    public void Setup()
+    [TestFixture]
+    public class GitTagControllerTest
     {
-        _tagMessageFile = Path.Combine(_workingDir, "TAGMESSAGE");
+        private readonly string _workingDir = TestContext.CurrentContext.TestDirectory;
+        private string _tagMessageFile;
+        private IGitTagController _controller;
+        private IFileSystem _fileSystem;
+        private IGitUICommands _uiCommands;
 
-        _fileSystem = Substitute.For<IFileSystem>();
-        _fileSystem.File.Returns(Substitute.For<FileBase>());
+        [SetUp]
+        public void Setup()
+        {
+            _tagMessageFile = Path.Combine(_workingDir, "TAGMESSAGE");
 
-        _uiCommands = Substitute.For<IGitUICommands>();
-        _uiCommands.Module.WorkingDir.Returns(_workingDir);
-        _uiCommands.Module.GetPathForGitExecution(_tagMessageFile).Returns(_tagMessageFile);
+            _fileSystem = Substitute.For<IFileSystem>();
+            _fileSystem.File.Returns(Substitute.For<FileBase>());
 
-        _controller = new GitTagController(_uiCommands, _fileSystem);
-    }
+            _uiCommands = Substitute.For<IGitUICommands>();
+            _uiCommands.Module.WorkingDir.Returns(_workingDir);
+            _uiCommands.Module.GetPathForGitExecution(_tagMessageFile).Returns(_tagMessageFile);
 
-    [Test]
-    public void CreateTagWithMessageThrowsIfTheWindowIsNull()
-    {
-        GitCreateTagArgs args = CreateAnnotatedTagArgs();
-        ClassicAssert.Throws<ArgumentNullException>(() => _controller.CreateTag(args, parentWindow: null));
-    }
+            _controller = new GitTagController(_uiCommands, _fileSystem);
+        }
 
-    [Test]
-    public void CreateTagWithMessageWritesTagMessageFile()
-    {
-        GitCreateTagArgs args = CreateAnnotatedTagArgs();
+        [Test]
+        public void CreateTagWithMessageThrowsIfTheWindowIsNull()
+        {
+            GitCreateTagArgs args = CreateAnnotatedTagArgs();
+            Assert.Throws<ArgumentNullException>(() => _controller.CreateTag(args, parentWindow: null));
+        }
 
-        _controller.CreateTag(args, CreateTestingWindow());
+        [Test]
+        public void CreateTagWithMessageWritesTagMessageFile()
+        {
+            GitCreateTagArgs args = CreateAnnotatedTagArgs();
 
-        _fileSystem.File.Received(1).WriteAllText(_tagMessageFile, "hello world");
-    }
+            _controller.CreateTag(args, CreateTestingWindow());
 
-    [Test]
-    [TestCase(true)]
-    [TestCase(false)]
-    public void CreateTagWithMessageDeletesTheTemporaryFileForUiResult(bool uiResult)
-    {
-        GitCreateTagArgs args = CreateAnnotatedTagArgs();
+            _fileSystem.File.Received(1).WriteAllText(_tagMessageFile, "hello world");
+        }
 
-        _fileSystem.File.Exists(Arg.Is<string>(s => s != null)).Returns(true);
+        [Test]
+        [TestCase(true)]
+        [TestCase(false)]
+        public void CreateTagWithMessageDeletesTheTemporaryFileForUiResult(bool uiResult)
+        {
+            GitCreateTagArgs args = CreateAnnotatedTagArgs();
 
-        _uiCommands.StartCommandLineProcessDialog(Arg.Any<IWin32Window>(), Arg.Is<IGitCommand>(cmd => cmd.Arguments.StartsWith("tag")))
-            .Returns(uiResult);
+            _fileSystem.File.Exists(Arg.Is<string>(s => s != null)).Returns(true);
 
-        ClassicAssert.AreEqual(uiResult, _controller.CreateTag(args, CreateTestingWindow()));
+            _uiCommands.StartCommandLineProcessDialog(Arg.Any<IWin32Window>(), Arg.Is<IGitCommand>(cmd => cmd.Arguments.StartsWith("tag")))
+                .Returns(uiResult);
 
-        _fileSystem.File.Received(1).Delete(_tagMessageFile);
-    }
+            Assert.AreEqual(uiResult, _controller.CreateTag(args, CreateTestingWindow()));
 
-    [Test]
-    public void PassesCreatedArgsAndWindowToCommands()
-    {
-        GitCreateTagArgs args = CreateAnnotatedTagArgs();
-        IWin32Window window = CreateTestingWindow();
+            _fileSystem.File.Received(1).Delete(_tagMessageFile);
+        }
 
-        _controller.CreateTag(args, window);
+        [Test]
+        public void PassesCreatedArgsAndWindowToCommands()
+        {
+            GitCreateTagArgs args = CreateAnnotatedTagArgs();
+            IWin32Window window = CreateTestingWindow();
 
-        _uiCommands.Received(1).StartCommandLineProcessDialog(window, Arg.Is<IGitCommand>(cmd => cmd.Arguments.StartsWith("tag")));
-    }
+            _controller.CreateTag(args, window);
 
-    private static IWin32Window CreateTestingWindow()
-    {
-        return Substitute.For<IWin32Window>();
-    }
+            _uiCommands.Received(1).StartCommandLineProcessDialog(window, Arg.Is<IGitCommand>(cmd => cmd.Arguments.StartsWith("tag")));
+        }
 
-    private static GitCreateTagArgs CreateAnnotatedTagArgs()
-    {
-        return new GitCreateTagArgs("tagname", ObjectId.Parse("0000000000000000000000000000000000000000"), TagOperation.Annotate, "hello world");
+        private static IWin32Window CreateTestingWindow()
+        {
+            return Substitute.For<IWin32Window>();
+        }
+
+        private static GitCreateTagArgs CreateAnnotatedTagArgs()
+        {
+            return new GitCreateTagArgs("tagname", ObjectId.Parse("0000000000000000000000000000000000000000"), TagOperation.Annotate, "hello world");
+        }
     }
 }

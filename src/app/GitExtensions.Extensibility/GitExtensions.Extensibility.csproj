@@ -9,7 +9,6 @@
 
   <ItemGroup>
     <PackageReference Include="AdysTech.CredentialManager" />
-    <PackageReference Include="StrongOf" />
   </ItemGroup>
 
   <ItemGroup>

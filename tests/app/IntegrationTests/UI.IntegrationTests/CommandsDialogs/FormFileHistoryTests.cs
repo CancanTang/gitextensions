@@ -17,14 +17,14 @@ public class FormFileHistoryTests
     [SetUp]
     public void SetUp()
     {
-        _referenceRepository = new ReferenceRepository();
+        ReferenceRepository.ResetRepo(ref _referenceRepository);
         _commands = new GitUICommands(GlobalServiceContainer.CreateDefaultMockServiceContainer(), _referenceRepository.Module);
 
         AppSettings.UseBrowseForFileHistory.Value = false;
     }
 
-    [TearDown]
-    public void TearDown()
+    [OneTimeTearDown]
+    public void OneTimeTearDown()
     {
         _referenceRepository.Dispose();
     }

@@ -1,23 +1,24 @@
 ﻿using GitCommands.Git;
 using GitExtensions.Extensibility.Git;
 
-namespace GitUI.CommandsDialogs.BrowseDialog;
-
-public class GitFileTreeComparer : IComparer<IGitItem>
+namespace GitUI.CommandsDialogs.BrowseDialog
 {
-    public int Compare(IGitItem x, IGitItem y)
+    public class GitFileTreeComparer : IComparer<IGitItem>
     {
-        return (x as GitItem, y as GitItem) switch
+        public int Compare(IGitItem x, IGitItem y)
         {
-            (null, null) => 0,
-            (null, _) => 1,
-            (_, null) => -1,
-            var (xGitItem, yGitItem) => (xGitItem.ObjectType, yGitItem.ObjectType) switch
+            return (x as GitItem, y as GitItem) switch
             {
-                (GitObjectType.Tree or GitObjectType.Commit, GitObjectType.Blob) => -1,
-                (GitObjectType.Blob, GitObjectType.Tree or GitObjectType.Commit) => 1,
-                _ => xGitItem.Name.CompareTo(yGitItem.Name)
-            }
-        };
+                (null, null) => 0,
+                (null, _) => 1,
+                (_, null) => -1,
+                var (xGitItem, yGitItem) => (xGitItem.ObjectType, yGitItem.ObjectType) switch
+                {
+                    (GitObjectType.Tree or GitObjectType.Commit, GitObjectType.Blob) => -1,
+                    (GitObjectType.Blob, GitObjectType.Tree or GitObjectType.Commit) => 1,
+                    _ => xGitItem.Name.CompareTo(yGitItem.Name)
+                }
+            };
+        }
     }
 }

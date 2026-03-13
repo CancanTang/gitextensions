@@ -4,8 +4,9 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace BugReporter.Info;
-
-public class AssemblyInfo
+namespace BugReporter.Info
 {
+    public class AssemblyInfo
+    {
+    }
 }

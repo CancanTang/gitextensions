@@ -1,10 +1,11 @@
-﻿namespace GitCommands;
-
-public enum TruncatePathMethod
+﻿namespace GitCommands
 {
-    // DO NOT RENAME THESE -- doing so will break user preferences
-    None,
-    Compact,
-    TrimStart,
-    FileNameOnly
+    public enum TruncatePathMethod
+    {
+        // DO NOT RENAME THESE -- doing so will break user preferences
+        None,
+        Compact,
+        TrimStart,
+        FileNameOnly
+    }
 }

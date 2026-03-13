@@ -63,11 +63,6 @@
         <target>拉取所有子模块</target>
         
       </trans-unit>
-      <trans-unit id="_fetchImmediatelyOnRepoOpening.Caption">
-        <source>Fetch immediately on repository opening</source>
-        <target>打开存储库时立即获取</target>
-        
-      </trans-unit>
       <trans-unit id="_fetchInterval.Caption">
         <source>Fetch every (seconds) - set to 0 to disable</source>
         <target>每（几）秒自动拉取一次 - 设为 0 以禁用</target>
@@ -215,7 +210,7 @@
       </trans-unit>
       <trans-unit id="lblRepositoryView.Text">
         <source>Repository</source>
-        <target>版本库</target>
+        <target>档案库</target>
         
       </trans-unit>
       <trans-unit id="lblReviewerView.Text">
@@ -230,12 +225,12 @@
       </trans-unit>
       <trans-unit id="lblSourceRepoView.Text">
         <source>Repository</source>
-        <target>版本库</target>
+        <target>档案库</target>
         
       </trans-unit>
       <trans-unit id="lblSourceRepository.Text">
         <source>Repository</source>
-        <target>版本库</target>
+        <target>档案库</target>
         
       </trans-unit>
       <trans-unit id="lblState.Text">
@@ -270,7 +265,7 @@
       </trans-unit>
       <trans-unit id="tabCreate.Text">
         <source>Create Pull Request</source>
-        <target>创建拉取请求</target>
+        <target>创建推送请求</target>
         
       </trans-unit>
       <trans-unit id="tabView.Text">
@@ -755,7 +750,7 @@ Are you sure you want to continue?</source>
     <body>
       <trans-unit id="$this.Text">
         <source>GitFlow</source>
-        <target>GitFlow</target>
+        <target>Git工作流</target>
         
       </trans-unit>
       <trans-unit id="_gitFlowTooltip.Text">
@@ -906,39 +901,14 @@ Are you sure you want to continue?</source>
         <target>个人访问令牌</target>
         
       </trans-unit>
-      <trans-unit id="_error.Text">
-        <source>Error</source>
-        <target>错误</target>
-        
-      </trans-unit>
       <trans-unit id="_generateToken.Text">
         <source>Generate a GitHub personal access token</source>
         <target>生成GitHub个人访问令牌</target>
         
       </trans-unit>
-      <trans-unit id="_issueCommitMessageHelperEnabled.Caption">
-        <source>Enable commit message issue helper</source>
-        <target>启用提交信息问题助手</target>
-        
-      </trans-unit>
-      <trans-unit id="_issueCommitMessageHelperMaxCount.Caption">
-        <source>Maximum number of issues retrieved</source>
-        <target>检索到的最大问题数量</target>
-        
-      </trans-unit>
       <trans-unit id="_manageToken.Text">
         <source>Manage GitHub personal access token</source>
         <target>管理GitHub个人访问令牌</target>
-        
-      </trans-unit>
-      <trans-unit id="_noAssignedIssues.Text">
-        <source>No assigned GitHub issues found</source>
-        <target>未找到分配的 GitHub 问题</target>
-        
-      </trans-unit>
-      <trans-unit id="_noTokenError.Text">
-        <source>No GitHub personal access token (PAT) defined</source>
-        <target>未定义GitHub个人访问令牌（PAT）</target>
         
       </trans-unit>
       <trans-unit id="_noteRestartNeeded.Text">
@@ -1144,7 +1114,7 @@ Do you want to reset the configured path?</source>
       </trans-unit>
       <trans-unit id="label2.Text">
         <source>Repository</source>
-        <target>版本库</target>
+        <target>档案库</target>
         
       </trans-unit>
       <trans-unit id="linkLabel1.Text">
@@ -1212,7 +1182,6 @@ Do you want to reset the configured path?</source>
       </trans-unit>
       <trans-unit id="JiraPluginConfigurationErrorText.Text">
         <source>Jira plugin configuration incomplete!</source>
-        <target>Jira插件设置未完成！</target>
         
       </trans-unit>
       <trans-unit id="PreviewButtonText.Text">

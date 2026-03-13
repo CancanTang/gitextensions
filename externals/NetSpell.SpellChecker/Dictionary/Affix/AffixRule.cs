@@ -1,26 +1,27 @@
 using System.Collections.Generic;
 
-namespace NetSpell.SpellChecker.Dictionary.Affix;
-
-using AffixEntryCollection = List<AffixEntry>;
-
-/// <summary>
-///     Rule for expanding base words
-/// </summary>
-public class AffixRule
+namespace NetSpell.SpellChecker.Dictionary.Affix
 {
-    /// <summary>
-    ///     Allow combining prefix and suffix
-    /// </summary>
-    public bool AllowCombine { get; set; }
+    using AffixEntryCollection = List<AffixEntry>;
 
     /// <summary>
-    ///     Collection of text entries that make up this rule
+    ///     Rule for expanding base words
     /// </summary>
-    public AffixEntryCollection AffixEntries { get; set; } = [];
+    public class AffixRule
+    {
+        /// <summary>
+        ///     Allow combining prefix and suffix
+        /// </summary>
+        public bool AllowCombine { get; set; }
 
-    /// <summary>
-    ///     Name of the Affix rule
-    /// </summary>
-    public string Name { get; set; } = "";
+        /// <summary>
+        ///     Collection of text entries that make up this rule
+        /// </summary>
+        public AffixEntryCollection AffixEntries { get; set; } = [];
+
+        /// <summary>
+        ///     Name of the Affix rule
+        /// </summary>
+        public string Name { get; set; } = "";
+    }
 }

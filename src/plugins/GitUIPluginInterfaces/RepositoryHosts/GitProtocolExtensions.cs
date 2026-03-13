@@ -1,10 +1,11 @@
-﻿namespace GitUIPluginInterfaces.RepositoryHosts;
-
-public static class GitProtocolExtensions
+﻿namespace GitUIPluginInterfaces.RepositoryHosts
 {
-    public static bool IsUrlUsingHttp(this string url)
+    public static class GitProtocolExtensions
     {
-        return url.StartsWith($"https://", StringComparison.CurrentCultureIgnoreCase) ||
-            url.StartsWith($"http://", StringComparison.CurrentCultureIgnoreCase);
+        public static bool IsUrlUsingHttp(this string url)
+        {
+            return url.StartsWith($"https://", StringComparison.CurrentCultureIgnoreCase) ||
+                url.StartsWith($"http://", StringComparison.CurrentCultureIgnoreCase);
+        }
     }
 }

@@ -1,45 +1,46 @@
 ﻿using GitUI.Infrastructure;
 
-namespace GitUI;
-
-/// <summary>
-/// Shows a dialog to let the user browse for a SSH key.
-/// </summary>
-public static class BrowseForPrivateKey
+namespace GitUI
 {
     /// <summary>
-    /// Prompts the user to browse for a key, and attempts to load it. Returns the path to the key, if successful.
+    /// Shows a dialog to let the user browse for a SSH key.
     /// </summary>
-    public static string? BrowseAndLoad(IWin32Window parent)
+    public static class BrowseForPrivateKey
     {
-        string? sshKeyFile = Browse(parent);
-        if (!string.IsNullOrEmpty(sshKeyFile))
+        /// <summary>
+        /// Prompts the user to browse for a key, and attempts to load it. Returns the path to the key, if successful.
+        /// </summary>
+        public static string? BrowseAndLoad(IWin32Window parent)
         {
-            if (PuttyHelpers.StartPageantIfConfigured(() => sshKeyFile))
+            string? sshKeyFile = Browse(parent);
+            if (!string.IsNullOrEmpty(sshKeyFile))
             {
-                return sshKeyFile;
+                if (PuttyHelpers.StartPageantIfConfigured(() => sshKeyFile))
+                {
+                    return sshKeyFile;
+                }
             }
+
+            return null;
         }
 
-        return null;
-    }
+        /// <summary>
+        /// Prompts the user to browse for a key. Returns the path chosen, or null.
+        /// </summary>
+        public static string? Browse(IWin32Window parent)
+        {
+            using OpenFileDialog dialog = new()
+            {
+                Filter = " (*.ppk)|*.ppk",
+                InitialDirectory = ".",
+                Title = "Browse for key"
+            };
+            if (dialog.ShowDialog(parent) == DialogResult.OK)
+            {
+                return dialog.FileName;
+            }
 
-    /// <summary>
-    /// Prompts the user to browse for a key. Returns the path chosen, or null.
-    /// </summary>
-    public static string? Browse(IWin32Window parent)
-    {
-        using OpenFileDialog dialog = new()
-        {
-            Filter = " (*.ppk)|*.ppk",
-            InitialDirectory = ".",
-            Title = "Browse for key"
-        };
-        if (dialog.ShowDialog(parent) == DialogResult.OK)
-        {
-            return dialog.FileName;
+            return null;
         }
-
-        return null;
     }
 }

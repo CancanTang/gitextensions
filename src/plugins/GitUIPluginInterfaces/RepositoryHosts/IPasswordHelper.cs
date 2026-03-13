@@ -1,6 +1,7 @@
-﻿namespace GitUIPluginInterfaces.RepositoryHosts;
-
-public interface IPasswordHelper
+﻿namespace GitUIPluginInterfaces.RepositoryHosts
 {
-    string TryGetHelperPassword(string inputUrl);
+    public interface IPasswordHelper
+    {
+        string TryGetHelperPassword(string inputUrl);
+    }
 }

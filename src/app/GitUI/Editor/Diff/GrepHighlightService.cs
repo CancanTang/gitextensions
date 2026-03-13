@@ -11,16 +11,11 @@ namespace GitUI.Editor.Diff;
 
 public partial class GrepHighlightService : TextHighlightService
 {
-    private const string _grepResultKind_FunctionHeader = "=";
-    private const string _grepResultKind_Match = ":";
-    private const string _grepResultKind_Separator = "--";
-    private const string _grepResultKind_Unknown = "";
-
     private readonly List<TextMarker> _textMarkers = [];
     private DiffLinesInfo _diffLinesInfo = new();
 
     [GeneratedRegex(@"^(?<line>\d+)(?<kind>:|.)(?<text>.*)$", RegexOptions.ExplicitCapture)]
-    private static partial Regex GrepLineRegex { get; }
+    private static partial Regex GrepLineRegex();
 
     public GrepHighlightService(ref string text, DiffViewerLineNumberControl lineNumbersControl)
     {
@@ -68,13 +63,12 @@ public partial class GrepHighlightService : TextHighlightService
         }
 
         // No coloring, values are parsed
-        commandConfiguration.Add(new GitConfigItem("color.grep.linenumber", ""), "grep");
+        commandConfiguration.Add(new GitConfigItem("color.grep.lineNumber", ""), "grep");
         commandConfiguration.Add(new GitConfigItem("color.grep.separator", ""), "grep");
 
-        SetIfUnsetInGit(key: "color.grep.function", value: "white dim reverse");
         if (AppSettings.ReverseGitColoring.Value)
         {
-            SetIfUnsetInGit(key: "color.grep.matchselected", value: "red bold reverse");
+            SetIfUnsetInGit(key: "color.grep.matchSelected", value: "red bold reverse");
         }
 
         return commandConfiguration;
@@ -92,53 +86,38 @@ public partial class GrepHighlightService : TextHighlightService
     private void SetText(ref string text)
     {
         StringBuilder sb = new(text.Length);
-        bool skipNextSeparator = false;
-        bool pendingSeparator = false;
-        bool firstError = true;
         foreach (string line in text.LazySplit('\n'))
         {
-            if (line == _grepResultKind_Separator)
+            if (line == "--")
             {
-                if (!skipNextSeparator && sb.Length > 0)
+                if (sb.Length > 0)
                 {
-                    pendingSeparator = true;
+                    _diffLinesInfo.Add(GetDiffLineInfo(DiffLineInfo.NotApplicableLineNum, false));
+                    sb.Append('\n');
                 }
 
                 continue;
             }
 
             // Parse line no and if match (must not have colors)
-            Match match = GrepLineRegex.Match(line);
+            Match match = GrepLineRegex().Match(line);
             if (!match.Success || !int.TryParse(match.Groups["line"].ValueSpan, out int lineNo))
             {
                 if (line.Length > 0)
                 {
-                    if (firstError)
-                    {
-                        firstError = false;
-                        Trace.WriteLine($"Cannot parse lineNo for grep {line.ShortenTo(80)} ({sb.Length})");
-                    }
+                    Trace.WriteLine($"Cannot parse lineNo for grep {line} ({sb.Length})");
+                    DebugHelpers.Fail($"Cannot parse lineNo for grep {line} ({sb.Length})");
                 }
 
                 // git-grep emits an empty line last, should not be displayed.
-                // Other occurrences should not occur, just print them to debug (no lineno to not add extra line).
+                // Other occurrences should not occur, just print them to debug.
                 sb.Append(line);
-                pendingSeparator = false;
                 continue;
             }
 
+            bool isMatch = match.Groups["kind"].Success && match.Groups["kind"].Value == ":";
+            _diffLinesInfo.Add(GetDiffLineInfo(lineNo, isMatch));
             string grepText = match.Groups["text"].Value;
-            string kind = match.Groups["kind"].Success ? match.Groups["kind"].Value : _grepResultKind_Unknown;
-
-            skipNextSeparator = kind == _grepResultKind_FunctionHeader;
-            if (pendingSeparator && !skipNextSeparator)
-            {
-                _diffLinesInfo.Add(GetDiffLineInfo(DiffLineInfo.NotApplicableLineNum, _grepResultKind_Separator));
-                sb.Append('\n');
-            }
-
-            pendingSeparator = false;
-            _diffLinesInfo.Add(GetDiffLineInfo(lineNo, kind));
 
             AnsiEscapeUtilities.ParseEscape(grepText, sb, _textMarkers);
             sb.Append('\n');
@@ -159,15 +138,15 @@ public partial class GrepHighlightService : TextHighlightService
     /// for git-diff this is parsed dynamically.
     /// </summary>
     /// <returns>The type of contents for all editor lines.</returns>
-    private DiffLineInfo GetDiffLineInfo(int lineno, string kind)
+    private DiffLineInfo GetDiffLineInfo(int lineno, bool match)
         => new()
         {
             LineNumInDiff = _diffLinesInfo.DiffLines.Count + 1,
             LeftLineNumber = DiffLineInfo.NotApplicableLineNum,
             RightLineNumber = lineno,
-            LineType = lineno == DiffLineInfo.NotApplicableLineNum || kind == _grepResultKind_FunctionHeader
+            LineType = lineno == DiffLineInfo.NotApplicableLineNum
                     ? DiffLineType.Header
-                    : kind == _grepResultKind_Match
+                    : match
                         ? DiffLineType.Grep
                         : DiffLineType.Context
         };

@@ -3,206 +3,174 @@ using GitExtensions.Extensibility;
 using GitExtensions.Extensibility.Git;
 using GitExtUtils;
 
-namespace GitUI.CommandsDialogs.WorktreeDialog;
-
-public sealed partial class FormCreateWorktree : GitExtensionsDialog
+namespace GitUI.CommandsDialogs.WorktreeDialog
 {
-    private readonly AsyncLoader _branchesLoader = new();
-    private readonly char[] _invalidCharsInPath = Path.GetInvalidFileNameChars();
-
-    private readonly string? _initialDirectoryPath;
-
-    public string WorktreeDirectory => txtWorktreeDirectory.Text;
-    public bool OpenWorktree => chkOpenWorktree.Checked;
-
-    public IReadOnlyList<IGitRef>? ExistingBranches { get; set; }
-
-    public FormCreateWorktree(IGitUICommands commands, string? path)
-        : base(commands, enablePositionRestore: false)
+    public sealed partial class FormCreateWorktree : GitModuleForm
     {
-        InitializeComponent();
+        private readonly AsyncLoader _branchesLoader = new();
+        private readonly char[] _invalidCharsInPath = Path.GetInvalidFileNameChars();
 
-        tlpnlMain.AdjustWidthToSize(0, rbCheckoutExistingBranch, rbCreateNewBranch, lblNewWorktreeFolder);
-        tlpnlCheckout.AdjustWidthToSize(0, rbCheckoutExistingBranch, rbCreateNewBranch, lblNewWorktreeFolder);
+        private readonly string? _initialDirectoryPath;
 
-        MinimumSize = new Size(Width, PreferredMinimumHeight);
+        public string WorktreeDirectory => newWorktreeDirectory.Text;
+        public bool OpenWorktree => openWorktreeCheckBox.Checked;
 
-        InitializeComplete();
-        _initialDirectoryPath = path;
-    }
+        public IReadOnlyList<IGitRef>? ExistingBranches { get; set; }
 
-    private void FormCreateWorktree_Load(object sender, EventArgs e)
-    {
-        LoadBranchesAsync();
-
-        UpdateWorktreePathAndValidateWorktreeOptions();
-
-        Task LoadBranchesAsync()
+        public FormCreateWorktree(IGitUICommands commands, string? path)
+            : base(commands)
         {
-            string selectedBranch = UICommands.Module.GetSelectedBranch();
-            ExistingBranches = Module.GetRefs(RefsFilter.Heads);
-            cbxBranches.Text = TranslatedStrings.LoadingData;
-            ThreadHelper.FileAndForget(async () =>
+            InitializeComponent();
+            InitializeComplete();
+            _initialDirectoryPath = path;
+        }
+
+        private void FormCreateWorktree_Load(object sender, EventArgs e)
+        {
+            LoadBranchesAsync();
+
+            UpdateWorktreePathAndValidateWorktreeOptions();
+
+            void LoadBranchesAsync()
             {
-                await _branchesLoader.LoadAsync(
-                    () => ExistingBranches.Where(r => r.Name != selectedBranch).ToList(),
-                    list =>
+                string selectedBranch = UICommands.Module.GetSelectedBranch();
+                ExistingBranches = Module.GetRefs(RefsFilter.Heads);
+                comboBoxBranches.Text = TranslatedStrings.LoadingData;
+                ThreadHelper.FileAndForget(async () =>
+                {
+                    await _branchesLoader.LoadAsync(
+                        () => ExistingBranches.Where(r => r.Name != selectedBranch).ToList(),
+                        list =>
+                        {
+                            comboBoxBranches.Text = string.Empty;
+                            comboBoxBranches.DataSource = list;
+                            comboBoxBranches.DisplayMember = nameof(IGitRef.LocalName);
+                        });
+
+                    await this.SwitchToMainThreadAsync();
+                    if (comboBoxBranches.Items.Count == 0)
                     {
-                        cbxBranches.Text = string.Empty;
-                        cbxBranches.DataSource = list;
-                        cbxBranches.DisplayMember = nameof(IGitRef.LocalName);
-                    });
+                        radioButtonCreateNewBranch.Checked = true;
+                        radioButtonCheckoutExistingBranch.Enabled = false;
+                    }
+                    else
+                    {
+                        radioButtonCheckoutExistingBranch.Checked = true;
+                    }
 
-                await this.SwitchToMainThreadAsync();
-                if (cbxBranches.Items.Count == 0)
-                {
-                    rbCreateNewBranch.Checked = true;
-                    rbCheckoutExistingBranch.Enabled = false;
-                }
-                else
-                {
-                    rbCheckoutExistingBranch.Checked = true;
-                }
-
-                ValidateWorktreeOptions();
-            });
-
-            return Task.CompletedTask;
+                    ValidateWorktreeOptions();
+                });
+            }
         }
-    }
 
-    protected override void Dispose(bool disposing)
-    {
-        if (disposing)
+        protected override void Dispose(bool disposing)
         {
-            _branchesLoader.Dispose();
+            if (disposing)
+            {
+                _branchesLoader.Dispose();
 
-            components?.Dispose();
+                components?.Dispose();
+            }
+
+            base.Dispose(disposing);
         }
 
-        base.Dispose(disposing);
-    }
+        private void comboBoxBranches_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                CreateWorktree();
+            }
+        }
 
-    private void cbxBranches_KeyUp(object sender, KeyEventArgs e)
-    {
-        if (e.KeyCode == Keys.Enter)
+        private void createWorktreeButton_Click(object sender, EventArgs e)
         {
             CreateWorktree();
         }
-    }
 
-    private void btnCreateWorktree_Click(object sender, EventArgs e)
-    {
-        CreateWorktree();
-    }
-
-    private void CreateWorktree()
-    {
-        string relativePath = Path.GetRelativePath(Module.WorkingDir, WorktreeDirectory).ToPosixPath().Quote();
-        string newBranchOption =
-            rbCreateNewBranch.Checked
-            ? $"-b {txtNewBranchName.Text}"
-            : (cbxBranches.SelectedItem as GitRef)?.Name;
-        DialogResult = UICommands.StartGitCommandProcessDialog(this, CreateWorktreeCommand(Module, relativePath, newBranchOption)) ? DialogResult.OK : DialogResult.None;
-    }
-
-    private GitArgumentBuilder CreateWorktreeCommand(IGitModule module, string relativePath, string newBranchOption)
-    {
-        // https://git-scm.com/docs/git-worktree
-
-        // Get the default value, set if unset in config.
-        // Similar in DiffHighlightService.
-        const string command = "worktree";
-        GitCommandConfiguration commandConfiguration = new();
-        IReadOnlyList<GitConfigItem> items = GitCommandConfiguration.Default.Get(command);
-        foreach (GitConfigItem cfg in items)
+        private void CreateWorktree()
         {
-            commandConfiguration.Add(cfg, command);
+            // https://git-scm.com/docs/git-worktree
+
+            GitArgumentBuilder args = new("worktree")
+            {
+                "add",
+                Path.GetRelativePath(Module.WorkingDir, WorktreeDirectory).ToPosixPath().Quote(),
+                {
+                    radioButtonCreateNewBranch.Checked,
+                    $"-b {textBoxNewBranchName.Text}",
+                    comboBoxBranches.SelectedItem is not null ? ((GitRef)comboBoxBranches.SelectedItem).Name : null
+                }
+            };
+
+            DialogResult = UICommands.StartGitCommandProcessDialog(this, args) ? DialogResult.OK : DialogResult.None;
         }
 
-        SetIfUnsetInGit("worktree.useRelativePaths", "true");
-        GitArgumentBuilder args = new(command, commandConfiguration)
+        private void ValidateWorktreeOptions()
         {
-            "add",
-            relativePath,
-            newBranchOption,
-        };
-
-        return args;
-
-        void SetIfUnsetInGit(string key, string value)
-        {
-            if (string.IsNullOrEmpty(module.GetEffectiveSetting(key)))
+            comboBoxBranches.Enabled = radioButtonCheckoutExistingBranch.Checked;
+            textBoxNewBranchName.Enabled = radioButtonCreateNewBranch.Checked;
+            if (radioButtonCheckoutExistingBranch.Checked)
             {
-                commandConfiguration.Add(new GitConfigItem(key, value), command);
+                createWorktreeButton.Enabled = comboBoxBranches.SelectedItem is not null;
             }
-        }
-    }
-
-    private void ValidateWorktreeOptions()
-    {
-        cbxBranches.Enabled = rbCheckoutExistingBranch.Checked;
-        txtNewBranchName.Enabled = rbCreateNewBranch.Checked;
-        if (rbCheckoutExistingBranch.Checked)
-        {
-            btnCreateWorktree.Enabled = cbxBranches.SelectedItem is not null;
-        }
-        else
-        {
-            btnCreateWorktree.Enabled = !(string.IsNullOrWhiteSpace(txtNewBranchName.Text)
-                                             || ExistingBranches.Any(b => b.Name == txtNewBranchName.Text));
-        }
-
-        if (btnCreateWorktree.Enabled)
-        {
-            btnCreateWorktree.Enabled = IsTargetFolderValid();
-        }
-
-        return;
-
-        bool IsTargetFolderValid()
-        {
-            if (string.IsNullOrWhiteSpace(txtWorktreeDirectory.Text))
+            else
             {
-                return false;
+                createWorktreeButton.Enabled = !(string.IsNullOrWhiteSpace(textBoxNewBranchName.Text)
+                                                 || ExistingBranches.Any(b => b.Name == textBoxNewBranchName.Text));
             }
 
-            try
+            if (createWorktreeButton.Enabled)
             {
-                DirectoryInfo directoryInfo = new(txtWorktreeDirectory.Text);
-                return !directoryInfo.Exists || (!directoryInfo.EnumerateFiles().Any() && !directoryInfo.EnumerateDirectories().Any());
+                createWorktreeButton.Enabled = IsTargetFolderValid();
             }
-            catch
+
+            return;
+
+            bool IsTargetFolderValid()
             {
-                return false;
+                if (string.IsNullOrWhiteSpace(newWorktreeDirectory.Text))
+                {
+                    return false;
+                }
+
+                try
+                {
+                    DirectoryInfo directoryInfo = new(newWorktreeDirectory.Text);
+                    return !directoryInfo.Exists || (!directoryInfo.EnumerateFiles().Any() && !directoryInfo.EnumerateDirectories().Any());
+                }
+                catch
+                {
+                    return false;
+                }
             }
         }
-    }
 
-    private void txtWorktreeDirectory_TextChanged(object sender, EventArgs e)
-    {
-        ValidateWorktreeOptions();
-    }
-
-    private void UpdateWorktreePathAndValidateWorktreeOptions(object sender, EventArgs e)
-        => UpdateWorktreePathAndValidateWorktreeOptions();
-
-    private void UpdateWorktreePathAndValidateWorktreeOptions()
-    {
-        UpdateWorktreePath();
-
-        ValidateWorktreeOptions();
-
-        return;
-
-        void UpdateWorktreePath()
+        private void ValidateWorktreeOptions(object sender, EventArgs e)
         {
-            string branchNameNormalized = NormalizeBranchName(rbCheckoutExistingBranch.Checked
-                ? ((IGitRef)cbxBranches.SelectedItem)?.Name ?? string.Empty
-                : txtNewBranchName.Text);
-            txtWorktreeDirectory.Text = $"{_initialDirectoryPath}_{branchNameNormalized}";
+            ValidateWorktreeOptions();
         }
 
-        string NormalizeBranchName(string branchName) => string.Join("_", branchName.Split(_invalidCharsInPath, StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.');
+        private void UpdateWorktreePathAndValidateWorktreeOptions(object sender, EventArgs e)
+            => UpdateWorktreePathAndValidateWorktreeOptions();
+
+        private void UpdateWorktreePathAndValidateWorktreeOptions()
+        {
+            UpdateWorktreePath();
+
+            ValidateWorktreeOptions();
+
+            return;
+
+            void UpdateWorktreePath()
+            {
+                string branchNameNormalized = NormalizeBranchName(radioButtonCheckoutExistingBranch.Checked
+                    ? ((IGitRef)comboBoxBranches.SelectedItem)?.Name ?? string.Empty
+                    : textBoxNewBranchName.Text);
+                newWorktreeDirectory.Text = $"{_initialDirectoryPath}_{branchNameNormalized}";
+            }
+
+            string NormalizeBranchName(string branchName) => string.Join("_", branchName.Split(_invalidCharsInPath, StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.');
+        }
     }
 }

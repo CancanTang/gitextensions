@@ -1,20 +1,23 @@
 using GitCommands;
 
-namespace GitUI.CommandsDialogs.SettingsDialog;
+namespace GitUI.CommandsDialogs.SettingsDialog.Pages;
 
 public static class EditorHelper
 {
+    public static string FileEditorCommand
+        => $"\"{AppSettings.GetGitExtensionsFullPath()}\" fileeditor";
+
     public static string[] GetEditors()
     {
-        return
-        [
-            AppSettings.FileEditorCommand,
+        return new[]
+        {
+            FileEditorCommand,
             "vi",
             "notepad",
             GetNotepadPlusPlus(),
             GetSublimeText(),
             GetVsCode(),
-        ];
+        };
     }
 
     private static string GetNotepadPlusPlus()

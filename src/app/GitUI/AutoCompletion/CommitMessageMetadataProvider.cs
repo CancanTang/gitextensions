@@ -10,7 +10,7 @@ internal class CommitMessageMetadataProvider : IAutoCompleteProvider
         "Tested-by: ",
         ];
 
-    private static readonly AutoCompleteWord[] _autoCompleteWords = [.. keywords.Select(k => new AutoCompleteWord(k))];
+    private static readonly AutoCompleteWord[] _autoCompleteWords = keywords.Select(k => new AutoCompleteWord(k)).ToArray();
 
     public Task<IEnumerable<AutoCompleteWord>> GetAutoCompleteWordsAsync(CancellationToken cancellationToken)
     {

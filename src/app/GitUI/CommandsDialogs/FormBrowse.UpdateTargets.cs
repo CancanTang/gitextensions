@@ -1,13 +1,14 @@
-﻿namespace GitUI.CommandsDialogs;
-
-public sealed partial class FormBrowse
+﻿namespace GitUI.CommandsDialogs
 {
-    [Flags]
-    private enum UpdateTargets
+    public sealed partial class FormBrowse
     {
-        None = 1,
-        DiffList = 2,
-        FileTree = 4,
-        CommitInfo = 8
+        [Flags]
+        private enum UpdateTargets
+        {
+            None = 1,
+            DiffList = 2,
+            FileTree = 4,
+            CommitInfo = 8
+        }
     }
 }

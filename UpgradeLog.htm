@@ -1,0 +1,339 @@
+﻿<!DOCTYPE html>
+<!-- saved from url=(0014)about:internet -->
+ <html xmlns:msxsl="urn:schemas-microsoft-com:xslt"><head><meta content="en-us" http-equiv="Content-Language" /><meta content="text/html; charset=utf-16" http-equiv="Content-Type" /><title _locID="ConversionReport0">
+          Migration Report
+        </title><style> 
+                    /* Body style, for the entire document */
+                    body
+                    {
+                        background: #F3F3F4;
+                        color: #1E1E1F;
+                        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                        padding: 0;
+                        margin: 0;
+                    }
+
+                    /* Header1 style, used for the main title */
+                    h1
+                    {
+                        padding: 10px 0px 10px 10px;
+                        font-size: 21pt;
+                        background-color: #E2E2E2;
+                        border-bottom: 1px #C1C1C2 solid; 
+                        color: #201F20;
+                        margin: 0;
+                        font-weight: normal;
+                    }
+
+                    /* Header2 style, used for "Overview" and other sections */
+                    h2
+                    {
+                        font-size: 18pt;
+                        font-weight: normal;
+                        padding: 15px 0 5px 0;
+                        margin: 0;
+                    }
+
+                    /* Header3 style, used for sub-sections, such as project name */
+                    h3
+                    {
+                        font-weight: normal;
+                        font-size: 15pt;
+                        margin: 0;
+                        padding: 15px 0 5px 0;
+                        background-color: transparent;
+                    }
+
+                    /* Color all hyperlinks one color */
+                    a
+                    {
+                        color: #1382CE;
+                    }
+
+                    /* Table styles */ 
+                    table
+                    {
+                        border-spacing: 0 0;
+                        border-collapse: collapse;
+                        font-size: 10pt;
+                    }
+
+                    table th
+                    {
+                        background: #E7E7E8;
+                        text-align: left;
+                        text-decoration: none;
+                        font-weight: normal;
+                        padding: 3px 6px 3px 6px;
+                    }
+
+                    table td
+                    {
+                        vertical-align: top;
+                        padding: 3px 6px 5px 5px;
+                        margin: 0px;
+                        border: 1px solid #E7E7E8;
+                        background: #F7F7F8;
+                    }
+
+                    /* Local link is a style for hyperlinks that link to file:/// content, there are lots so color them as 'normal' text until the user mouse overs */
+                    .localLink
+                    {
+                        color: #1E1E1F;
+                        background: #EEEEED;
+                        text-decoration: none;
+                    }
+
+                    .localLink:hover
+                    {
+                        color: #1382CE;
+                        background: #FFFF99;
+                        text-decoration: none;
+                    }
+
+                    /* Center text, used in the over views cells that contain message level counts */ 
+                    .textCentered
+                    {
+                        text-align: center;
+                    }
+
+                    /* The message cells in message tables should take up all avaliable space */
+                    .messageCell
+                    {
+                        width: 100%;
+                    }
+
+                    /* Padding around the content after the h1 */ 
+                    #content 
+                    {
+	                    padding: 0px 12px 12px 12px; 
+                    }
+
+                    /* The overview table expands to width, with a max width of 97% */ 
+                    #overview table
+                    {
+                        width: auto;
+                        max-width: 75%; 
+                    }
+
+                    /* The messages tables are always 97% width */
+                    #messages table
+                    {
+                        width: 97%;
+                    }
+
+                    /* All Icons */
+                    .IconSuccessEncoded, .IconInfoEncoded, .IconWarningEncoded, .IconErrorEncoded
+                    {
+                        min-width:18px;
+                        min-height:18px; 
+                        background-repeat:no-repeat;
+                        background-position:center;
+                    }
+
+                    /* Success icon encoded */
+                    .IconSuccessEncoded
+                    {
+                        /* Note: Do not delete the comment below. It is used to verify the correctness of the encoded image resource below before the product is released */
+                        /* [---XsltValidateInternal-Base64EncodedImage:IconSuccess#Begin#background-image: url(data:image/png;base64,#Separator#);#End#] */
+                        background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABcElEQVR4Xq2TsUsCURzHv15g8ZJcBWlyiYYgCIWcb9DFRRwMW5TA2c0/QEFwFkxxUQdxVlBwCYWOi6IhWgQhBLHJUCkhLr/BW8S7gvrAg+N+v8/v+x68Z8MGy+XSCyABQAXgBgHGALoASkIIDWSLeLBetdHryMjd5IxQPWT4rn1c/P7+xxp72Cs9m5SZ0Bq2vPnbPFafK2zDvmNHypdC0BPkLlQhxJsCAhQoZwdZU5mwxh720qGo8MzTxTTKZDPCx2HoVzp6lz0Q9tKhyx0kGs8Ny+TkWRKk8lCROwEduhyg9l/6lunOPSfmH3NUH6uQ0KHLAe7JYvJjevm+DAMGJHToKtigE+vwvIidxLamb8IBY9e+C5LiXREkfho3TSd06HJA13/oh6T51MTsfQbHrsMynQ5dDihFjiK8JJAU9AKIWTp76dCVN7HWHrajmUEGvyF9nkbAE6gLIS7kTUyuf2gscLoJrElZo/Mvj+nPz/kLTmfnEwP3tB0AAAAASUVORK5CYII=);
+                    }
+
+                    /* Information icon encoded */
+                    .IconInfoEncoded
+                    {
+                        /* Note: Do not delete the comment below. It is used to verify the correctness of the encoded image resource below before the product is released */
+                        /* [---XsltValidateInternal-Base64EncodedImage:IconInformation#Begin#background-image: url(data:image/png;base64,#Separator#);#End#] */
+                        background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABHElEQVR4Xs2TsUoDQRRF7wwoziokjZUKadInhdhukR9YP8DMX1hYW+QvdsXa/QHBbcXC7W0CamWTQnclFutceIQJwwaWNLlwm5k5d94M76mmaeCrrmsLYOocY12FcxZFUeozCqKqqgYA8uevv1H6VuPxcwlfk5N92KHBxfFeCSAxxswlYAW/Xr989x/mv9gkhtyMDhcAxgzRsp7flj8B/HF1RsMXq+NZMkopaHe7lbKxQUEIGbKsYNoGn969060hZBkQex/W8oRQwsQaW2o3Ago2SVcJUzAgY3N0lTCZZm+zPS8HB51gMmS1DEYyOz9acKO1D8JWTlafKIMxdhvlfdyT94Vv5h7P8Ky7nQzACmhvKq3zk3PjW9asz9D/1oigecsioooAAAAASUVORK5CYII=);
+                    }
+
+                    /* Warning icon encoded */
+                    .IconWarningEncoded
+                    {
+                        /* Note: Do not delete the comment below. It is used to verify the correctness of the encoded image resource below before the product is released */
+                        /* [---XsltValidateInternal-Base64EncodedImage:IconWarning#Begin#background-image: url(data:image/png;base64,#Separator#);#End#] */
+                        background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAx0lEQVR4XpWSMQ7CMAxFf4xAyBMLCxMrO8dhaBcuwdCJS3RJBw7SA/QGTCxdWJgiQYWKXJWKIXHIlyw5lqr34tQgEOdcBsCOx5yZK3hCCKdYXneQkh4pEfqzLfu+wVDSyyzFoJjfz9NB+pAF+eizx2Vruts0k15mPgvS6GYvpVtQhB61IB/dk6AF6fS4Ben0uIX5odtFe8Q/eW1KvFeH4e8khT6+gm5B+t3juyDt7n0jpe+CANTd+oTUjN/U3yVaABnSUjFz/gFq44JaVSCXeQAAAABJRU5ErkJggg==);
+                    }
+
+                    /* Error icon encoded */
+                    .IconErrorEncoded
+                    {
+                        /* Note: Do not delete the comment below. It is used to verify the correctness of the encoded image resource below before the product is released */
+                        /* [---XsltValidateInternal-Base64EncodedImage:IconError#Begin#background-image: url(data:image/png;base64,#Separator#);#End#] */
+                        background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABQElEQVR4XqWTvUoEQRCE6wYPZUA80AfwAQz23uCMjA7MDRQEIzPBVEyNTQUFIw00vcQTTMzuAh/AxEQQT8HF/3G/oGGnEUGuoNnd6qoZuqltyKEsyzVJq5I6rnUp6SjGeGhESikzzlc1eL7opfuVbrqbU1Zw9NCgtQMaZpY0eNnaaL2fHusvTK5vKu7sjSS1Y4y3QUA6K3e3Mau5UFDyMP7tYF9o8cAHZv68vipoIJg971PZIZ5HiwdvYGGvFVFHmGmZ2MxwmQYPXubPl9Up0tfoMQGetXd6mRbvhBw+boZ6WF7Mbv1+GsHRk0fQmPAH1GfmZirbCfDJ61tw3Px8/8pZsPAG4jlVhcPgZ7adwNWBB68lkRQWFiTgFlbnLY3DGGM7izIJIyT/jjIvEJw6fdJTc6krDzh6aMwMP9bvDH4ADSsa9uSWVJkAAAAASUVORK5CYII=);
+                    }
+                 </style><script type="text/javascript" language="javascript"> 
+          
+            // Startup 
+            // Hook up the the loaded event for the document/window, to linkify the document content
+            var startupFunction = function() { linkifyElement("messages"); };
+            
+            if(window.attachEvent)
+            {
+              window.attachEvent('onload', startupFunction);
+            }
+            else if (window.addEventListener) 
+            {
+              window.addEventListener('load', startupFunction, false);
+            }
+            else 
+            {
+              document.addEventListener('load', startupFunction, false);
+            } 
+            
+            // Toggles the visibility of table rows with the specified name 
+            function toggleTableRowsByName(name)
+            {
+               var allRows = document.getElementsByTagName('tr');
+               for (i=0; i < allRows.length; i++)
+               {
+                  var currentName = allRows[i].getAttribute('name');
+                  if(!!currentName && currentName.indexOf(name) == 0)
+                  {
+                      var isVisible = allRows[i].style.display == ''; 
+                      isVisible ? allRows[i].style.display = 'none' : allRows[i].style.display = '';
+                  }
+               }
+            }
+            
+            function scrollToFirstVisibleRow(name) 
+            {
+               var allRows = document.getElementsByTagName('tr');
+               for (i=0; i < allRows.length; i++)
+               {
+                  var currentName = allRows[i].getAttribute('name');
+                  var isVisible = allRows[i].style.display == ''; 
+                  if(!!currentName && currentName.indexOf(name) == 0 && isVisible)
+                  {
+                     allRows[i].scrollIntoView(true); 
+                     return true; 
+                  }
+               }
+               
+               return false;
+            }
+            
+            // Linkifies the specified text content, replaces candidate links with html links 
+            function linkify(text)
+            {
+                 if(!text || 0 === text.length)
+                 {
+                     return text; 
+                 }
+
+                 // Find http, https and ftp links and replace them with hyper links 
+                 var urlLink = /(http|https|ftp)\:\/\/[a-zA-Z0-9\-\.]+(:[a-zA-Z0-9]*)?\/?([a-zA-Z0-9\-\._\?\,\/\\\+&%\$#\=~;\{\}])*/gi;
+                 
+                 return text.replace(urlLink, '<a href="$&">$&</a>') ;
+            }
+            
+            // Linkifies the specified element by ID
+            function linkifyElement(id)
+            {
+                var element = document.getElementById(id);
+                if(!!element)
+                {
+                  element.innerHTML = linkify(element.innerHTML); 
+                }
+            }
+            
+            function ToggleMessageVisibility(projectName)
+            {
+              if(!projectName || 0 === projectName.length)
+              {
+                return; 
+              }
+              
+              toggleTableRowsByName("MessageRowClass" + projectName);
+              toggleTableRowsByName('MessageRowHeaderShow' + projectName);
+              toggleTableRowsByName('MessageRowHeaderHide' + projectName); 
+            }
+            
+            function ScrollToFirstVisibleMessage(projectName)
+            {
+              if(!projectName || 0 === projectName.length)
+              {
+                return; 
+              }
+              
+              // First try the 'Show messages' row
+              if(!scrollToFirstVisibleRow('MessageRowHeaderShow' + projectName))
+              {
+                // Failed to find a visible row for 'Show messages', try an actual message row 
+                scrollToFirstVisibleRow('MessageRowClass' + projectName); 
+              }
+            }
+           </script></head><body><h1 _locID="ConversionReport">
+          Migration Report - </h1><div id="content"><h2 _locID="OverviewTitle">Overview</h2><div id="overview"><table><tr><th></th><th _locID="ProjectTableHeader">Project</th><th _locID="PathTableHeader">Path</th><th _locID="ErrorsTableHeader">Errors</th><th _locID="WarningsTableHeader">Warnings</th><th _locID="MessagesTableHeader">Messages</th></tr><tr><td class="IconErrorEncoded" /><td><strong><a href="#Setup">Setup</a></strong></td><td>Setup\Setup.wixproj</td><td class="textCentered"><a href="#SetupError">1</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#analyzers">analyzers</a></strong></td><td>analyzers</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#app">app</a></strong></td><td>app</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#AppVeyorIntegration.Tests">AppVeyorIntegration.Tests</a></strong></td><td>tests\plugins\UnitTests\BuildServerIntegration\AppVeyorIntegration.Tests\AppVeyorIntegration.Tests.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#assets">assets</a></strong></td><td>assets</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#AzureDevOpsIntegration.Tests">AzureDevOpsIntegration.Tests</a></strong></td><td>tests\plugins\UnitTests\BuildServerIntegration\AzureDevOpsIntegration.Tests\AzureDevOpsIntegration.Tests.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#BugReporter">BugReporter</a></strong></td><td>src\app\BugReporter\BugReporter.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#BugReporter.IntegrationTests">BugReporter.IntegrationTests</a></strong></td><td>tests\app\IntegrationTests\BugReporter.IntegrationTests\BugReporter.IntegrationTests.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#BugReporter.Tests">BugReporter.Tests</a></strong></td><td>tests\app\UnitTests\BugReporter.Tests\BugReporter.Tests.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#BuildServerIntegration">BuildServerIntegration</a></strong></td><td>BuildServerIntegration</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#CommonTestUtils">CommonTestUtils</a></strong></td><td>tests\CommonTestUtils\CommonTestUtils.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#ConEmuWinForms">ConEmuWinForms</a></strong></td><td>externals\conemu-inside\ConEmuWinForms\ConEmuWinForms.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#DeleteUnusedBranches.Tests">DeleteUnusedBranches.Tests</a></strong></td><td>tests\plugins\UnitTests\DeleteUnusedBranches.Tests\DeleteUnusedBranches.Tests.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#eng">eng</a></strong></td><td>eng</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#externals">externals</a></strong></td><td>externals</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#FindLargeFiles.Tests">FindLargeFiles.Tests</a></strong></td><td>tests\plugins\UnitTests\FindLargeFiles.Tests\FindLargeFiles.Tests.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#Git.hub">Git.hub</a></strong></td><td>externals\Git.hub\Git.hub\Git.hub.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitCommands">GitCommands</a></strong></td><td>src\app\GitCommands\GitCommands.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitCommands.Tests">GitCommands.Tests</a></strong></td><td>tests\app\UnitTests\GitCommands.Tests\GitCommands.Tests.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitExtensions">GitExtensions</a></strong></td><td>src\app\GitExtensions\GitExtensions.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitExtensions.Analyzers.CSharp">GitExtensions.Analyzers.CSharp</a></strong></td><td>src\app\GitExtensions.Analyzers.CSharp\GitExtensions.Analyzers.CSharp.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitExtensions.Extensibility">GitExtensions.Extensibility</a></strong></td><td>src\app\GitExtensions.Extensibility\GitExtensions.Extensibility.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitExtensions.Extensibility.Tests">GitExtensions.Extensibility.Tests</a></strong></td><td>tests\app\UnitTests\GitExtensions.Extensibility.Tests\GitExtensions.Extensibility.Tests.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitExtensions.Plugins.AppVeyorIntegration">GitExtensions.Plugins.AppVeyorIntegration</a></strong></td><td>src\plugins\BuildServerIntegration\AppVeyorIntegration\GitExtensions.Plugins.AppVeyorIntegration.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitExtensions.Plugins.AutoCompileSubmodules">GitExtensions.Plugins.AutoCompileSubmodules</a></strong></td><td>src\plugins\AutoCompileSubmodules\GitExtensions.Plugins.AutoCompileSubmodules.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitExtensions.Plugins.AzureDevOpsIntegration">GitExtensions.Plugins.AzureDevOpsIntegration</a></strong></td><td>src\plugins\BuildServerIntegration\AzureDevOpsIntegration\GitExtensions.Plugins.AzureDevOpsIntegration.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitExtensions.Plugins.BackgroundFetch">GitExtensions.Plugins.BackgroundFetch</a></strong></td><td>src\plugins\BackgroundFetch\GitExtensions.Plugins.BackgroundFetch.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitExtensions.Plugins.Bitbucket">GitExtensions.Plugins.Bitbucket</a></strong></td><td>src\plugins\Bitbucket\GitExtensions.Plugins.Bitbucket.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitExtensions.Plugins.CreateLocalBranches">GitExtensions.Plugins.CreateLocalBranches</a></strong></td><td>src\plugins\CreateLocalBranches\GitExtensions.Plugins.CreateLocalBranches.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitExtensions.Plugins.DeleteUnusedBranches">GitExtensions.Plugins.DeleteUnusedBranches</a></strong></td><td>src\plugins\DeleteUnusedBranches\GitExtensions.Plugins.DeleteUnusedBranches.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitExtensions.Plugins.FindLargeFiles">GitExtensions.Plugins.FindLargeFiles</a></strong></td><td>src\plugins\FindLargeFiles\GitExtensions.Plugins.FindLargeFiles.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitExtensions.Plugins.GitFlow">GitExtensions.Plugins.GitFlow</a></strong></td><td>src\plugins\GitFlow\GitExtensions.Plugins.GitFlow.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitExtensions.Plugins.GitHub3">GitExtensions.Plugins.GitHub3</a></strong></td><td>src\plugins\GitHub3\GitExtensions.Plugins.GitHub3.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitExtensions.Plugins.GitImpact">GitExtensions.Plugins.GitImpact</a></strong></td><td>src\plugins\Statistics\GitImpact\GitExtensions.Plugins.GitImpact.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitExtensions.Plugins.GitlabIntegration">GitExtensions.Plugins.GitlabIntegration</a></strong></td><td>src\plugins\BuildServerIntegration\GitlabIntegration\GitExtensions.Plugins.GitlabIntegration.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitExtensions.Plugins.GitStatistics">GitExtensions.Plugins.GitStatistics</a></strong></td><td>src\plugins\Statistics\GitStatistics\GitExtensions.Plugins.GitStatistics.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitExtensions.Plugins.Gource">GitExtensions.Plugins.Gource</a></strong></td><td>src\plugins\Gource\GitExtensions.Plugins.Gource.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitExtensions.Plugins.JenkinsIntegration">GitExtensions.Plugins.JenkinsIntegration</a></strong></td><td>src\plugins\BuildServerIntegration\JenkinsIntegration\GitExtensions.Plugins.JenkinsIntegration.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitExtensions.Plugins.JiraCommitHintPlugin">GitExtensions.Plugins.JiraCommitHintPlugin</a></strong></td><td>src\plugins\JiraCommitHintPlugin\GitExtensions.Plugins.JiraCommitHintPlugin.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitExtensions.Plugins.ProxySwitcher">GitExtensions.Plugins.ProxySwitcher</a></strong></td><td>src\plugins\ProxySwitcher\GitExtensions.Plugins.ProxySwitcher.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitExtensions.Plugins.ReleaseNotesGenerator">GitExtensions.Plugins.ReleaseNotesGenerator</a></strong></td><td>src\plugins\ReleaseNotesGenerator\GitExtensions.Plugins.ReleaseNotesGenerator.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitExtensions.Plugins.TeamCityIntegration">GitExtensions.Plugins.TeamCityIntegration</a></strong></td><td>src\plugins\BuildServerIntegration\TeamCityIntegration\GitExtensions.Plugins.TeamCityIntegration.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitExtUtils">GitExtUtils</a></strong></td><td>src\app\GitExtUtils\GitExtUtils.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitExtUtils.Tests">GitExtUtils.Tests</a></strong></td><td>tests\app\UnitTests\GitExtUtils.Tests\GitExtUtils.Tests.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitHub">GitHub</a></strong></td><td>GitHub</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitlabIntegration.Tests">GitlabIntegration.Tests</a></strong></td><td>tests\plugins\UnitTests\BuildServerIntegration\GitlabIntegration.Tests\GitlabIntegration.Tests.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitUI">GitUI</a></strong></td><td>src\app\GitUI\GitUI.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitUI.Tests">GitUI.Tests</a></strong></td><td>tests\app\UnitTests\GitUI.Tests\GitUI.Tests.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitUIPluginInterfaces">GitUIPluginInterfaces</a></strong></td><td>src\plugins\GitUIPluginInterfaces\GitUIPluginInterfaces.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#GitUIPluginInterfaces.Tests">GitUIPluginInterfaces.Tests</a></strong></td><td>tests\plugins\UnitTests\GitUIPluginInterfaces.Tests\GitUIPluginInterfaces.Tests.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#ICSharpCode.TextEditor">ICSharpCode.TextEditor</a></strong></td><td>externals\ICSharpCode.TextEditor\Project\ICSharpCode.TextEditor.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#IntegrationTests">IntegrationTests</a></strong></td><td>IntegrationTests</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#ISSUE_TEMPLATE">ISSUE_TEMPLATE</a></strong></td><td>ISSUE_TEMPLATE</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#plugins">plugins</a></strong></td><td>plugins</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#ReleaseNotesGenerator.Tests">ReleaseNotesGenerator.Tests</a></strong></td><td>tests\plugins\UnitTests\ReleaseNotesGenerator.Tests\ReleaseNotesGenerator.Tests.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#ResourceManager">ResourceManager</a></strong></td><td>src\app\ResourceManager\ResourceManager.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#ResourceManager.Tests">ResourceManager.Tests</a></strong></td><td>tests\app\UnitTests\ResourceManager.Tests\ResourceManager.Tests.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#setup">setup</a></strong></td><td>setup</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#Solution Items">Solution Items</a></strong></td><td>Solution Items</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#SpellChecker">SpellChecker</a></strong></td><td>externals\NetSpell.SpellChecker\SpellChecker.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#src">src</a></strong></td><td>src</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#Statistics">Statistics</a></strong></td><td>Statistics</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#tests">tests</a></strong></td><td>tests</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#transifex">transifex</a></strong></td><td>transifex</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#TranslationApp">TranslationApp</a></strong></td><td>setup\TranslationApp\TranslationApp.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#UI.IntegrationTests">UI.IntegrationTests</a></strong></td><td>tests\app\IntegrationTests\UI.IntegrationTests\UI.IntegrationTests.csproj</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#UnitTests">UnitTests</a></strong></td><td>UnitTests</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#">0</a></td></tr><tr><td class="IconSuccessEncoded" /><td><strong><a href="#Solution"><span _locID="OverviewSolutionSpan">Solution</span></a></strong></td><td>GitExtensions.sln</td><td class="textCentered"><a>0</a></td><td class="textCentered"><a>0</a></td><td class="textCentered"><a href="#" onclick="ScrollToFirstVisibleMessage('Solution'); return false;">1</a></td></tr></table></div><h2 _locID="SolutionAndProjectsTitle">Solution and projects</h2><div id="messages"><a name="Setup" /><h3>Setup</h3><table><tr id="SetupHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr name="ErrorRowClassSetup"><td class="IconErrorEncoded"><a name="SetupError" /></td><td class="messageCell"><strong>Setup\Setup.wixproj:
+        </strong><span>The application which this project type is based on was not found. Please try this link for further information: 930c7802-8a8c-48f9-8165-68863bccd9dd</span></td></tr></table><a name="analyzers" /><h3>analyzers</h3><table><tr id="analyzersHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">analyzers logged no messages.
+                  </td></tr></table><a name="app" /><h3>app</h3><table><tr id="appHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">app logged no messages.
+                  </td></tr></table><a name="AppVeyorIntegration.Tests" /><h3>AppVeyorIntegration.Tests</h3><table><tr id="AppVeyorIntegration.TestsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">AppVeyorIntegration.Tests logged no messages.
+                  </td></tr></table><a name="assets" /><h3>assets</h3><table><tr id="assetsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">assets logged no messages.
+                  </td></tr></table><a name="AzureDevOpsIntegration.Tests" /><h3>AzureDevOpsIntegration.Tests</h3><table><tr id="AzureDevOpsIntegration.TestsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">AzureDevOpsIntegration.Tests logged no messages.
+                  </td></tr></table><a name="BugReporter" /><h3>BugReporter</h3><table><tr id="BugReporterHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">BugReporter logged no messages.
+                  </td></tr></table><a name="BugReporter.IntegrationTests" /><h3>BugReporter.IntegrationTests</h3><table><tr id="BugReporter.IntegrationTestsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">BugReporter.IntegrationTests logged no messages.
+                  </td></tr></table><a name="BugReporter.Tests" /><h3>BugReporter.Tests</h3><table><tr id="BugReporter.TestsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">BugReporter.Tests logged no messages.
+                  </td></tr></table><a name="BuildServerIntegration" /><h3>BuildServerIntegration</h3><table><tr id="BuildServerIntegrationHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">BuildServerIntegration logged no messages.
+                  </td></tr></table><a name="CommonTestUtils" /><h3>CommonTestUtils</h3><table><tr id="CommonTestUtilsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">CommonTestUtils logged no messages.
+                  </td></tr></table><a name="ConEmuWinForms" /><h3>ConEmuWinForms</h3><table><tr id="ConEmuWinFormsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">ConEmuWinForms logged no messages.
+                  </td></tr></table><a name="DeleteUnusedBranches.Tests" /><h3>DeleteUnusedBranches.Tests</h3><table><tr id="DeleteUnusedBranches.TestsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">DeleteUnusedBranches.Tests logged no messages.
+                  </td></tr></table><a name="eng" /><h3>eng</h3><table><tr id="engHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">eng logged no messages.
+                  </td></tr></table><a name="externals" /><h3>externals</h3><table><tr id="externalsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">externals logged no messages.
+                  </td></tr></table><a name="FindLargeFiles.Tests" /><h3>FindLargeFiles.Tests</h3><table><tr id="FindLargeFiles.TestsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">FindLargeFiles.Tests logged no messages.
+                  </td></tr></table><a name="Git.hub" /><h3>Git.hub</h3><table><tr id="Git.hubHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">Git.hub logged no messages.
+                  </td></tr></table><a name="GitCommands" /><h3>GitCommands</h3><table><tr id="GitCommandsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitCommands logged no messages.
+                  </td></tr></table><a name="GitCommands.Tests" /><h3>GitCommands.Tests</h3><table><tr id="GitCommands.TestsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitCommands.Tests logged no messages.
+                  </td></tr></table><a name="GitExtensions" /><h3>GitExtensions</h3><table><tr id="GitExtensionsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitExtensions logged no messages.
+                  </td></tr></table><a name="GitExtensions.Analyzers.CSharp" /><h3>GitExtensions.Analyzers.CSharp</h3><table><tr id="GitExtensions.Analyzers.CSharpHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitExtensions.Analyzers.CSharp logged no messages.
+                  </td></tr></table><a name="GitExtensions.Extensibility" /><h3>GitExtensions.Extensibility</h3><table><tr id="GitExtensions.ExtensibilityHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitExtensions.Extensibility logged no messages.
+                  </td></tr></table><a name="GitExtensions.Extensibility.Tests" /><h3>GitExtensions.Extensibility.Tests</h3><table><tr id="GitExtensions.Extensibility.TestsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitExtensions.Extensibility.Tests logged no messages.
+                  </td></tr></table><a name="GitExtensions.Plugins.AppVeyorIntegration" /><h3>GitExtensions.Plugins.AppVeyorIntegration</h3><table><tr id="GitExtensions.Plugins.AppVeyorIntegrationHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitExtensions.Plugins.AppVeyorIntegration logged no messages.
+                  </td></tr></table><a name="GitExtensions.Plugins.AutoCompileSubmodules" /><h3>GitExtensions.Plugins.AutoCompileSubmodules</h3><table><tr id="GitExtensions.Plugins.AutoCompileSubmodulesHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitExtensions.Plugins.AutoCompileSubmodules logged no messages.
+                  </td></tr></table><a name="GitExtensions.Plugins.AzureDevOpsIntegration" /><h3>GitExtensions.Plugins.AzureDevOpsIntegration</h3><table><tr id="GitExtensions.Plugins.AzureDevOpsIntegrationHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitExtensions.Plugins.AzureDevOpsIntegration logged no messages.
+                  </td></tr></table><a name="GitExtensions.Plugins.BackgroundFetch" /><h3>GitExtensions.Plugins.BackgroundFetch</h3><table><tr id="GitExtensions.Plugins.BackgroundFetchHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitExtensions.Plugins.BackgroundFetch logged no messages.
+                  </td></tr></table><a name="GitExtensions.Plugins.Bitbucket" /><h3>GitExtensions.Plugins.Bitbucket</h3><table><tr id="GitExtensions.Plugins.BitbucketHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitExtensions.Plugins.Bitbucket logged no messages.
+                  </td></tr></table><a name="GitExtensions.Plugins.CreateLocalBranches" /><h3>GitExtensions.Plugins.CreateLocalBranches</h3><table><tr id="GitExtensions.Plugins.CreateLocalBranchesHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitExtensions.Plugins.CreateLocalBranches logged no messages.
+                  </td></tr></table><a name="GitExtensions.Plugins.DeleteUnusedBranches" /><h3>GitExtensions.Plugins.DeleteUnusedBranches</h3><table><tr id="GitExtensions.Plugins.DeleteUnusedBranchesHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitExtensions.Plugins.DeleteUnusedBranches logged no messages.
+                  </td></tr></table><a name="GitExtensions.Plugins.FindLargeFiles" /><h3>GitExtensions.Plugins.FindLargeFiles</h3><table><tr id="GitExtensions.Plugins.FindLargeFilesHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitExtensions.Plugins.FindLargeFiles logged no messages.
+                  </td></tr></table><a name="GitExtensions.Plugins.GitFlow" /><h3>GitExtensions.Plugins.GitFlow</h3><table><tr id="GitExtensions.Plugins.GitFlowHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitExtensions.Plugins.GitFlow logged no messages.
+                  </td></tr></table><a name="GitExtensions.Plugins.GitHub3" /><h3>GitExtensions.Plugins.GitHub3</h3><table><tr id="GitExtensions.Plugins.GitHub3HeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitExtensions.Plugins.GitHub3 logged no messages.
+                  </td></tr></table><a name="GitExtensions.Plugins.GitImpact" /><h3>GitExtensions.Plugins.GitImpact</h3><table><tr id="GitExtensions.Plugins.GitImpactHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitExtensions.Plugins.GitImpact logged no messages.
+                  </td></tr></table><a name="GitExtensions.Plugins.GitlabIntegration" /><h3>GitExtensions.Plugins.GitlabIntegration</h3><table><tr id="GitExtensions.Plugins.GitlabIntegrationHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitExtensions.Plugins.GitlabIntegration logged no messages.
+                  </td></tr></table><a name="GitExtensions.Plugins.GitStatistics" /><h3>GitExtensions.Plugins.GitStatistics</h3><table><tr id="GitExtensions.Plugins.GitStatisticsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitExtensions.Plugins.GitStatistics logged no messages.
+                  </td></tr></table><a name="GitExtensions.Plugins.Gource" /><h3>GitExtensions.Plugins.Gource</h3><table><tr id="GitExtensions.Plugins.GourceHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitExtensions.Plugins.Gource logged no messages.
+                  </td></tr></table><a name="GitExtensions.Plugins.JenkinsIntegration" /><h3>GitExtensions.Plugins.JenkinsIntegration</h3><table><tr id="GitExtensions.Plugins.JenkinsIntegrationHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitExtensions.Plugins.JenkinsIntegration logged no messages.
+                  </td></tr></table><a name="GitExtensions.Plugins.JiraCommitHintPlugin" /><h3>GitExtensions.Plugins.JiraCommitHintPlugin</h3><table><tr id="GitExtensions.Plugins.JiraCommitHintPluginHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitExtensions.Plugins.JiraCommitHintPlugin logged no messages.
+                  </td></tr></table><a name="GitExtensions.Plugins.ProxySwitcher" /><h3>GitExtensions.Plugins.ProxySwitcher</h3><table><tr id="GitExtensions.Plugins.ProxySwitcherHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitExtensions.Plugins.ProxySwitcher logged no messages.
+                  </td></tr></table><a name="GitExtensions.Plugins.ReleaseNotesGenerator" /><h3>GitExtensions.Plugins.ReleaseNotesGenerator</h3><table><tr id="GitExtensions.Plugins.ReleaseNotesGeneratorHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitExtensions.Plugins.ReleaseNotesGenerator logged no messages.
+                  </td></tr></table><a name="GitExtensions.Plugins.TeamCityIntegration" /><h3>GitExtensions.Plugins.TeamCityIntegration</h3><table><tr id="GitExtensions.Plugins.TeamCityIntegrationHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitExtensions.Plugins.TeamCityIntegration logged no messages.
+                  </td></tr></table><a name="GitExtUtils" /><h3>GitExtUtils</h3><table><tr id="GitExtUtilsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitExtUtils logged no messages.
+                  </td></tr></table><a name="GitExtUtils.Tests" /><h3>GitExtUtils.Tests</h3><table><tr id="GitExtUtils.TestsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitExtUtils.Tests logged no messages.
+                  </td></tr></table><a name="GitHub" /><h3>GitHub</h3><table><tr id="GitHubHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitHub logged no messages.
+                  </td></tr></table><a name="GitlabIntegration.Tests" /><h3>GitlabIntegration.Tests</h3><table><tr id="GitlabIntegration.TestsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitlabIntegration.Tests logged no messages.
+                  </td></tr></table><a name="GitUI" /><h3>GitUI</h3><table><tr id="GitUIHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitUI logged no messages.
+                  </td></tr></table><a name="GitUI.Tests" /><h3>GitUI.Tests</h3><table><tr id="GitUI.TestsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitUI.Tests logged no messages.
+                  </td></tr></table><a name="GitUIPluginInterfaces" /><h3>GitUIPluginInterfaces</h3><table><tr id="GitUIPluginInterfacesHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitUIPluginInterfaces logged no messages.
+                  </td></tr></table><a name="GitUIPluginInterfaces.Tests" /><h3>GitUIPluginInterfaces.Tests</h3><table><tr id="GitUIPluginInterfaces.TestsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">GitUIPluginInterfaces.Tests logged no messages.
+                  </td></tr></table><a name="ICSharpCode.TextEditor" /><h3>ICSharpCode.TextEditor</h3><table><tr id="ICSharpCode.TextEditorHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">ICSharpCode.TextEditor logged no messages.
+                  </td></tr></table><a name="IntegrationTests" /><h3>IntegrationTests</h3><table><tr id="IntegrationTestsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">IntegrationTests logged no messages.
+                  </td></tr></table><a name="ISSUE_TEMPLATE" /><h3>ISSUE_TEMPLATE</h3><table><tr id="ISSUE_TEMPLATEHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">ISSUE_TEMPLATE logged no messages.
+                  </td></tr></table><a name="plugins" /><h3>plugins</h3><table><tr id="pluginsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">plugins logged no messages.
+                  </td></tr></table><a name="ReleaseNotesGenerator.Tests" /><h3>ReleaseNotesGenerator.Tests</h3><table><tr id="ReleaseNotesGenerator.TestsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">ReleaseNotesGenerator.Tests logged no messages.
+                  </td></tr></table><a name="ResourceManager" /><h3>ResourceManager</h3><table><tr id="ResourceManagerHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">ResourceManager logged no messages.
+                  </td></tr></table><a name="ResourceManager.Tests" /><h3>ResourceManager.Tests</h3><table><tr id="ResourceManager.TestsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">ResourceManager.Tests logged no messages.
+                  </td></tr></table><a name="setup" /><h3>setup</h3><table><tr id="setupHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">setup logged no messages.
+                  </td></tr></table><a name="Solution Items" /><h3>Solution Items</h3><table><tr id="Solution ItemsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">Solution Items logged no messages.
+                  </td></tr></table><a name="SpellChecker" /><h3>SpellChecker</h3><table><tr id="SpellCheckerHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">SpellChecker logged no messages.
+                  </td></tr></table><a name="src" /><h3>src</h3><table><tr id="srcHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">src logged no messages.
+                  </td></tr></table><a name="Statistics" /><h3>Statistics</h3><table><tr id="StatisticsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">Statistics logged no messages.
+                  </td></tr></table><a name="tests" /><h3>tests</h3><table><tr id="testsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">tests logged no messages.
+                  </td></tr></table><a name="transifex" /><h3>transifex</h3><table><tr id="transifexHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">transifex logged no messages.
+                  </td></tr></table><a name="TranslationApp" /><h3>TranslationApp</h3><table><tr id="TranslationAppHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">TranslationApp logged no messages.
+                  </td></tr></table><a name="UI.IntegrationTests" /><h3>UI.IntegrationTests</h3><table><tr id="UI.IntegrationTestsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">UI.IntegrationTests logged no messages.
+                  </td></tr></table><a name="UnitTests" /><h3>UnitTests</h3><table><tr id="UnitTestsHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr><td class="IconInfoEncoded" /><td class="messageCell" _locID="NoMessagesRow">UnitTests logged no messages.
+                  </td></tr></table><a name="Solution" /><h3 _locID="ProjectDisplayNameHeader">Solution</h3><table><tr id="SolutionHeaderRow"><th></th><th class="messageCell" _locID="MessageTableHeader">Message</th></tr><tr name="MessageRowHeaderShowSolution"><td class="IconInfoEncoded" /><td class="messageCell"><a _locID="ShowAdditionalMessages" href="#" name="SolutionMessage" onclick="ToggleMessageVisibility('Solution'); return false;">
+          Show 1 additional messages
+        </a></td></tr><tr name="MessageRowClassSolution" style="display: none"><td class="IconInfoEncoded"><a name="SolutionMessage" /></td><td class="messageCell"><strong>GitExtensions.sln:
+        </strong><span>The solution file does not require migration.</span></td></tr><tr style="display: none" name="MessageRowHeaderHideSolution"><td class="IconInfoEncoded" /><td class="messageCell"><a _locID="HideAdditionalMessages" href="#" name="SolutionMessage" onclick="ToggleMessageVisibility('Solution'); return false;">
+          Hide 1 additional messages
+        </a></td></tr></table></div></div></body></html>

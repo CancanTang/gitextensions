@@ -1,16 +1,17 @@
 ﻿using BugReporter;
 using FluentAssertions;
 
-namespace GitUITests;
-
-[TestFixture]
-public class BugReportFormTests
+namespace GitUITests
 {
-    [TestCase("", false)]
-    [TestCase("\t\r\n\t\t   \r   \n   \r", false)]
-    [TestCase("\t\r\n\t\t  a \r   \n   \r", true)]
-    public void Test(string input, bool expected)
+    [TestFixture]
+    public class BugReportFormTests
     {
-        BugReportForm.TestAccessor.CheckContainsInfo(input).Should().Be(expected);
+        [TestCase("", false)]
+        [TestCase("\t\r\n\t\t   \r   \n   \r", false)]
+        [TestCase("\t\r\n\t\t  a \r   \n   \r", true)]
+        public void Test(string input, bool expected)
+        {
+            BugReportForm.TestAccessor.CheckContainsInfo(input).Should().Be(expected);
+        }
     }
 }

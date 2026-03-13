@@ -1,14 +1,15 @@
-﻿namespace GitExtensions.Plugins.GitlabIntegration.ApiClient;
-
-public interface IGitlabApiClientFactory
+﻿namespace GitExtensions.Plugins.GitlabIntegration.ApiClient
 {
-    IGitlabApiClient CreateGitlabApiClient(string instanceUrl, string apiToken, int projectId);
-}
-
-internal class GitlabApiClientFactory : IGitlabApiClientFactory
-{
-    public IGitlabApiClient CreateGitlabApiClient(string instanceUrl, string apiToken, int projectId)
+    public interface IGitlabApiClientFactory
     {
-        return new GitlabApiClient(instanceUrl, apiToken, projectId);
+        IGitlabApiClient CreateGitlabApiClient(string instanceUrl, string apiToken, int projectId);
+    }
+
+    internal class GitlabApiClientFactory : IGitlabApiClientFactory
+    {
+        public IGitlabApiClient CreateGitlabApiClient(string instanceUrl, string apiToken, int projectId)
+        {
+            return new GitlabApiClient(instanceUrl, apiToken, projectId);
+        }
     }
 }

@@ -10,108 +10,114 @@ using GitUIPluginInterfaces;
 using GitUIPluginInterfaces.BuildServerIntegration;
 using Microsoft.VisualStudio.Composition;
 
-namespace UITests.CommandsDialogs.SettingsDialog.Pages;
-
-[Apartment(ApartmentState.STA)]
-public class BuildServerIntegrationSettingsPageTests_WithPlugins
+namespace UITests.CommandsDialogs.SettingsDialog.Pages
 {
-    private ReferenceRepository _referenceRepository;
-    private MockHost _form;
-    private BuildServerIntegrationSettingsPage _settingsPage;
-
-    [SetUp]
-    public void SetUp()
+    [Apartment(ApartmentState.STA)]
+    public class BuildServerIntegrationSettingsPageTests_WithPlugins
     {
-        _referenceRepository = new ReferenceRepository();
-        TestComposition composition = TestComposition.Empty
-            .AddParts(typeof(MockGenericBuildServerAdapter))
-            .AddParts(typeof(MockGenericBuildServerSettingsUserControl));
-        ExportProvider mefExportProvider = composition.ExportProviderFactory.CreateExportProvider();
-        ManagedExtensibility.SetTestExportProvider(mefExportProvider);
-    }
+        private ReferenceRepository _referenceRepository;
+        private MockHost _form;
+        private BuildServerIntegrationSettingsPage _settingsPage;
 
-    [TearDown]
-    public void TearDown()
-    {
-        _settingsPage.Dispose();
-        _form.Dispose();
-        _referenceRepository.Dispose();
-    }
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            _referenceRepository.Dispose();
+        }
 
-    [Test]
-    public void BuildServerType_should_contain_discovered_build_server_plugins()
-    {
-        RunFormTest(
-          async form =>
-          {
-              await AsyncTestHelper.JoinPendingOperationsAsync(AsyncTestHelper.UnexpectedTimeout);
+        [SetUp]
+        public void SetUp()
+        {
+            ReferenceRepository.ResetRepo(ref _referenceRepository);
+            TestComposition composition = TestComposition.Empty
+                .AddParts(typeof(MockGenericBuildServerAdapter))
+                .AddParts(typeof(MockGenericBuildServerSettingsUserControl));
+            ExportProvider mefExportProvider = composition.ExportProviderFactory.CreateExportProvider();
+            ManagedExtensibility.SetTestExportProvider(mefExportProvider);
+        }
 
-              ClassicAssert.AreEqual(/* default None + GenericBuildServerMock */2, _settingsPage.GetTestAccessor().BuildServerType.Items.Count);
-              ClassicAssert.AreEqual(0, _settingsPage.GetTestAccessor().BuildServerType.SelectedIndex);
-              ClassicAssert.AreEqual("GenericBuildServerMock", _settingsPage.GetTestAccessor().BuildServerType.Items[1]);
-          });
-    }
+        [TearDown]
+        public void TearDown()
+        {
+            _settingsPage.Dispose();
+            _form.Dispose();
+        }
 
-    [Test]
-    public void BuildServerType_should_toggle_plugin_settings_controls()
-    {
-        RunFormTest(
-          async form =>
-          {
-              await AsyncTestHelper.JoinPendingOperationsAsync(AsyncTestHelper.UnexpectedTimeout);
+        [Test]
+        public void BuildServerType_should_contain_discovered_build_server_plugins()
+        {
+            RunFormTest(
+              async form =>
+              {
+                  await AsyncTestHelper.JoinPendingOperationsAsync(AsyncTestHelper.UnexpectedTimeout);
 
-              // Default option, no custom control
-              ClassicAssert.AreEqual(0, _settingsPage.GetTestAccessor().buildServerSettingsPanel.Controls.Count);
+                  Assert.AreEqual(/* default None + GenericBuildServerMock */2, _settingsPage.GetTestAccessor().BuildServerType.Items.Count);
+                  Assert.AreEqual(0, _settingsPage.GetTestAccessor().BuildServerType.SelectedIndex);
+                  Assert.AreEqual("GenericBuildServerMock", _settingsPage.GetTestAccessor().BuildServerType.Items[1]);
+              });
+        }
 
-              // Select the custom build server
-              _settingsPage.GetTestAccessor().BuildServerType.SelectedIndex = 1;
-              ClassicAssert.AreEqual(1, _settingsPage.GetTestAccessor().buildServerSettingsPanel.Controls.Count);
-              ClassicAssert.IsInstanceOf<IBuildServerSettingsUserControl>(_settingsPage.GetTestAccessor().buildServerSettingsPanel.Controls[0]);
-          });
-    }
+        [Test]
+        public void BuildServerType_should_toggle_plugin_settings_controls()
+        {
+            RunFormTest(
+              async form =>
+              {
+                  await AsyncTestHelper.JoinPendingOperationsAsync(AsyncTestHelper.UnexpectedTimeout);
 
-    private void RunFormTest(Func<MockHost, Task> testDriverAsync)
-    {
-        UITest.RunForm(
-            () =>
-            {
-                _form = new MockHost(_referenceRepository.Module)
+                  // Default option, no custom control
+                  Assert.AreEqual(0, _settingsPage.GetTestAccessor().buildServerSettingsPanel.Controls.Count);
+
+                  // Select the custom build server
+                  _settingsPage.GetTestAccessor().BuildServerType.SelectedIndex = 1;
+                  Assert.AreEqual(1, _settingsPage.GetTestAccessor().buildServerSettingsPanel.Controls.Count);
+                  Assert.IsInstanceOf<IBuildServerSettingsUserControl>(_settingsPage.GetTestAccessor().buildServerSettingsPanel.Controls[0]);
+              });
+        }
+
+        private void RunFormTest(Func<MockHost, Task> testDriverAsync)
+        {
+            UITest.RunForm(
+                () =>
                 {
-                    Size = new(800, 400)
-                };
+                    _form = new MockHost(_referenceRepository.Module)
+                    {
+                        Size = new(800, 400)
+                    };
 
-                _settingsPage = SettingsPageBase.Create<BuildServerIntegrationSettingsPage>(_form, GitUICommands.EmptyServiceProvider);
-                _settingsPage.Dock = DockStyle.Fill;
+                    _settingsPage = SettingsPageBase.Create<BuildServerIntegrationSettingsPage>(_form, GitUICommands.EmptyServiceProvider);
+                    _settingsPage.Dock = DockStyle.Fill;
 
-                _form.Controls.Add(_settingsPage);
+                    _form.Controls.Add(_settingsPage);
 
-                _form.ShowDialog(owner: null);
-            },
-            testDriverAsync);
-    }
-
-    private class MockHost : Form, ISettingsPageHost
-    {
-        public MockHost(GitModule module)
-        {
-            CheckSettingsLogic = new(new(module));
+                    _form.ShowDialog(owner: null);
+                },
+                testDriverAsync);
         }
 
-        public CheckSettingsLogic CheckSettingsLogic { get; }
-
-        public void GotoPage(SettingsPageReference settingsPageReference)
+        private class MockHost : Form, ISettingsPageHost
         {
-            throw new NotImplementedException();
-        }
+            public MockHost(GitModule module)
+            {
+                CheckSettingsLogic = new(new(module));
+            }
 
-        public void LoadAll()
-        {
-            throw new NotImplementedException();
-        }
+            public CheckSettingsLogic CheckSettingsLogic { get; }
 
-        public void SaveAll()
-        {
-            throw new NotImplementedException();
+            public void GotoPage(SettingsPageReference settingsPageReference)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void LoadAll()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SaveAll()
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

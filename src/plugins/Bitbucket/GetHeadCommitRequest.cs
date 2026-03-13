@@ -1,48 +1,49 @@
 ﻿using Newtonsoft.Json.Linq;
 using RestSharp;
 
-namespace GitExtensions.Plugins.Bitbucket;
-
-internal class Commit
+namespace GitExtensions.Plugins.Bitbucket
 {
-    public static Commit Parse(JObject json)
+    internal class Commit
     {
-        return new Commit
+        public static Commit Parse(JObject json)
         {
-            Hash = json["id"].ToString(),
-            Message = json["message"].ToString(),
-            AuthorName = json["author"]["name"].ToString(),
-            IsMerge = ((JArray)json["parents"]).Count > 1
-        };
+            return new Commit
+            {
+                Hash = json["id"].ToString(),
+                Message = json["message"].ToString(),
+                AuthorName = json["author"]["name"].ToString(),
+                IsMerge = ((JArray)json["parents"]).Count > 1
+            };
+        }
+
+        public string? Hash { get; set; }
+        public string? Message { get; set; }
+        public string? AuthorName { get; set; }
+        public bool IsMerge { get; set; }
     }
 
-    public string? Hash { get; set; }
-    public string? Message { get; set; }
-    public string? AuthorName { get; set; }
-    public bool IsMerge { get; set; }
-}
-
-internal class GetHeadCommitRequest : BitbucketRequestBase<Commit>
-{
-    private readonly Repository _repo;
-    private readonly string _branch;
-
-    public GetHeadCommitRequest(Repository repository, string branchName, Settings settings)
-        : base(settings)
+    internal class GetHeadCommitRequest : BitbucketRequestBase<Commit>
     {
-        _repo = repository;
-        _branch = branchName;
-    }
+        private readonly Repository _repo;
+        private readonly string _branch;
 
-    protected override object? RequestBody => null;
+        public GetHeadCommitRequest(Repository repository, string branchName, Settings settings)
+            : base(settings)
+        {
+            _repo = repository;
+            _branch = branchName;
+        }
 
-    protected override Method RequestMethod => Method.GET;
+        protected override object? RequestBody => null;
 
-    protected override string ApiUrl => string.Format("/projects/{0}/repos/{1}/commits/refs/heads/{2}",
-        _repo.ProjectKey, _repo.RepoName, _branch);
+        protected override Method RequestMethod => Method.GET;
 
-    protected override Commit ParseResponse(JObject json)
-    {
-        return Commit.Parse(json);
+        protected override string ApiUrl => string.Format("/projects/{0}/repos/{1}/commits/refs/heads/{2}",
+            _repo.ProjectKey, _repo.RepoName, _branch);
+
+        protected override Commit ParseResponse(JObject json)
+        {
+            return Commit.Parse(json);
+        }
     }
 }

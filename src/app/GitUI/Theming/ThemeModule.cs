@@ -1,107 +1,180 @@
-using System.Diagnostics;
 using GitCommands;
 using GitExtUtils.GitUI.Theming;
-using ICSharpCode.TextEditor.Document;
 
-namespace GitUI.Theming;
-
-public static class ThemeModule
+namespace GitUI.Theming
 {
-    public static ThemeSettings Settings { get; private set; } = ThemeSettings.Default;
-
-    private static ThemeRepository Repository { get; } = new();
-
-    public static void Load()
+    public static class ThemeModule
     {
-        Settings = LoadThemeSettings(Repository);
-        Application.SetColorMode(Settings.Theme.SystemColorMode);
-        UpdateEditorSettings();
-        ColorHelper.ThemeSettings = Settings;
-        ThemeFix.ThemeSettings = Settings;
-    }
+        private static bool _suppressWin32HooksForTests;
 
-    private static void UpdateEditorSettings()
-    {
-        DefaultHighlightingStrategy strategy = HighlightingManager.Manager.DefaultHighlighting;
-        strategy.SetColorFor("Default",
-            new HighlightColor(SystemColors.WindowText, AppColor.EditorBackground.GetThemeColor(), bold: false, italic: false, adaptable: false));
-        strategy.SetColorFor("LineNumbers",
-            new HighlightColor(SystemColors.GrayText, AppColor.LineNumberBackground.GetThemeColor(), bold: false, italic: false, adaptable: false));
-        strategy.SetColorFor("LineNumberSelected",
-            new HighlightColor(SystemColors.WindowText, AppColor.LineNumberBackground.GetThemeColor(), bold: true, italic: false, adaptable: false));
-        if (Application.IsDarkModeEnabled)
-        {
-            strategy.SetColorFor("EOLMarkers",
-                new HighlightColor(nameof(SystemColors.ControlDarkDark), bold: false, italic: false));
-            strategy.SetColorFor("SpaceMarkers",
-                new HighlightColor(nameof(SystemColors.ControlDarkDark), bold: false, italic: false));
-            strategy.SetColorFor("TabMarkers",
-                new HighlightColor(nameof(SystemColors.ControlDarkDark), bold: false, italic: false));
-        }
-    }
+        public static ThemeSettings Settings { get; private set; } = ThemeSettings.Default;
 
-    private static ThemeSettings LoadThemeSettings(IThemeRepository repository)
-    {
-        Theme invariantTheme;
-        try
+        private static ThemeRepository Repository { get; } = new();
+        public static bool IsDarkTheme { get; private set; }
+
+        public static void Load()
         {
-            invariantTheme = repository.GetInvariantTheme();
-        }
-        catch (ThemeException ex)
-        {
-            // Not good, ColorHelper needs actual InvariantTheme to correctly transform colors.
-            MessageBoxes.ShowError(null, $"Failed to load invariant theme: {ex.Message}"
-                    + $"{Environment.NewLine}{Environment.NewLine}See also https://github.com/gitextensions/gitextensions/wiki/Dark-Mode");
-            return ThemeSettings.Default;
+            new ThemeMigration(Repository).Migrate();
+            Settings = LoadThemeSettings(Repository);
+            IsDarkTheme = Settings.Theme.GetNonEmptyColor(KnownColor.Window).GetBrightness() < 0.5;
+            ColorHelper.ThemeSettings = Settings;
+            ThemeFix.ThemeSettings = Settings;
+            Win32ThemeHooks.ThemeSettings = Settings;
         }
 
-        ThemeId themeId = AppSettings.ThemeId;
-        if (string.IsNullOrEmpty(themeId.Name))
+#if SUPPORT_THEME_HOOKS
+        private static void InstallHooks(Theme theme)
         {
-            // Migrate from default invariant/light to Windows default color mode
-            themeId = ThemeId.WindowsAppColorModeId;
-            AppSettings.ThemeId = themeId;
+            Win32ThemeHooks.WindowCreated += Handle_WindowCreated;
+
+            try
+            {
+                Win32ThemeHooks.InstallHooks(theme, new SystemDialogDetector());
+            }
+            catch (Exception)
+            {
+                Win32ThemeHooks.Uninstall();
+                throw;
+            }
+
+            ResetGdiCaches();
+        }
+#endif
+
+        private static ThemeSettings LoadThemeSettings(IThemeRepository repository)
+        {
+            Theme invariantTheme;
+            try
+            {
+                invariantTheme = repository.GetInvariantTheme();
+            }
+            catch (ThemeException ex)
+            {
+                // Not good, ColorHelper needs actual InvariantTheme to correctly transform colors.
+                MessageBoxes.ShowError(null, $"Failed to load invariant theme: {ex}");
+                return ThemeSettings.Default;
+            }
+
+            string oldThemeName = AppSettings.ThemeIdName_v1;
+            if (oldThemeName is not null)
+            {
+                // Migrate to default theme
+                AppSettings.ThemeIdName_v1 = null;
+                AppSettings.ThemeId = ThemeId.Default;
+                if (oldThemeName != ThemeId.Default.Name)
+                {
+                    MessageBox.Show($"The theme ({oldThemeName}) is reset to default as the theme support is limited in this Git Extensions version.",
+                        TranslatedStrings.Warning, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+
+            ThemeId themeId = AppSettings.ThemeId;
+            string[] variations = AppSettings.ThemeVariations;
+            if (string.IsNullOrEmpty(themeId.Name))
+            {
+                return CreateFallbackSettings(invariantTheme, variations);
+            }
+
+            Theme theme;
+            try
+            {
+                theme = repository.GetTheme(themeId, AppSettings.ThemeVariations);
+            }
+            catch (ThemeException ex)
+            {
+                MessageBoxes.ShowError(null, $"Failed to load {(themeId.IsBuiltin ? "preinstalled" : "user-defined")} theme {themeId.Name}: {ex}");
+                return CreateFallbackSettings(invariantTheme, variations);
+            }
+
+            if (!AppSettings.UseSystemVisualStyle && !_suppressWin32HooksForTests)
+            {
+                try
+                {
+#if SUPPORT_THEME_HOOKS
+                    InstallHooks(theme);
+#endif
+                }
+                catch (Exception ex)
+                {
+                    MessageBoxes.ShowError(null, $"Failed to install Win32 theming hooks: {ex}");
+                    return CreateFallbackSettings(invariantTheme, variations);
+                }
+            }
+
+            return new ThemeSettings(theme, invariantTheme, AppSettings.ThemeVariations, AppSettings.UseSystemVisualStyle);
         }
 
-        bool systemVisualStyle = AppSettings.UseSystemVisualStyle;
-        if (themeId == ThemeId.WindowsAppColorModeId)
+#if SUPPORT_THEME_HOOKS
+        private static void ResetGdiCaches()
         {
-            // fix systemVisualStyle for WindowsAppColorModeId mode (always for DefaultLight)
-            // This is also how it is presented in Settings
-            themeId = ThemeId.ColorModeThemeId;
-            systemVisualStyle = themeId == ThemeId.DefaultLight;
+            System.Reflection.Assembly systemDrawingAssembly = typeof(Color).Assembly;
+
+            var colorTableField =
+                systemDrawingAssembly.GetType("System.Drawing.KnownColorTable")
+                    .GetField("colorTable", BindingFlags.Static | BindingFlags.NonPublic) ??
+                throw new NotSupportedException();
+
+            var threadDataProperty =
+                systemDrawingAssembly.GetType("System.Drawing.SafeNativeMethods")
+                    .GetNestedType("Gdip", BindingFlags.NonPublic)
+                    .GetProperty("ThreadData", BindingFlags.Static | BindingFlags.NonPublic) ??
+                throw new NotSupportedException();
+
+            var systemBrushesKeyField =
+                    typeof(SystemBrushes).GetField("SystemBrushesKey", BindingFlags.Static | BindingFlags.NonPublic) ??
+                    throw new NotSupportedException();
+
+            var systemBrushesKey = systemBrushesKeyField.GetValue(null);
+
+            FieldInfo systemPensKeyField = typeof(SystemPens)
+                .GetField("SystemPensKey", BindingFlags.Static | BindingFlags.NonPublic) ??
+                throw new NotSupportedException();
+
+            var systemPensKey = systemPensKeyField
+                .GetValue(null);
+
+            IDictionary<TKey, TValue> threadData = (IDictionary)threadDataProperty.GetValue(null, null);
+            colorTableField.SetValue(null, null);
+
+            threadData[systemBrushesKey] = null;
+            threadData[systemPensKey] = null;
         }
 
-        string[] variations = AppSettings.ThemeVariations;
-        if (themeId == ThemeId.DefaultLight)
+        public static void Unload()
         {
-            // default/invariant/light theme
-            return CreateFallbackSettings(invariantTheme, variations);
+            Win32ThemeHooks.Uninstall();
+            Win32ThemeHooks.WindowCreated -= Handle_WindowCreated;
         }
 
-        Theme theme;
-        try
+        public static void ReloadWin32ThemeData()
         {
-            theme = repository.GetTheme(themeId, variations);
-        }
-        catch (ThemeException ex)
-        {
-            Trace.WriteLine($"Failed to load {(themeId.IsBuiltin ? "preinstalled" : "user-defined")} theme {themeId.Name}: {ex}");
-            MessageBoxes.ShowError(null, $"Failed to load {(themeId.IsBuiltin ? "preinstalled" : "user-defined")} theme {themeId.Name}: {ex.Message}"
-                    + $"{Environment.NewLine}{Environment.NewLine}See also https://github.com/gitextensions/gitextensions/wiki/Dark-Mode");
-            AppSettings.ThemeId = ThemeId.DefaultLight;
-            return CreateFallbackSettings(invariantTheme, variations);
+            Win32ThemeHooks.LoadThemeData();
         }
 
-        return new ThemeSettings(theme, invariantTheme, variations, systemVisualStyle);
-    }
+        private static void Handle_WindowCreated(IntPtr hwnd)
+        {
+            switch (Control.FromHandle(hwnd))
+            {
+                case Form form:
+                    form.Load += (s, e) => ((Form)s!).FixVisualStyle();
+                    break;
+            }
+        }
+#endif
 
-    private static ThemeSettings CreateFallbackSettings(Theme invariantTheme, string[] variations) =>
-        new(Theme.CreateDefaultTheme(variations), invariantTheme, variations, useSystemVisualStyle: true);
+        private static ThemeSettings CreateFallbackSettings(Theme invariantTheme, string[] variations) =>
+            new(Theme.CreateDefaultTheme(variations), invariantTheme, variations, useSystemVisualStyle: true);
 
-    internal static class TestAccessor
-    {
-        public static void ReloadThemeSettings(IThemeRepository repository) =>
-            Settings = LoadThemeSettings(repository);
+        internal static class TestAccessor
+        {
+            public static void ReloadThemeSettings(IThemeRepository repository) =>
+                Settings = LoadThemeSettings(repository);
+
+            public static bool SuppressWin32Hooks
+            {
+                get => _suppressWin32HooksForTests;
+                set => _suppressWin32HooksForTests = value;
+            }
+        }
     }
 }

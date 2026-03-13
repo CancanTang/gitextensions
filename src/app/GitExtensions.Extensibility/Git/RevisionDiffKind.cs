@@ -1,8 +1,9 @@
-namespace GitExtensions.Extensibility.Git;
-
-public enum RevisionDiffKind
+namespace GitExtensions.Extensibility.Git
 {
-    DiffAB = 0,
-    DiffALocal,
-    DiffBLocal
+    public enum RevisionDiffKind
+    {
+        DiffAB = 0,
+        DiffALocal,
+        DiffBLocal
+    }
 }

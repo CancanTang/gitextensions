@@ -1,104 +1,108 @@
 ﻿using System.IO.Abstractions;
 
-namespace GitCommands.Git;
-
-/// <summary>
-/// Provides the ability to resolve the location of .git folder.
-/// </summary>
-public interface IGitDirectoryResolver
+namespace GitCommands.Git
 {
     /// <summary>
-    /// Resolves the .git folder for the given repository.
+    /// Provides the ability to resolve the location of .git folder.
     /// </summary>
-    /// <param name="repositoryPath">The repository working folder.</param>
-    /// <returns>The resolved location of .git folder.</returns>
-    string Resolve(string repositoryPath);
-}
-
-/// <summary>
-/// Resolves the location of .git folder.
-/// </summary>
-public sealed class GitDirectoryResolver : IGitDirectoryResolver
-{
-    private readonly IFileSystem _fileSystem;
-
-    public GitDirectoryResolver(IFileSystem fileSystem)
+    public interface IGitDirectoryResolver
     {
-        _fileSystem = fileSystem;
-    }
-
-    public GitDirectoryResolver()
-        : this(new FileSystem())
-    {
+        /// <summary>
+        /// Resolves the .git folder for the given repository.
+        /// </summary>
+        /// <param name="repositoryPath">The repository working folder.</param>
+        /// <returns>The resolved location of .git folder.</returns>
+        string Resolve(string repositoryPath);
     }
 
     /// <summary>
-    /// Resolves the .git folder for the given repository.
+    /// Resolves the location of .git folder.
     /// </summary>
-    /// <param name="repositoryPath">The repository working folder.</param>
-    /// <returns>
-    /// The resolved location of .git folder.
-    /// <list type="table">
-    ///   <item>
-    ///     <term>If <paramref name="repositoryPath"/> is an empty string</term>
-    ///     <description>it resolves to <see cref="string.Empty"/></description>
-    ///   </item>
-    ///   <item>
-    ///     <term>If <paramref name="repositoryPath"/> contains a .git file (i.e. the repository is a submodule)</term>
-    ///     <description>it resolves to the location of the submodule's .git folder under the superproject's .git folder with the trailing slash</description>
-    ///   </item>
-    ///   <item>
-    ///     <term>If <paramref name="repositoryPath"/> contains .git folder</term>
-    ///     <description>it resolves to the .git folder with the trailing slash</description>
-    ///   </item>
-    ///   <item>
-    ///     <term>else</term>
-    ///     <description>it returns <paramref name="repositoryPath"/> unchanged.</description>
-    ///   </item>
-    /// </list>
-    /// </returns>
-    /// <exception cref="ArgumentNullException"><paramref name="repositoryPath"/> is <see langword="null"/>.</exception>
-    public string Resolve(string repositoryPath)
+    public sealed class GitDirectoryResolver : IGitDirectoryResolver
     {
-        ArgumentNullException.ThrowIfNull(repositoryPath);
+        private readonly IFileSystem _fileSystem;
 
-        if (string.IsNullOrWhiteSpace(repositoryPath))
+        public GitDirectoryResolver(IFileSystem fileSystem)
         {
-            return string.Empty;
+            _fileSystem = fileSystem;
         }
 
-        // Workaround for links to .git directories on WSL
-        bool isWslLink = false;
-        string gitPath = Path.Combine(repositoryPath, ".git");
-        if (_fileSystem.File.Exists(gitPath))
+        public GitDirectoryResolver()
+            : this(new FileSystem())
         {
-            const string gitdir = "gitdir:";
-            string line;
-            try
+        }
+
+        /// <summary>
+        /// Resolves the .git folder for the given repository.
+        /// </summary>
+        /// <param name="repositoryPath">The repository working folder.</param>
+        /// <returns>
+        /// The resolved location of .git folder.
+        /// <list type="table">
+        ///   <item>
+        ///     <term>If <paramref name="repositoryPath"/> is an empty string</term>
+        ///     <description>it resolves to <see cref="string.Empty"/></description>
+        ///   </item>
+        ///   <item>
+        ///     <term>If <paramref name="repositoryPath"/> contains a .git file (i.e. the repository is a submodule)</term>
+        ///     <description>it resolves to the location of the submodule's .git folder under the superproject's .git folder with the trailing slash</description>
+        ///   </item>
+        ///   <item>
+        ///     <term>If <paramref name="repositoryPath"/> contains .git folder</term>
+        ///     <description>it resolves to the .git folder with the trailing slash</description>
+        ///   </item>
+        ///   <item>
+        ///     <term>else</term>
+        ///     <description>it returns <paramref name="repositoryPath"/> unchanged.</description>
+        ///   </item>
+        /// </list>
+        /// </returns>
+        /// <exception cref="ArgumentNullException"><paramref name="repositoryPath"/> is <see langword="null"/>.</exception>
+        public string Resolve(string repositoryPath)
+        {
+            if (repositoryPath is null)
             {
-                line = _fileSystem.File.ReadLines(gitPath).FirstOrDefault(l => l.StartsWith(gitdir));
-            }
-            catch (IOException) when (PathUtil.IsWslLink(gitPath))
-            {
-                // Assume this is a directory link as created by e.g. Google's repo tool.
-                // A link to a "gitdir:" file is not expected and not supported.
-                isWslLink = true;
-                line = null;
+                throw new ArgumentNullException(nameof(repositoryPath));
             }
 
-            if (line is not null)
+            if (string.IsNullOrWhiteSpace(repositoryPath))
             {
-                string path = line[gitdir.Length..].Trim().ToNativePath();
-                if (Path.IsPathRooted(path))
+                return string.Empty;
+            }
+
+            // Workaround for links to .git directories on WSL
+            bool isWslLink = false;
+            string gitPath = Path.Combine(repositoryPath, ".git");
+            if (_fileSystem.File.Exists(gitPath))
+            {
+                const string gitdir = "gitdir:";
+                string line;
+                try
                 {
-                    return path.EnsureTrailingPathSeparator();
+                    line = _fileSystem.File.ReadLines(gitPath).FirstOrDefault(l => l.StartsWith(gitdir));
+                }
+                catch (IOException) when (PathUtil.IsWslLink(gitPath))
+                {
+                    // Assume this is a directory link as created by e.g. Google's repo tool.
+                    // A link to a "gitdir:" file is not expected and not supported.
+                    isWslLink = true;
+                    line = null;
                 }
 
-                return Path.GetFullPath(Path.Combine(repositoryPath, path)).EnsureTrailingPathSeparator();
-            }
-        }
+                if (line is not null)
+                {
+                    string path = line[gitdir.Length..].Trim().ToNativePath();
+                    if (Path.IsPathRooted(path))
+                    {
+                        return path.EnsureTrailingPathSeparator();
+                    }
 
-        gitPath = gitPath.EnsureTrailingPathSeparator();
-        return _fileSystem.Directory.Exists(gitPath) || isWslLink ? gitPath : repositoryPath;
+                    return Path.GetFullPath(Path.Combine(repositoryPath, path)).EnsureTrailingPathSeparator();
+                }
+            }
+
+            gitPath = gitPath.EnsureTrailingPathSeparator();
+            return _fileSystem.Directory.Exists(gitPath) || isWslLink ? gitPath : repositoryPath;
+        }
     }
 }

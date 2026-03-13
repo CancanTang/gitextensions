@@ -1,61 +1,46 @@
 ﻿using System.Xml.Serialization;
 
-namespace GitCommands.UserRepositoryHistory;
-
-[Serializable]
-public class Repository
+namespace GitCommands.UserRepositoryHistory
 {
-    private string? _path;
-
-    public enum RepositoryAnchor
+    [Serializable]
+    public class Repository
     {
-        [XmlEnum(Name = "Pinned")]
-        AnchoredInTop,
-        [XmlEnum(Name = "AllRecent")]
-        AnchoredInRecent,
-        None
-    }
+        private string? _path;
 
-    // required by XmlSerializer
-    private Repository()
-    {
-        Anchor = RepositoryAnchor.None;
-    }
-
-    public Repository(string path)
-        : this()
-    {
-        Path = path;
-    }
-
-    public RepositoryAnchor Anchor { get; set; }
-
-    public string? Category { get; set; }
-
-    public string Path
-    {
-        get => _path ?? string.Empty;
-        set => _path = value;
-    }
-
-    public string GetParentPath()
-    {
-        if (Path.StartsWith(@"\\") || !Directory.Exists(Path))
+        public enum RepositoryAnchor
         {
-            return string.Empty;
+            [XmlEnum(Name = "Pinned")]
+            AnchoredInTop,
+            [XmlEnum(Name = "AllRecent")]
+            AnchoredInRecent,
+            None
         }
 
-        DirectoryInfo dir = new(Path);
-        if (dir.Parent is null)
+        // required by XmlSerializer
+        private Repository()
         {
-            return Path;
+            Anchor = RepositoryAnchor.None;
         }
 
-        return dir.Parent.FullName;
-    }
+        public Repository(string path)
+            : this()
+        {
+            Path = path;
+        }
 
-    public override string ToString()
-    {
-        return Path + " (" + Anchor + ")";
+        public RepositoryAnchor Anchor { get; set; }
+
+        public string? Category { get; set; }
+
+        public string Path
+        {
+            get => _path ?? string.Empty;
+            set => _path = value;
+        }
+
+        public override string ToString()
+        {
+            return Path + " (" + Anchor + ")";
+        }
     }
 }

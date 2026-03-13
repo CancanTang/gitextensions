@@ -1,36 +1,37 @@
 ﻿using GitCommands;
 
-namespace GitUI.UserManual;
-
-public class SingleHtmlUserManual : IProvideUserManual
+namespace GitUI.UserManual
 {
-    private static string? _location;
-
-    public static string Location
+    public class SingleHtmlUserManual : IProvideUserManual
     {
-        get
+        private static string? _location;
+
+        public static string Location
         {
-            if (_location is null)
+            get
             {
-                string path = Path.Combine(AppSettings.GetInstallDir(), "help");
-                Uri uri = new(path);
-                _location = uri.AbsolutePath;
+                if (_location is null)
+                {
+                    string path = Path.Combine(AppSettings.GetInstallDir(), "help");
+                    Uri uri = new(path);
+                    _location = uri.AbsolutePath;
+                }
+
+                return _location;
             }
-
-            return _location;
         }
-    }
 
-    private readonly string _anchorName;
+        private readonly string _anchorName;
 
-    public SingleHtmlUserManual(string anchorName)
-    {
-        _anchorName = anchorName;
-    }
+        public SingleHtmlUserManual(string anchorName)
+        {
+            _anchorName = anchorName;
+        }
 
-    public string GetUrl()
-    {
-        return string.Format("{0}/index.html{1}{2}",
-                             Location, string.IsNullOrEmpty(_anchorName) ? "" : "#", _anchorName);
+        public string GetUrl()
+        {
+            return string.Format("{0}/index.html{1}{2}",
+                                 Location, string.IsNullOrEmpty(_anchorName) ? "" : "#", _anchorName);
+        }
     }
 }

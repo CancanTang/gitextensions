@@ -3,70 +3,71 @@ using System.Text;
 using Git.hub;
 using GitExtensions.Extensibility.Plugins;
 
-namespace GitExtensions.Plugins.GitHub3;
-
-internal class GitHubPullRequest : IPullRequestInformation
+namespace GitExtensions.Plugins.GitHub3
 {
-    private readonly PullRequest _pullRequest;
-
-    public GitHubPullRequest(PullRequest pullRequest)
+    internal class GitHubPullRequest : IPullRequestInformation
     {
-        _pullRequest = pullRequest;
-    }
+        private readonly PullRequest _pullRequest;
 
-    public string Title => _pullRequest.Title;
-
-    public string Body => _pullRequest.Body;
-
-    public string Owner => _pullRequest.User.Login;
-
-    public DateTime Created => _pullRequest.CreatedAt;
-
-    private string? _diffData;
-
-    public async Task<string> GetDiffDataAsync()
-    {
-        if (_diffData is null)
+        public GitHubPullRequest(PullRequest pullRequest)
         {
-#pragma warning disable SYSLIB0014 // 'WebRequest.Create(string)' is obsolete
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(_pullRequest.DiffUrl);
-#pragma warning restore SYSLIB0014 // 'WebRequest.Create(string)' is obsolete
-            using WebResponse response = await request.GetResponseAsync();
-            using StreamReader reader = new(response.GetResponseStream(), Encoding.UTF8);
-            _diffData = await reader.ReadToEndAsync();
+            _pullRequest = pullRequest;
         }
 
-        return _diffData;
-    }
+        public string Title => _pullRequest.Title;
 
-    private IHostedRepository? _baseRepo;
-    public IHostedRepository BaseRepo => _baseRepo ??= new GitHubRepo(_pullRequest.Base.Repo);
+        public string Body => _pullRequest.Body;
 
-    private IHostedRepository? _headRepo;
-    public IHostedRepository HeadRepo => _headRepo ??= new GitHubRepo(_pullRequest.Head.Repo);
+        public string Owner => _pullRequest.User.Login;
 
-    public string BaseSha => _pullRequest.Base.Sha;
+        public DateTime Created => _pullRequest.CreatedAt;
 
-    public string HeadSha => _pullRequest.Head.Sha;
+        private string? _diffData;
 
-    public string BaseRef => _pullRequest.Base.Ref;
+        public async Task<string> GetDiffDataAsync()
+        {
+            if (_diffData is null)
+            {
+#pragma warning disable SYSLIB0014 // 'WebRequest.Create(string)' is obsolete
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(_pullRequest.DiffUrl);
+#pragma warning restore SYSLIB0014 // 'WebRequest.Create(string)' is obsolete
+                using WebResponse response = await request.GetResponseAsync();
+                using StreamReader reader = new(response.GetResponseStream(), Encoding.UTF8);
+                _diffData = await reader.ReadToEndAsync();
+            }
 
-    public string HeadRef => _pullRequest.Head.Ref;
+            return _diffData;
+        }
 
-    public string Id => _pullRequest.Number.ToString();
+        private IHostedRepository? _baseRepo;
+        public IHostedRepository BaseRepo => _baseRepo ??= new GitHubRepo(_pullRequest.Base.Repo);
 
-    public string DetailedInfo => string.Format("Base repo owner: {0}\nHead repo owner: {1}", BaseRepo.Owner, HeadRepo.Owner);
-    public string FetchBranch => string.Format("pr/n{0}_{1}", Id, HeadRef);
+        private IHostedRepository? _headRepo;
+        public IHostedRepository HeadRepo => _headRepo ??= new GitHubRepo(_pullRequest.Head.Repo);
 
-    public void Close()
-    {
-        _pullRequest.Close();
-    }
+        public string BaseSha => _pullRequest.Base.Sha;
 
-    private IPullRequestDiscussion? _discussion;
+        public string HeadSha => _pullRequest.Head.Sha;
 
-    public IPullRequestDiscussion GetDiscussion()
-    {
-        return _discussion ??= new GitHubPullRequestDiscussion(_pullRequest);
+        public string BaseRef => _pullRequest.Base.Ref;
+
+        public string HeadRef => _pullRequest.Head.Ref;
+
+        public string Id => _pullRequest.Number.ToString();
+
+        public string DetailedInfo => string.Format("Base repo owner: {0}\nHead repo owner: {1}", BaseRepo.Owner, HeadRepo.Owner);
+        public string FetchBranch => string.Format("pr/n{0}_{1}", Id, HeadRef);
+
+        public void Close()
+        {
+            _pullRequest.Close();
+        }
+
+        private IPullRequestDiscussion? _discussion;
+
+        public IPullRequestDiscussion GetDiscussion()
+        {
+            return _discussion ??= new GitHubPullRequestDiscussion(_pullRequest);
+        }
     }
 }

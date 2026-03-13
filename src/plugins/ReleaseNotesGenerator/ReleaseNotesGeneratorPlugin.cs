@@ -4,27 +4,28 @@ using GitExtensions.Extensibility.Git;
 using GitExtensions.Extensibility.Plugins;
 using GitExtensions.Plugins.ReleaseNotesGenerator.Properties;
 
-namespace GitExtensions.Plugins.ReleaseNotesGenerator;
-
-[Export(typeof(IGitPlugin))]
-public class ReleaseNotesGeneratorPlugin : GitPluginBase
+namespace GitExtensions.Plugins.ReleaseNotesGenerator
 {
-    public ReleaseNotesGeneratorPlugin() : base(false)
+    [Export(typeof(IGitPlugin))]
+    public class ReleaseNotesGeneratorPlugin : GitPluginBase
     {
-        Id = new Guid("49E7F2D6-AD79-489E-80A4-5CD212AE6DF3");
-        Name = "Release Notes Generator";
-        Translate(AppSettings.CurrentTranslation);
-        Icon = Resources.IconReleaseNotesGenerator;
-    }
-
-    public override bool Execute(GitUIEventArgs args)
-    {
-        using ReleaseNotesGeneratorForm form = new(args);
-        if (form.ShowDialog(args.OwnerForm) == DialogResult.OK)
+        public ReleaseNotesGeneratorPlugin() : base(false)
         {
-            return true;
+            Id = new Guid("49E7F2D6-AD79-489E-80A4-5CD212AE6DF3");
+            Name = "Release Notes Generator";
+            Translate(AppSettings.CurrentTranslation);
+            Icon = Resources.IconReleaseNotesGenerator;
         }
 
-        return false;
+        public override bool Execute(GitUIEventArgs args)
+        {
+            using ReleaseNotesGeneratorForm form = new(args);
+            if (form.ShowDialog(args.OwnerForm) == DialogResult.OK)
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 }

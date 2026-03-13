@@ -1,27 +1,28 @@
 using System.Net;
 
-namespace ResourceManager.CommitDataRenders;
-
-/// <summary>
-/// Formats the commit information heading labels with tabs.
-/// </summary>
-public sealed class TabbedHeaderLabelFormatter : IHeaderLabelFormatter
+namespace ResourceManager.CommitDataRenders
 {
-    public string FormatLabel(string label, int desiredLength)
+    /// <summary>
+    /// Formats the commit information heading labels with tabs.
+    /// </summary>
+    public sealed class TabbedHeaderLabelFormatter : IHeaderLabelFormatter
     {
-        return FillToLength(WebUtility.HtmlEncode(label) + ":");
-
-        string FillToLength(string input)
+        public string FormatLabel(string label, int desiredLength)
         {
-            const int tabSize = 4;
+            return FillToLength(WebUtility.HtmlEncode(label) + ":");
 
-            if (input.Length < desiredLength)
+            string FillToLength(string input)
             {
-                int l = desiredLength - input.Length;
-                return input + new string('\t', l / tabSize);
-            }
+                const int tabSize = 4;
 
-            return input;
+                if (input.Length < desiredLength)
+                {
+                    int l = desiredLength - input.Length;
+                    return input + new string('\t', l / tabSize);
+                }
+
+                return input;
+            }
         }
     }
 }

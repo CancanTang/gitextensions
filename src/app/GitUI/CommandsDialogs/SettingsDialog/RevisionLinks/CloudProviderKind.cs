@@ -1,8 +1,9 @@
-﻿namespace GitUI.CommandsDialogs.SettingsDialog.RevisionLinks;
-
-public enum CloudProviderKind
+﻿namespace GitUI.CommandsDialogs.SettingsDialog.RevisionLinks
 {
-    None = 0,
-    GitHub,
-    AzureDevOps,
+    public enum CloudProviderKind
+    {
+        None = 0,
+        GitHub,
+        AzureDevOps,
+    }
 }

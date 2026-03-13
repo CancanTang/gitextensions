@@ -4,82 +4,83 @@ using GitCommands.Git;
 using GitExtensions.Extensibility.Git;
 using NSubstitute;
 
-namespace GitCommandsTests;
-
-[TestFixture]
-public class GitRevisionInfoProviderTests
+namespace GitCommandsTests
 {
-    private IGitModule _module;
-    private GitRevisionInfoProvider _provider;
-
-    [SetUp]
-    public void Setup()
+    [TestFixture]
+    public class GitRevisionInfoProviderTests
     {
-        _module = Substitute.For<IGitModule>();
-        _provider = new GitRevisionInfoProvider(() => _module);
-    }
+        private IGitModule _module;
+        private GitRevisionInfoProvider _provider;
 
-    [Test]
-    public void LoadChildren_should_throw_if_null()
-    {
-        ((Action)(() => _provider.LoadChildren(null))).Should().Throw<ArgumentNullException>();
-    }
+        [SetUp]
+        public void Setup()
+        {
+            _module = Substitute.For<IGitModule>();
+            _provider = new GitRevisionInfoProvider(() => _module);
+        }
 
-    [Test]
-    public void LoadChildren_should_throw_if_ObjectId_is_null()
-    {
-        IGitItem item = Substitute.For<IGitItem>();
+        [Test]
+        public void LoadChildren_should_throw_if_null()
+        {
+            ((Action)(() => _provider.LoadChildren(null))).Should().Throw<ArgumentNullException>();
+        }
 
-        // ObjectId checks input, use Try to get an illegal value
-        ObjectId.TryParse("", out ObjectId objectId);
-        item.ObjectId.Returns(objectId);
+        [Test]
+        public void LoadChildren_should_throw_if_ObjectId_is_null()
+        {
+            IGitItem item = Substitute.For<IGitItem>();
 
-        ((Action)(() => _provider.LoadChildren(item))).Should().Throw<ArgumentException>();
-    }
+            // ObjectId checks input, use Try to get an illegal value
+            ObjectId.TryParse("", out ObjectId objectId);
+            item.ObjectId.Returns(objectId);
 
-    [Test]
-    public void LoadChildren_should_return_if_gitmodule_not_supplied()
-    {
-        string objectId = ObjectId.Random().ToString();
-        IGitItem item = Substitute.For<IGitItem>();
-        item.Guid.Returns(objectId);
+            ((Action)(() => _provider.LoadChildren(item))).Should().Throw<ArgumentException>();
+        }
 
-        _provider = new GitRevisionInfoProvider(() => null);
+        [Test]
+        public void LoadChildren_should_return_if_gitmodule_not_supplied()
+        {
+            string objectId = ObjectId.Random().ToString();
+            IGitItem item = Substitute.For<IGitItem>();
+            item.Guid.Returns(objectId);
 
-        ((Action)(() => _provider.LoadChildren(item))).Should().Throw<ArgumentException>();
-    }
+            _provider = new GitRevisionInfoProvider(() => null);
 
-    [Test]
-    public void LoadChildren_should_return_shallow_tree_for_non_GitItem()
-    {
-        ObjectId objectId = ObjectId.Random();
-        IGitItem item = Substitute.For<IGitItem>();
-        item.ObjectId.Returns(objectId);
-        item.Guid.Returns(objectId.ToString());
+            ((Action)(() => _provider.LoadChildren(item))).Should().Throw<ArgumentException>();
+        }
 
-        IObjectGitItem[] items = [Substitute.For<IObjectGitItem>(), Substitute.For<IObjectGitItem>(), Substitute.For<IObjectGitItem>()];
-        _module.GetTree(objectId, full: false).Returns(items);
+        [Test]
+        public void LoadChildren_should_return_shallow_tree_for_non_GitItem()
+        {
+            ObjectId objectId = ObjectId.Random();
+            IGitItem item = Substitute.For<IGitItem>();
+            item.ObjectId.Returns(objectId);
+            item.Guid.Returns(objectId.ToString());
 
-        IEnumerable<INamedGitItem> children = _provider.LoadChildren(item);
+            INamedGitItem[] items = new[] { Substitute.For<INamedGitItem>(), Substitute.For<INamedGitItem>(), Substitute.For<INamedGitItem>() };
+            _module.GetTree(objectId, full: false).Returns(items);
 
-        children.Should().BeEquivalentTo(items);
-        _module.Received(1).GetTree(objectId, full: false);
-    }
+            IEnumerable<INamedGitItem> children = _provider.LoadChildren(item);
 
-    [Test]
-    public void LoadChildren_should_return_shallow_tree_for_GitItem_with_updated_FileName()
-    {
-        ObjectId commitId = ObjectId.Random();
-        GitItem item = new(0, GitObjectType.Tree, commitId, "folder");
+            children.Should().BeEquivalentTo(items);
+            _module.Received(1).GetTree(objectId, false);
+        }
 
-        IObjectGitItem[] items = [Substitute.For<IObjectGitItem>(), new GitItem(0, GitObjectType.Blob, ObjectId.Random(), "file2"), new GitItem(0, GitObjectType.Blob, ObjectId.Random(), "file3")];
-        _module.GetTree(commitId, full: false).Returns(items);
+        [Test]
+        public void LoadChildren_should_return_shallow_tree_for_GitItem_with_updated_FileName()
+        {
+            ObjectId commitId = ObjectId.Random();
+            GitItem item = new(0, GitObjectType.Tree, commitId, "folder");
 
-        IEnumerable<INamedGitItem> children = _provider.LoadChildren(item);
+            INamedGitItem[] items = new[] { Substitute.For<INamedGitItem>(), new GitItem(0, GitObjectType.Blob, ObjectId.Random(), "file2"), new GitItem(0, GitObjectType.Blob, ObjectId.Random(), "file3") };
+            _module.GetTree(commitId, false).Returns(items);
 
-        children.Should().BeEquivalentTo(items);
-        ((GitItem)items[1]).FileName.Should().Be(Path.Combine(item.FileName, "file2"));
-        ((GitItem)items[2]).FileName.Should().Be(Path.Combine(item.FileName, "file3"));
-        _module.Received(1).GetTree(commitId, full: false);
+            IEnumerable<INamedGitItem> children = _provider.LoadChildren(item);
+
+            children.Should().BeEquivalentTo(items);
+            ((GitItem)items[1]).FileName.Should().Be(Path.Combine(item.FileName, "file2"));
+            ((GitItem)items[2]).FileName.Should().Be(Path.Combine(item.FileName, "file3"));
+            _module.Received(1).GetTree(commitId, false);
+        }
     }
 }

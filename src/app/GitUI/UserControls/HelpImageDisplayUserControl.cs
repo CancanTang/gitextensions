@@ -2,271 +2,272 @@
 using GitExtUtils.GitUI;
 using ResourceManager;
 
-namespace GitUI.Help;
-
-public partial class HelpImageDisplayUserControl : GitExtensionsControl
+namespace GitUI.Help
 {
-    private Image? _image1;
-    private Image? _image2;
-    private bool _isExpanded;
-
-    ////public const string fastForwardHoverText = "Hover to see scenario when fast forward is possible.";
-
-    private bool _isLoaded;
-
-    public HelpImageDisplayUserControl()
+    public partial class HelpImageDisplayUserControl : GitExtensionsControl
     {
-        InitializeComponent();
-        InitializeComplete();
-    }
+        private Image? _image1;
+        private Image? _image2;
+        private bool _isExpanded;
 
-    /// <summary>
-    /// NOTE: will also be called if designer code calls "this.helpImageDisplayUserControl1.ShowImage2OnHover = true;".
-    /// </summary>
-    private void HelpImageDisplayUserControl_Load(object sender, EventArgs e)
-    {
-        IsExpanded = LoadIsExpandedValueFromSettings(IsExpanded);
-        UpdateIsExpandedState();
-        UpdateImageDisplay();
-        UpdateControlSize();
+        ////public const string fastForwardHoverText = "Hover to see scenario when fast forward is possible.";
 
-        _isLoaded = true;
-    }
+        private bool _isLoaded;
 
-    public bool IsExpanded
-    {
-        get { return _isExpanded; }
-        set
+        public HelpImageDisplayUserControl()
         {
-            _isExpanded = value;
+            InitializeComponent();
+            InitializeComplete();
+        }
+
+        /// <summary>
+        /// NOTE: will also be called if designer code calls "this.helpImageDisplayUserControl1.ShowImage2OnHover = true;".
+        /// </summary>
+        private void HelpImageDisplayUserControl_Load(object sender, EventArgs e)
+        {
+            IsExpanded = LoadIsExpandedValueFromSettings(IsExpanded);
             UpdateIsExpandedState();
-
-            if (_isLoaded)
-            {
-                // to avoid calling this when InitializeComponents is called
-                /*
-                 * ...
-                            this.helpImageDisplayUserControl1.IsExpanded = false;                       // this before...
-                            this.helpImageDisplayUserControl1.Location = new System.Drawing.Point(3, 3);
-                            this.helpImageDisplayUserControl1.MinimumSize = new System.Drawing.Size(30, 50);
-                            this.helpImageDisplayUserControl1.Name = "helpImageDisplayUserControl1";    // ...this gives wrong id!!!
-                 * ...
-
-                 */
-
-                SaveIsExpandedValueInSettings(value);
-            }
-        }
-    }
-
-    public string? UniqueIsExpandedSettingsId { get; set; }
-
-    private void UpdateIsExpandedState()
-    {
-        if (_isExpanded)
-        {
-            linkLabelHide.Visible = true;
-
-            buttonShowHelp.Visible = false;
-            //// linkLabelShowHelp.Visible = false; // Why use button instead of label? Because button has constant width independent of language!
-
-            pictureBox1.Visible = true;
-            labelHoverText.Visible = IsOnHoverShowImage2;
-        }
-        else
-        {
-            linkLabelHide.Visible = false;
-
-            buttonShowHelp.Visible = true;
-            ////linkLabelShowHelp.Visible = true;
-
-            pictureBox1.Visible = false;
-            labelHoverText.Visible = false;
-        }
-
-        UpdateControlSize();
-    }
-
-    public Image? Image1
-    {
-        get { return _image1; }
-        set
-        {
-            _image1 = value is null ? value : DpiUtil.Scale(value);
             UpdateImageDisplay();
-            if (IsExpanded)
-            {
-                UpdateControlSize();
-            }
-        }
-    }
+            UpdateControlSize();
 
-    public Image? Image2
-    {
-        get { return _image2; }
-        set
-        {
-            _image2 = value is null ? value : DpiUtil.Scale(value);
-            UpdateImageDisplay();
-            if (IsExpanded)
-            {
-                UpdateControlSize();
-            }
+            _isLoaded = true;
         }
-    }
 
-    /// <summary>
-    /// see also IsOnHoverShowImage2NoticeText.
-    /// </summary>
-    public bool IsOnHoverShowImage2
-    {
-        get { return _showImage2OnHover; }
-        set
+        public bool IsExpanded
         {
-            _showImage2OnHover = value;
-            if (_isLoaded)
+            get { return _isExpanded; }
+            set
             {
+                _isExpanded = value;
                 UpdateIsExpandedState();
-                ////labelHoverText.Visible = value; // NOTE: would trigger OnLoad
+
+                if (_isLoaded)
+                {
+                    // to avoid calling this when InitializeComponents is called
+                    /*
+                     * ...
+                                this.helpImageDisplayUserControl1.IsExpanded = false;                       // this before...
+                                this.helpImageDisplayUserControl1.Location = new System.Drawing.Point(3, 3);
+                                this.helpImageDisplayUserControl1.MinimumSize = new System.Drawing.Size(30, 50);
+                                this.helpImageDisplayUserControl1.Name = "helpImageDisplayUserControl1";    // ...this gives wrong id!!!
+                     * ...
+
+                     */
+
+                    SaveIsExpandedValueInSettings(value);
+                }
             }
         }
-    }
 
-    /// <summary>
-    /// only shown when IsOnHoverShowImage2 is true.
-    /// </summary>
-    public string IsOnHoverShowImage2NoticeText
-    {
-        get => labelHoverText.Text;
-        set => labelHoverText.Text = value;
-    }
+        public string? UniqueIsExpandedSettingsId { get; set; }
 
-    private bool _isHover;
-    private bool _showImage2OnHover;
-
-    private bool IsHovering()
-    {
-        return _isHover;
-    }
-
-    private string GetId()
-    {
-        return UniqueIsExpandedSettingsId ?? "MUST_BE_SET";
-    }
-
-    private void SaveIsExpandedValueInSettings(bool value)
-    {
-        AppSettings.SetBool("HelpIsExpanded" + GetId(), value);
-    }
-
-    private bool LoadIsExpandedValueFromSettings(bool defaultValue)
-    {
-        return AppSettings.GetBool("HelpIsExpanded" + GetId(), defaultValue);
-    }
-
-    private void UpdateControlSize()
-    {
-        Size size;
-        if (IsExpanded)
+        private void UpdateIsExpandedState()
         {
-            if (_image1 is not null && _image2 is null)
+            if (_isExpanded)
             {
-                size = _image1.Size;
-            }
-            else if (_image1 is not null && _image2 is not null)
-            {
-                int w = Math.Max(_image1.Size.Width, _image2.Width);
-                int h = Math.Max(_image1.Size.Height, _image2.Height);
-                size = new Size(w, h);
+                linkLabelHide.Visible = true;
+
+                buttonShowHelp.Visible = false;
+                //// linkLabelShowHelp.Visible = false; // Why use button instead of label? Because button has constant width independent of language!
+
+                pictureBox1.Visible = true;
+                labelHoverText.Visible = IsOnHoverShowImage2;
             }
             else
             {
-                size = new Size(40, 40); // default size
+                linkLabelHide.Visible = false;
+
+                buttonShowHelp.Visible = true;
+                ////linkLabelShowHelp.Visible = true;
+
+                pictureBox1.Visible = false;
+                labelHoverText.Visible = false;
             }
 
-            // add vertical space of other controls
-            size.Height +=
-                /*labelHoverText.Height too much because when collapsed there is much wordwrap, use fixed value 30*/ 30
-                + flowLayoutPanel1.Height;
-        }
-        else
-        {
-            size = new Size(30, 50); // size for "show help" button
+            UpdateControlSize();
         }
 
-        // apply size to control
-        Form form = TopLevelControl as Form;
-        Size s = new();
-        Size ms = new();
-        if (form is not null)
+        public Image? Image1
         {
-            s = form.Size;
-            s.Width -= Size.Width;
-            ms = form.MinimumSize;
-            if (!ms.IsEmpty)
+            get { return _image1; }
+            set
             {
-                ms.Width -= Size.Width;
-                form.MinimumSize = new Size();
+                _image1 = value is null ? value : DpiUtil.Scale(value);
+                UpdateImageDisplay();
+                if (IsExpanded)
+                {
+                    UpdateControlSize();
+                }
             }
         }
 
-        Size = size;
-        MinimumSize = size;
-        if (form is not null)
+        public Image? Image2
         {
-            s.Width += Size.Width;
-            form.Size = s;
-            if (!ms.IsEmpty)
+            get { return _image2; }
+            set
             {
-                ms.Width += Size.Width;
-                form.MinimumSize = ms;
+                _image2 = value is null ? value : DpiUtil.Scale(value);
+                UpdateImageDisplay();
+                if (IsExpanded)
+                {
+                    UpdateControlSize();
+                }
             }
         }
-    }
 
-    private void UpdateImageDisplay()
-    {
-        if (!IsOnHoverShowImage2)
+        /// <summary>
+        /// see also IsOnHoverShowImage2NoticeText.
+        /// </summary>
+        public bool IsOnHoverShowImage2
         {
-            pictureBox1.Image = Image1;
-            return;
+            get { return _showImage2OnHover; }
+            set
+            {
+                _showImage2OnHover = value;
+                if (_isLoaded)
+                {
+                    UpdateIsExpandedState();
+                    ////labelHoverText.Visible = value; // NOTE: would trigger OnLoad
+                }
+            }
         }
 
-        pictureBox1.Image = IsHovering()
-            ? Image2
-            : Image1;
-    }
-
-    private void HelpImageDisplayUserControl_MouseEnter(object sender, EventArgs e)
-    {
-        if (IsOnHoverShowImage2)
+        /// <summary>
+        /// only shown when IsOnHoverShowImage2 is true.
+        /// </summary>
+        public string IsOnHoverShowImage2NoticeText
         {
-            _isHover = true;
-            UpdateImageDisplay();
+            get => labelHoverText.Text;
+            set => labelHoverText.Text = value;
         }
-    }
 
-    private void HelpImageDisplayUserControl_MouseLeave(object sender, EventArgs e)
-    {
-        if (IsOnHoverShowImage2)
+        private bool _isHover;
+        private bool _showImage2OnHover;
+
+        private bool IsHovering()
         {
-            _isHover = false;
-            UpdateImageDisplay();
+            return _isHover;
         }
-    }
 
-    private void linkLabelHide_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-    {
-        IsExpanded = false;
-    }
+        private string GetId()
+        {
+            return UniqueIsExpandedSettingsId ?? "MUST_BE_SET";
+        }
 
-    private void buttonShowHelp_Click(object sender, EventArgs e)
-    {
-        IsExpanded = true;
-    }
+        private void SaveIsExpandedValueInSettings(bool value)
+        {
+            AppSettings.SetBool("HelpIsExpanded" + GetId(), value);
+        }
 
-    private void linkLabelShowHelp_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-    {
-        IsExpanded = true;
+        private bool LoadIsExpandedValueFromSettings(bool defaultValue)
+        {
+            return AppSettings.GetBool("HelpIsExpanded" + GetId(), defaultValue);
+        }
+
+        private void UpdateControlSize()
+        {
+            Size size;
+            if (IsExpanded)
+            {
+                if (_image1 is not null && _image2 is null)
+                {
+                    size = _image1.Size;
+                }
+                else if (_image1 is not null && _image2 is not null)
+                {
+                    int w = Math.Max(_image1.Size.Width, _image2.Width);
+                    int h = Math.Max(_image1.Size.Height, _image2.Height);
+                    size = new Size(w, h);
+                }
+                else
+                {
+                    size = new Size(40, 40); // default size
+                }
+
+                // add vertical space of other controls
+                size.Height +=
+                    /*labelHoverText.Height too much because when collapsed there is much wordwrap, use fixed value 30*/ 30
+                    + flowLayoutPanel1.Height;
+            }
+            else
+            {
+                size = new Size(30, 50); // size for "show help" button
+            }
+
+            // apply size to control
+            Form form = TopLevelControl as Form;
+            Size s = new();
+            Size ms = new();
+            if (form is not null)
+            {
+                s = form.Size;
+                s.Width -= Size.Width;
+                ms = form.MinimumSize;
+                if (!ms.IsEmpty)
+                {
+                    ms.Width -= Size.Width;
+                    form.MinimumSize = new Size();
+                }
+            }
+
+            Size = size;
+            MinimumSize = size;
+            if (form is not null)
+            {
+                s.Width += Size.Width;
+                form.Size = s;
+                if (!ms.IsEmpty)
+                {
+                    ms.Width += Size.Width;
+                    form.MinimumSize = ms;
+                }
+            }
+        }
+
+        private void UpdateImageDisplay()
+        {
+            if (!IsOnHoverShowImage2)
+            {
+                pictureBox1.Image = Image1;
+                return;
+            }
+
+            pictureBox1.Image = IsHovering()
+                ? Image2
+                : Image1;
+        }
+
+        private void HelpImageDisplayUserControl_MouseEnter(object sender, EventArgs e)
+        {
+            if (IsOnHoverShowImage2)
+            {
+                _isHover = true;
+                UpdateImageDisplay();
+            }
+        }
+
+        private void HelpImageDisplayUserControl_MouseLeave(object sender, EventArgs e)
+        {
+            if (IsOnHoverShowImage2)
+            {
+                _isHover = false;
+                UpdateImageDisplay();
+            }
+        }
+
+        private void linkLabelHide_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            IsExpanded = false;
+        }
+
+        private void buttonShowHelp_Click(object sender, EventArgs e)
+        {
+            IsExpanded = true;
+        }
+
+        private void linkLabelShowHelp_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            IsExpanded = true;
+        }
     }
 }

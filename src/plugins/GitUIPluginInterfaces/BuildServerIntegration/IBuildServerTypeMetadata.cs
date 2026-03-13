@@ -1,11 +1,12 @@
-namespace GitUIPluginInterfaces.BuildServerIntegration;
-
-public interface IBuildServerTypeMetadata
+namespace GitUIPluginInterfaces.BuildServerIntegration
 {
-    string BuildServerType { get; }
+    public interface IBuildServerTypeMetadata
+    {
+        string BuildServerType { get; }
 
-    /// <summary>
-    /// returns null if can be loaded, the reason if can't
-    /// </summary>
-    string? CanBeLoaded { get; }
+        /// <summary>
+        /// returns null if can be loaded, the reason if can't
+        /// </summary>
+        string? CanBeLoaded { get; }
+    }
 }

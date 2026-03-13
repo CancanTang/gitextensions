@@ -1,11 +1,12 @@
-﻿namespace System;
-
-internal static partial class NativeMethods
+﻿namespace System
 {
-    public struct COLORREF
+    internal static partial class NativeMethods
     {
-        public byte R;
-        public byte G;
-        public byte B;
+        public struct COLORREF
+        {
+            public byte R;
+            public byte G;
+            public byte B;
+        }
     }
 }

@@ -4,73 +4,74 @@ using GitCommands.Git;
 using GitUI;
 using GitUI.CommandsDialogs;
 
-namespace GitExtensions.UITests.CommandsDialogs;
-
-[Apartment(ApartmentState.STA)]
-public class FormPushTests
+namespace GitExtensions.UITests.CommandsDialogs
 {
-    // Created once for the fixture
-    private ReferenceRepository _referenceRepository;
-
-    // Created once for each test
-    private GitUICommands _commands;
-
-    [SetUp]
-    public void SetUp()
+    [Apartment(ApartmentState.STA)]
+    public class FormPushTests
     {
-        _referenceRepository = new ReferenceRepository();
-        _commands = new GitUICommands(GlobalServiceContainer.CreateDefaultMockServiceContainer(), _referenceRepository.Module);
-    }
+        // Created once for the fixture
+        private ReferenceRepository _referenceRepository;
 
-    [TearDown]
-    public void TearDown()
-    {
-        _referenceRepository.Dispose();
-    }
+        // Created once for each test
+        private GitUICommands _commands;
 
-    // Note: the DataBindings between ForcePushTags and ForcePushBranches or ckForceWithLease (depending on Git version) do not function in this test environment
-    [TestCase(false, false, false, ForcePushOptions.DoNotForce)]
-    [TestCase(false, true, false, ForcePushOptions.Force)]
-    [TestCase(false, false, true, ForcePushOptions.Force)] // ForcePushTag requires normal force as with-lease is not allowed for tags
-    [TestCase(false, true, true, ForcePushOptions.Force)]
-    [TestCase(true, false, false, ForcePushOptions.ForceWithLease)] // would be ForcePushOptions.DoNotForce if DataBindings were working
-    [TestCase(true, true, false, ForcePushOptions.Force)]
-    [TestCase(true, false, true, ForcePushOptions.Force)] // ForcePushBranches and ForcePushTags take precedence over ckForceWithLease
-    [TestCase(true, true, true, ForcePushOptions.Force)] // ForcePushBranches and ForcePushTags take precedence over ckForceWithLease
-    public void Should_choose_correct_force_push_option_for_checkbox_state(
-        bool forcePushBranchWithLeaseChecked, bool forcePushBranchChecked, bool forcePushTagChecked, ForcePushOptions forcePushOption)
-    {
-        RunFormTest(
-            form =>
-            {
-                FormPush.TestAccessor accessor = form.GetTestAccessor();
+        [SetUp]
+        public void SetUp()
+        {
+            ReferenceRepository.ResetRepo(ref _referenceRepository);
+            _commands = new GitUICommands(GlobalServiceContainer.CreateDefaultMockServiceContainer(), _referenceRepository.Module);
+        }
 
-                accessor.ForcePushTags.Checked = forcePushTagChecked;
-                accessor.ckForceWithLease.Checked = forcePushBranchWithLeaseChecked;
-                accessor.ForcePushBranches.Checked = forcePushBranchChecked;
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            _referenceRepository.Dispose();
+        }
 
-                accessor.GetForcePushOption().Should().Be(forcePushOption);
-            });
-    }
+        // Note: the DataBindings between ForcePushTags and ForcePushBranches or ckForceWithLease (depending on Git version) do not function in this test environment
+        [TestCase(false, false, false, ForcePushOptions.DoNotForce)]
+        [TestCase(false, true, false, ForcePushOptions.Force)]
+        [TestCase(false, false, true, ForcePushOptions.Force)] // ForcePushTag requires normal force as with-lease is not allowed for tags
+        [TestCase(false, true, true, ForcePushOptions.Force)]
+        [TestCase(true, false, false, ForcePushOptions.ForceWithLease)] // would be ForcePushOptions.DoNotForce if DataBindings were working
+        [TestCase(true, true, false, ForcePushOptions.Force)]
+        [TestCase(true, false, true, ForcePushOptions.Force)] // ForcePushBranches and ForcePushTags take precedence over ckForceWithLease
+        [TestCase(true, true, true, ForcePushOptions.Force)] // ForcePushBranches and ForcePushTags take precedence over ckForceWithLease
+        public void Should_choose_correct_force_push_option_for_checkbox_state(
+            bool forcePushBranchWithLeaseChecked, bool forcePushBranchChecked, bool forcePushTagChecked, ForcePushOptions forcePushOption)
+        {
+            RunFormTest(
+                form =>
+                {
+                    FormPush.TestAccessor accessor = form.GetTestAccessor();
 
-    private void RunFormTest(Action<FormPush> testDriver)
-    {
-        RunFormTest(
-            form =>
-            {
-                testDriver(form);
-                return Task.CompletedTask;
-            });
-    }
+                    accessor.ForcePushTags.Checked = forcePushTagChecked;
+                    accessor.ckForceWithLease.Checked = forcePushBranchWithLeaseChecked;
+                    accessor.ForcePushBranches.Checked = forcePushBranchChecked;
 
-    private void RunFormTest(Func<FormPush, Task> testDriverAsync)
-    {
-        UITest.RunForm(
-            () =>
-            {
-                // False because we haven't performed any actions
-                ClassicAssert.False(_commands.StartPushDialog(owner: null, pushOnShow: false, forceWithLease: false, out _));
-            },
-            testDriverAsync);
+                    accessor.GetForcePushOption().Should().Be(forcePushOption);
+                });
+        }
+
+        private void RunFormTest(Action<FormPush> testDriver)
+        {
+            RunFormTest(
+                form =>
+                {
+                    testDriver(form);
+                    return Task.CompletedTask;
+                });
+        }
+
+        private void RunFormTest(Func<FormPush, Task> testDriverAsync)
+        {
+            UITest.RunForm(
+                () =>
+                {
+                    // False because we haven't performed any actions
+                    Assert.False(_commands.StartPushDialog(owner: null, pushOnShow: false, forceWithLease: false, out _));
+                },
+                testDriverAsync);
+        }
     }
 }

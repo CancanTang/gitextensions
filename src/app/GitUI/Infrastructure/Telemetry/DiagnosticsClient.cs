@@ -5,89 +5,90 @@ using GitCommands;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
 
-namespace GitUI.Infrastructure.Telemetry;
-
-public static class DiagnosticsClient
+namespace GitUI.Infrastructure.Telemetry
 {
-    private static bool _initialized;
-    private static TelemetryClient? _client;
-    private static TelemetryConfiguration _telemetryConfiguration = TelemetryConfiguration.CreateDefault();
-
-    private static bool Enabled => _initialized && (AppSettings.TelemetryEnabled ?? false);
-
-    public static void Initialize(bool isDirty)
+    public static class DiagnosticsClient
     {
-        _telemetryConfiguration.TelemetryInitializers.Add(new AppEnvironmentTelemetryInitializer());
-        _telemetryConfiguration.TelemetryInitializers.Add(new AppInfoTelemetryInitializer(isDirty));
-        _telemetryConfiguration.TelemetryInitializers.Add(new MonitorsTelemetryInitializer());
-        _telemetryConfiguration.TelemetryInitializers.Add(new ThemingTelemetryInitializer());
+        private static bool _initialized;
+        private static TelemetryClient? _client;
+        private static TelemetryConfiguration _telemetryConfiguration = TelemetryConfiguration.CreateDefault();
 
-        Application.ApplicationExit += (s, e) =>
+        private static bool Enabled => _initialized && (AppSettings.TelemetryEnabled ?? false);
+
+        public static void Initialize(bool isDirty)
         {
-            TrackEvent("AppExit");
-            OnExit();
-        };
+            _telemetryConfiguration.TelemetryInitializers.Add(new AppEnvironmentTelemetryInitializer());
+            _telemetryConfiguration.TelemetryInitializers.Add(new AppInfoTelemetryInitializer(isDirty));
+            _telemetryConfiguration.TelemetryInitializers.Add(new MonitorsTelemetryInitializer());
+            _telemetryConfiguration.TelemetryInitializers.Add(new ThemingTelemetryInitializer());
 
-        _client = new TelemetryClient(_telemetryConfiguration);
+            Application.ApplicationExit += (s, e) =>
+            {
+                TrackEvent("AppExit");
+                OnExit();
+            };
 
-        // override capture of the hostname
-        // https://github.com/Microsoft/ApplicationInsights-dotnet/blob/80025b5d79cc52485510d422cfa5a0a8159dac83/src/Microsoft.ApplicationInsights/TelemetryClient.cs#L544
-        _client.Context.Cloud.RoleInstance = AppSettings.ApplicationName;
-        _client.Context.Cloud.RoleName = AppSettings.ApplicationName;
+            _client = new TelemetryClient(_telemetryConfiguration);
 
-        _initialized = true;
-    }
+            // override capture of the hostname
+            // https://github.com/Microsoft/ApplicationInsights-dotnet/blob/80025b5d79cc52485510d422cfa5a0a8159dac83/src/Microsoft.ApplicationInsights/TelemetryClient.cs#L544
+            _client.Context.Cloud.RoleInstance = AppSettings.ApplicationName;
+            _client.Context.Cloud.RoleName = AppSettings.ApplicationName;
 
-    public static void TrackEvent(string eventName, IDictionary<string, string>? properties = null, IDictionary<string, double>? metrics = null)
-    {
-        if (!Enabled)
-        {
-            return;
+            _initialized = true;
         }
 
-        _client!.TrackEvent(eventName, properties, metrics);
-    }
-
-    public static void TrackTrace(string evt)
-    {
-        if (!Enabled)
+        public static void TrackEvent(string eventName, IDictionary<string, string>? properties = null, IDictionary<string, double>? metrics = null)
         {
-            return;
+            if (!Enabled)
+            {
+                return;
+            }
+
+            _client!.TrackEvent(eventName, properties, metrics);
         }
 
-        _client!.TrackTrace(evt);
-    }
-
-    public static void Notify(Exception exception)
-    {
-        if (!Enabled)
+        public static void TrackTrace(string evt)
         {
-            return;
+            if (!Enabled)
+            {
+                return;
+            }
+
+            _client!.TrackTrace(evt);
         }
 
-        _client!.TrackException(exception);
-    }
-
-    public static void TrackPageView(string pageName)
-    {
-        if (!Enabled)
+        public static void Notify(Exception exception)
         {
-            return;
+            if (!Enabled)
+            {
+                return;
+            }
+
+            _client!.TrackException(exception);
         }
 
-        _client!.TrackPageView(pageName);
-    }
-
-    private static void OnExit()
-    {
-        if (!Enabled)
+        public static void TrackPageView(string pageName)
         {
-            return;
+            if (!Enabled)
+            {
+                return;
+            }
+
+            _client!.TrackPageView(pageName);
         }
 
-        _client!.Flush();
+        private static void OnExit()
+        {
+            if (!Enabled)
+            {
+                return;
+            }
 
-        // Allow time for flushing:
-        System.Threading.Thread.Sleep(1000);
+            _client!.Flush();
+
+            // Allow time for flushing:
+            System.Threading.Thread.Sleep(1000);
+        }
     }
 }

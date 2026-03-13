@@ -1,13 +1,14 @@
-﻿namespace GitExtensions.Plugins.ReleaseNotesGenerator;
-
-public class LogLine
+﻿namespace GitExtensions.Plugins.ReleaseNotesGenerator
 {
-    public LogLine(string hash, string message)
+    public class LogLine
     {
-        Commit = hash;
-        MessageLines = [message];
-    }
+        public LogLine(string hash, string message)
+        {
+            Commit = hash;
+            MessageLines = new List<string> { message };
+        }
 
-    public string Commit { get; }
-    public IList<string> MessageLines { get; }
+        public string Commit { get; }
+        public IList<string> MessageLines { get; }
+    }
 }

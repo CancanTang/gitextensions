@@ -1,24 +1,25 @@
 ﻿using FluentAssertions;
 using GitCommands.DiffMergeTools;
 
-namespace GitCommandsTests.DiffMergeTools;
-
-[TestFixture]
-public class RegisteredDiffMergeToolsTests
+namespace GitCommandsTests.DiffMergeTools
 {
-    [Test]
-    public void All_DiffTools()
+    [TestFixture]
+    public class RegisteredDiffMergeToolsTests
     {
-        IEnumerable<string> tools = RegisteredDiffMergeTools.All(DiffMergeToolType.Diff);
+        [Test]
+        public void All_DiffTools()
+        {
+            IEnumerable<string> tools = RegisteredDiffMergeTools.All(DiffMergeToolType.Diff);
 
-        tools.Should().BeEquivalentTo("araxis", "bc", "bc3", "diffmerge", "kdiff3", "meld", "p4merge", "semanticmerge", "smerge", "tortoisediff", "TortoiseGitIDiff", "vscode", "vsdiffmerge", "winmerge");
-    }
+            tools.Should().BeEquivalentTo("araxis", "bc", "bc3", "diffmerge", "kdiff3", "meld", "p4merge", "semanticmerge", "smerge", "tortoisediff", "TortoiseGitIDiff", "vscode", "vsdiffmerge", "winmerge");
+        }
 
-    [Test]
-    public void All_MergeTools()
-    {
-        IEnumerable<string> tools = RegisteredDiffMergeTools.All(DiffMergeToolType.Merge);
+        [Test]
+        public void All_MergeTools()
+        {
+            IEnumerable<string> tools = RegisteredDiffMergeTools.All(DiffMergeToolType.Merge);
 
-        tools.Should().BeEquivalentTo("araxis", "bc", "bc3", "diffmerge", "kdiff3", "meld", "p4merge", "semanticmerge", "smerge", "tortoisediff", "tortoisemerge", "vscode", "vsdiffmerge", "winmerge");
+            tools.Should().BeEquivalentTo("araxis", "bc", "bc3", "diffmerge", "kdiff3", "meld", "p4merge", "semanticmerge", "smerge", "tortoisediff", "tortoisemerge", "vscode", "vsdiffmerge", "winmerge");
+        }
     }
 }

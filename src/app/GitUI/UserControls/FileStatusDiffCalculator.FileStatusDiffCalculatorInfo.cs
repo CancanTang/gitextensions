@@ -1,16 +1,16 @@
 ﻿using GitExtensions.Extensibility.Git;
 using GitUIPluginInterfaces;
 
-namespace GitUI;
-
-partial class FileStatusDiffCalculator
+namespace GitUI
 {
-    private record struct FileStatusDiffCalculatorInfo(
-        IReadOnlyList<GitRevision> Revisions,
-        ObjectId? HeadId,
-        bool AllowMultiDiff,
-        bool FileTreeMode,
-        string GrepArguments,
-        bool ShowSkipWorktreeFiles,
-        UntrackedFilesMode UntrackedFilesMode);
+    partial class FileStatusDiffCalculator
+    {
+        private struct FileStatusDiffCalculatorInfo
+        {
+            public IReadOnlyList<GitRevision> Revisions { get; set; }
+            public ObjectId? HeadId { get; set; }
+            public bool AllowMultiDiff { get; set; }
+            public string GrepArguments { get; set; }
+        }
+    }
 }

@@ -1,44 +1,54 @@
 ﻿using System.Runtime.CompilerServices;
 using GitExtUtils.GitUI;
 
-namespace GitUI;
-
-public static class ToolStripExtensions
+namespace GitUI
 {
-    private static readonly ConditionalWeakTable<ToolStrip, IMenuItemBackgroundFilter> MenuItemBackgroundFilters = [];
-    private static readonly ConditionalWeakTable<ToolStrip, ToolStripExSystemRenderer> ExtendedSystemRenderers = [];
-    private static readonly ConditionalWeakTable<ToolStrip, ToolStripExProfessionalRenderer> ExtendedProfessionalRenderers = [];
-
-    public static void AttachMenuItemBackgroundFilter(this ToolStrip toolStrip, IMenuItemBackgroundFilter? value)
+    public static class ToolStripExtensions
     {
-        toolStrip.UseExtendedRenderer();
-        MenuItemBackgroundFilters.Remove(toolStrip);
+        private static readonly ConditionalWeakTable<ToolStrip, IMenuItemBackgroundFilter> MenuItemBackgroundFilters = [];
+        private static readonly ConditionalWeakTable<ToolStrip, ToolStripExSystemRenderer> ExtendedSystemRenderers = [];
+        private static readonly ConditionalWeakTable<ToolStrip, ToolStripExProfessionalRenderer> ExtendedProfessionalRenderers = [];
+        private static readonly ConditionalWeakTable<ToolStrip, ToolStripExThemeAwareRenderer> ExtendedThemeAwareRenderers = [];
 
-        if (value is not null)
+        public static void AttachMenuItemBackgroundFilter(this ToolStrip toolStrip, IMenuItemBackgroundFilter? value)
         {
-            MenuItemBackgroundFilters.Add(toolStrip, value);
-        }
-    }
+            toolStrip.UseExtendedRenderer();
+            MenuItemBackgroundFilters.Remove(toolStrip);
 
-    private static void UseExtendedRenderer(this ToolStrip toolStrip)
-    {
-        if (toolStrip.Renderer is ToolStripSystemRenderer and not ToolStripExSystemRenderer)
-        {
-            toolStrip.Renderer = ExtendedSystemRenderers.GetOrCreateValue(toolStrip);
-        }
-        else if (toolStrip.Renderer is ToolStripProfessionalRenderer and not ToolStripExProfessionalRenderer)
-        {
-            toolStrip.Renderer = ExtendedProfessionalRenderers.GetOrCreateValue(toolStrip);
-        }
-    }
-
-    internal static IMenuItemBackgroundFilter? GetMenuItemBackgroundFilter(this ToolStrip toolStrip)
-    {
-        if (MenuItemBackgroundFilters.TryGetValue(toolStrip, out IMenuItemBackgroundFilter filter))
-        {
-            return filter;
+            if (value is not null)
+            {
+                MenuItemBackgroundFilters.Add(toolStrip, value);
+            }
         }
 
-        return null;
+        private static void UseExtendedRenderer(this ToolStrip toolStrip)
+        {
+            if (toolStrip.Renderer is ToolStripSystemRenderer and not ToolStripExSystemRenderer)
+            {
+                toolStrip.Renderer = ExtendedSystemRenderers.GetOrCreateValue(toolStrip);
+            }
+            else if (toolStrip.Renderer is ToolStripProfessionalRenderer and not ToolStripExProfessionalRenderer)
+            {
+                toolStrip.Renderer = ExtendedProfessionalRenderers.GetOrCreateValue(toolStrip);
+            }
+        }
+
+        internal static void UseExtendedThemeAwareRenderer(this ToolStrip toolStrip)
+        {
+            if (toolStrip.Renderer is not ToolStripExThemeAwareRenderer)
+            {
+                toolStrip.Renderer = ExtendedThemeAwareRenderers.GetOrCreateValue(toolStrip);
+            }
+        }
+
+        internal static IMenuItemBackgroundFilter? GetMenuItemBackgroundFilter(this ToolStrip toolStrip)
+        {
+            if (MenuItemBackgroundFilters.TryGetValue(toolStrip, out IMenuItemBackgroundFilter filter))
+            {
+                return filter;
+            }
+
+            return null;
+        }
     }
 }

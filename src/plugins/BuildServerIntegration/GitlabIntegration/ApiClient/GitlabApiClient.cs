@@ -2,56 +2,57 @@
 using System.Web;
 using GitExtensions.Plugins.GitlabIntegration.ApiClient.Models;
 
-namespace GitExtensions.Plugins.GitlabIntegration.ApiClient;
-
-public interface IGitlabApiClient : IDisposable
+namespace GitExtensions.Plugins.GitlabIntegration.ApiClient
 {
-    Task<PagedResponse<GitlabPipeline>> GetPipelinesAsync(DateTime? sinceDate, bool running, int pageNumber, CancellationToken cancellationToken);
-    string InstanceUrl { get; }
-}
-
-public class GitlabApiClient : GitlabApiClientBase, IGitlabApiClient
-{
-    private const int _pageSize = 100;
-    private readonly int _projectId;
-
-    public GitlabApiClient(string instanceUrl, string apiToken, int projectId = 0)
-        : base(instanceUrl, apiToken)
+    public interface IGitlabApiClient : IDisposable
     {
-        _projectId = projectId;
+        Task<PagedResponse<GitlabPipeline>> GetPipelinesAsync(DateTime? sinceDate, bool running, int pageNumber, CancellationToken cancellationToken);
+        string InstanceUrl { get; }
     }
 
-    public async Task<PagedResponse<GitlabPipeline>> GetPipelinesAsync(DateTime? sinceDate, bool running, int pageNumber, CancellationToken cancellationToken)
+    public class GitlabApiClient : GitlabApiClientBase, IGitlabApiClient
     {
-        UriBuilder pipelinesUriBuilder = new($"{InstanceUrl}/api/v4/projects/{_projectId}/pipelines");
-        NameValueCollection query = HttpUtility.ParseQueryString(pipelinesUriBuilder.Query);
+        private const int _pageSize = 100;
+        private readonly int _projectId;
 
-        if (sinceDate is not null)
+        public GitlabApiClient(string instanceUrl, string apiToken, int projectId = 0)
+            : base(instanceUrl, apiToken)
         {
-            query["updated_after"] = sinceDate.Value.ToString("u");
+            _projectId = projectId;
         }
 
-        if (running)
+        public async Task<PagedResponse<GitlabPipeline>> GetPipelinesAsync(DateTime? sinceDate, bool running, int pageNumber, CancellationToken cancellationToken)
         {
-            query["scope"] = "running";
+            UriBuilder pipelinesUriBuilder = new($"{InstanceUrl}/api/v4/projects/{_projectId}/pipelines");
+            NameValueCollection query = HttpUtility.ParseQueryString(pipelinesUriBuilder.Query);
+
+            if (sinceDate is not null)
+            {
+                query["updated_after"] = sinceDate.Value.ToString("u");
+            }
+
+            if (running)
+            {
+                query["scope"] = "running";
+            }
+            else
+            {
+                query["scope"] = "finished";
+            }
+
+            query["page"] = pageNumber.ToString();
+            query["per_page"] = _pageSize.ToString();
+
+            pipelinesUriBuilder.Query = query.ToString() ?? string.Empty;
+
+            return await LoadListAsync<GitlabPipeline>(pipelinesUriBuilder.Uri, cancellationToken);
         }
-        else
+
+        public async Task<GitlabProject?> GetProjectAsync(string projectNamespace, string projectName)
         {
-            query["scope"] = "finished";
+            UriBuilder projectUriBuilder = new($"{InstanceUrl}/api/v4/projects/{Uri.EscapeDataString($"{projectNamespace}/{projectName}")}");
+
+            return await LoadItemAsync<GitlabProject?>(projectUriBuilder.Uri);
         }
-
-        query["page"] = pageNumber.ToString();
-        query["per_page"] = _pageSize.ToString();
-
-        pipelinesUriBuilder.Query = query.ToString() ?? string.Empty;
-
-        return await LoadListAsync<GitlabPipeline>(pipelinesUriBuilder.Uri, cancellationToken);
-    }
-
-    public async Task<GitlabProject?> GetProjectAsync(string projectNamespace, string projectName)
-    {
-        UriBuilder projectUriBuilder = new($"{InstanceUrl}/api/v4/projects/{Uri.EscapeDataString($"{projectNamespace}/{projectName}")}");
-
-        return await LoadItemAsync<GitlabProject?>(projectUriBuilder.Uri);
     }
 }

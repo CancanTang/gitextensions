@@ -1,37 +1,38 @@
 ﻿using GitCommands;
 
-namespace GitUI.Editor;
-
-public sealed class ContinuousScrollEventManager
+namespace GitUI.Editor
 {
-    public EventHandler? BottomScrollReached;
-    public EventHandler? TopScrollReached;
-
-    private static bool IsScrollDisabled
-        => Control.ModifierKeys != Keys.Alt && !AppSettings.AutomaticContinuousScroll;
-    private bool IsScrollTooFast
-        => DateTime.Now - LastScrollEventFiredDate < TimeSpan.FromMilliseconds(AppSettings.AutomaticContinuousScrollDelay);
-    private DateTime LastScrollEventFiredDate { get; set; } = DateTime.MinValue;
-
-    public void RaiseBottomScrollReached(object sender, EventArgs e)
+    public sealed class ContinuousScrollEventManager
     {
-        if (IsScrollDisabled || IsScrollTooFast)
+        public EventHandler? BottomScrollReached;
+        public EventHandler? TopScrollReached;
+
+        private static bool IsScrollDisabled
+            => Control.ModifierKeys != Keys.Alt && !AppSettings.AutomaticContinuousScroll;
+        private bool IsScrollTooFast
+            => DateTime.Now - LastScrollEventFiredDate < TimeSpan.FromMilliseconds(AppSettings.AutomaticContinuousScrollDelay);
+        private DateTime LastScrollEventFiredDate { get; set; } = DateTime.MinValue;
+
+        public void RaiseBottomScrollReached(object sender, EventArgs e)
         {
-            return;
+            if (IsScrollDisabled || IsScrollTooFast)
+            {
+                return;
+            }
+
+            LastScrollEventFiredDate = DateTime.Now;
+            BottomScrollReached?.Invoke(this, EventArgs.Empty);
         }
 
-        LastScrollEventFiredDate = DateTime.Now;
-        BottomScrollReached?.Invoke(this, EventArgs.Empty);
-    }
-
-    public void RaiseTopScrollReached(object sender, EventArgs e)
-    {
-        if (IsScrollDisabled || IsScrollTooFast)
+        public void RaiseTopScrollReached(object sender, EventArgs e)
         {
-            return;
-        }
+            if (IsScrollDisabled || IsScrollTooFast)
+            {
+                return;
+            }
 
-        LastScrollEventFiredDate = DateTime.Now;
-        TopScrollReached?.Invoke(this, EventArgs.Empty);
+            LastScrollEventFiredDate = DateTime.Now;
+            TopScrollReached?.Invoke(this, EventArgs.Empty);
+        }
     }
 }

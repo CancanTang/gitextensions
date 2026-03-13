@@ -1,36 +1,32 @@
-﻿namespace GitUI.UserControls.RevisionGrid.Graph;
-
-public sealed class LaneInfo
+﻿namespace GitUI.UserControls.RevisionGrid.Graph
 {
-    public LaneInfo(RevisionGraphSegment startSegment, RevisionGraphSegment? segmentToTheLeft, RevisionGraphSegment? segmentToTheRight = null)
+    public class LaneInfo
     {
-        StartRevision = startSegment.Child;
-        Color = GetColor(colorSeed: StartRevision.Objectid.GetHashCode() ^ startSegment.Parent.Objectid.GetHashCode(), segmentToTheLeft, segmentToTheRight);
-    }
-
-    public LaneInfo(RevisionGraphSegment startSegment, RevisionGraphSegment? segmentToTheLeft, RevisionGraphSegment? segmentToTheRight, LaneInfo derivedFrom)
-    {
-        StartRevision = startSegment.Parent;
-        Color = GetColor(colorSeed: StartRevision.Objectid.GetHashCode(), segmentToTheLeft, segmentToTheRight, derivedFrom.Color);
-    }
-
-    public int Color { get; }
-
-    public RevisionGraphRevision StartRevision { get; }
-
-    public int StartScore => StartRevision.Score;
-
-    private static int GetColor(int colorSeed, RevisionGraphSegment? segmentToTheLeft, RevisionGraphSegment? segmentToTheRight, int? derivedFromColor = null)
-    {
-        int? leftLaneColor = segmentToTheLeft?.LaneInfo?.Color;
-        int? rightLaneColor = segmentToTheRight?.LaneInfo?.Color;
-        for (; ; ++colorSeed)
+        public LaneInfo(RevisionGraphSegment startSegment)
         {
-            int color = RevisionGraphLaneColor.GetColorForLane(colorSeed);
-            if (color != leftLaneColor && color != rightLaneColor && color != derivedFromColor)
-            {
-                return color;
-            }
+            StartRevision = startSegment.Child;
+
+            int colorSeed = StartRevision.Objectid.GetHashCode() ^ startSegment.Parent.Objectid.GetHashCode();
+            Color = RevisionGraphLaneColor.GetColorForLane(colorSeed);
         }
+
+        public LaneInfo(RevisionGraphSegment startSegment, LaneInfo derivedFrom)
+        {
+            StartRevision = startSegment.Parent;
+            int colorSeed = StartRevision.Objectid.GetHashCode();
+
+            do
+            {
+                Color = RevisionGraphLaneColor.GetColorForLane(colorSeed);
+                ++colorSeed;
+            }
+            while (Color == derivedFrom.Color);
+        }
+
+        public int Color { get; private set; }
+
+        public RevisionGraphRevision StartRevision { get; private set; }
+
+        public int StartScore => StartRevision.Score;
     }
 }

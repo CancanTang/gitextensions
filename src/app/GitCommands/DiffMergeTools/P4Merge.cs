@@ -1,19 +1,20 @@
-namespace GitCommands.DiffMergeTools;
-
-internal class P4Merge : DiffMergeTool
+namespace GitCommands.DiffMergeTools
 {
-    /// <inheritdoc />
-    public override string ExeFileName => "p4merge.exe";
-
-    /// <inheritdoc />
-    public override string MergeCommand => "\"$BASE\" \"$LOCAL\" \"$REMOTE\" \"$MERGED\"";
-
-    /// <inheritdoc />
-    public override string Name => "p4merge";
-
-    /// <inheritdoc />
-    public override IEnumerable<string> SearchPaths => new[]
+    internal class P4Merge : DiffMergeTool
     {
-        @"Perforce\"
-    };
+        /// <inheritdoc />
+        public override string ExeFileName => "p4merge.exe";
+
+        /// <inheritdoc />
+        public override string MergeCommand => "\"$BASE\" \"$LOCAL\" \"$REMOTE\" \"$MERGED\"";
+
+        /// <inheritdoc />
+        public override string Name => "p4merge";
+
+        /// <inheritdoc />
+        public override IEnumerable<string> SearchPaths => new[]
+        {
+            @"Perforce\"
+        };
+    }
 }

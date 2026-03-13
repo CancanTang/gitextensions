@@ -1,147 +1,108 @@
-﻿#nullable enable
-
-namespace GitUI.CommandsDialogs.SettingsDialog;
-
-public interface IGlobalSettingsPage : ISettingsPage
+﻿namespace GitUI.CommandsDialogs.SettingsDialog
 {
-    void SetGlobalSettings();
-}
-
-public interface ILocalSettingsPage : IGlobalSettingsPage
-{
-    void SetLocalSettings();
-
-    void SetEffectiveSettings();
-}
-
-public interface IDistributedSettingsPage : ILocalSettingsPage
-{
-    void SetDistributedSettings();
-}
-
-public interface IGitConfigSettingsPage : ILocalSettingsPage
-{
-    void SetSystemSettings();
-}
-
-public partial class SettingsPageHeader
-{
-    private readonly SettingsPageWithHeader? _page;
-
-    public SettingsPageHeader(SettingsPageWithHeader? page, bool canSaveInsideRepo)
+    public interface IGlobalSettingsPage : ISettingsPage
     {
-        InitializeComponent();
-        InitializeComplete();
-
-        label1.Font = new Font(label1.Font, System.Drawing.FontStyle.Bold);
-
-        if (page is not null)
-        {
-            settingsPagePanel.Controls.Add(page);
-            page.Dock = DockStyle.Fill;
-            _page = page;
-            ConfigureHeader(canSaveInsideRepo);
-        }
+        void SetGlobalSettings();
     }
 
-    public bool ReadOnly
+    public interface ILocalSettingsPage : IGlobalSettingsPage
     {
-        get => !settingsPagePanel.Enabled;
-        private set
-        {
-            settingsPagePanel.Enabled = !value;
-        }
+        void SetLocalSettings();
+
+        void SetEffectiveSettings();
     }
 
-    private void ConfigureHeader(bool canSaveInsideRepo)
+    public interface IDistributedSettingsPage : ILocalSettingsPage
     {
-        if (!canSaveInsideRepo || _page is not ILocalSettingsPage localSettingsPage)
-        {
-            GlobalRB.Checked = true;
+        void SetDistributedSettings();
+    }
 
-            EffectiveRB.Visible = false;
-            arrowLocal.Visible = false;
-            LocalRB.Visible = false;
-            arrowDistributed.Visible = false;
-            DistributedRB.Visible = false;
-            arrowGlobal.Visible = false;
-            arrowSystem.Visible = false;
-            SystemRB.Visible = false;
-            tableLayoutPanel2.RowStyles[2].Height = 0;
-            return;
-        }
+    public partial class SettingsPageHeader
+    {
+        private readonly SettingsPageWithHeader? _page;
 
-        LocalRB.CheckedChanged += (s, e) =>
+        public SettingsPageHeader(SettingsPageWithHeader? page, bool canSaveInsideRepo)
         {
-            if (LocalRB.Checked)
+            InitializeComponent();
+            InitializeComplete();
+
+            label1.Font = new Font(label1.Font, System.Drawing.FontStyle.Bold);
+
+            if (page is not null)
             {
-                localSettingsPage.SetLocalSettings();
-                ReadOnly = false;
+                settingsPagePanel.Controls.Add(page);
+                page.Dock = DockStyle.Fill;
+                _page = page;
+                ConfigureHeader(canSaveInsideRepo);
             }
-        };
+        }
 
-        EffectiveRB.CheckedChanged += (s, e) =>
+        private void ConfigureHeader(bool canSaveInsideRepo)
         {
-            if (EffectiveRB.Checked)
+            if (!(_page is ILocalSettingsPage localSettingsPage) || !canSaveInsideRepo)
             {
-                arrowLocal.ForeColor = EffectiveRB.ForeColor;
-                localSettingsPage.SetEffectiveSettings();
-                ReadOnly = true;
+                GlobalRB.Checked = true;
+
+                EffectiveRB.Visible = false;
+                DistributedRB.Visible = false;
+                LocalRB.Visible = false;
+                arrowLocal.Visible = false;
+                arrowDistributed.Visible = false;
+                arrowGlobal.Visible = false;
+                tableLayoutPanel2.RowStyles[2].Height = 0;
             }
             else
             {
-                arrowLocal.ForeColor = arrowLocal.BackColor;
+                LocalRB.CheckedChanged += (a, b) =>
+                {
+                    if (LocalRB.Checked)
+                    {
+                        localSettingsPage.SetLocalSettings();
+                    }
+                };
+
+                EffectiveRB.CheckedChanged += (a, b) =>
+                {
+                    if (EffectiveRB.Checked)
+                    {
+                        arrowLocal.ForeColor = EffectiveRB.ForeColor;
+                        localSettingsPage.SetEffectiveSettings();
+                    }
+                    else
+                    {
+                        arrowLocal.ForeColor = arrowLocal.BackColor;
+                    }
+
+                    arrowDistributed.ForeColor = arrowLocal.ForeColor;
+                    arrowGlobal.ForeColor = arrowLocal.ForeColor;
+                };
+
+                EffectiveRB.Checked = true;
+
+                if (!(localSettingsPage is IDistributedSettingsPage distributedSettingsPage))
+                {
+                    DistributedRB.Visible = false;
+                    arrowDistributed.Visible = false;
+                }
+                else
+                {
+                    DistributedRB.CheckedChanged += (a, b) =>
+                    {
+                        if (DistributedRB.Checked)
+                        {
+                            distributedSettingsPage.SetDistributedSettings();
+                        }
+                    };
+                }
             }
-
-            arrowDistributed.ForeColor = arrowLocal.ForeColor;
-            arrowGlobal.ForeColor = arrowLocal.ForeColor;
-            arrowSystem.ForeColor = arrowLocal.ForeColor;
-        };
-
-        EffectiveRB.Checked = true;
-        ReadOnly = true;
-
-        if (localSettingsPage is not IDistributedSettingsPage distributedSettingsPage)
-        {
-            DistributedRB.Visible = false;
-            arrowDistributed.Visible = false;
         }
-        else
+
+        private void GlobalRB_CheckedChanged(object sender, EventArgs e)
         {
-            DistributedRB.CheckedChanged += (s, e) =>
+            if (GlobalRB.Checked)
             {
-                if (DistributedRB.Checked)
-                {
-                    distributedSettingsPage.SetDistributedSettings();
-                    ReadOnly = false;
-                }
-            };
-        }
-
-        if (localSettingsPage is not IGitConfigSettingsPage configFileSettingsPage)
-        {
-            SystemRB.Visible = false;
-            arrowSystem.Visible = false;
-        }
-        else
-        {
-            SystemRB.CheckedChanged += (s, e) =>
-            {
-                if (SystemRB.Checked)
-                {
-                    configFileSettingsPage.SetSystemSettings();
-                    ReadOnly = true;
-                }
-            };
-        }
-    }
-
-    private void GlobalRB_CheckedChanged(object sender, EventArgs e)
-    {
-        if (GlobalRB.Checked)
-        {
-            _page?.SetGlobalSettings();
-            ReadOnly = false;
+                _page?.SetGlobalSettings();
+            }
         }
     }
 }

@@ -1,8 +1,9 @@
-﻿namespace GitCommands.Git;
-
-public enum GitBisectOption
+﻿namespace GitCommands.Git
 {
-    Good,
-    Bad,
-    Skip
+    public enum GitBisectOption
+    {
+        Good,
+        Bad,
+        Skip
+    }
 }

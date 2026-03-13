@@ -1,9 +1,10 @@
-﻿namespace GitUI.UserControls;
-
-internal class WebBrowserControl : WebBrowser
+﻿namespace GitUI.UserControls
 {
-    public WebBrowserControl()
+    internal class WebBrowserControl : WebBrowser
     {
-        ScriptErrorsSuppressed = true;
+        public WebBrowserControl()
+        {
+            ScriptErrorsSuppressed = true;
+        }
     }
 }

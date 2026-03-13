@@ -1,9 +1,10 @@
-﻿namespace GitUI.Theming;
-
-public class ThemeCssUrlResolverException : ThemeException
+﻿namespace GitUI.Theming
 {
-    public ThemeCssUrlResolverException(string message, Exception innerException)
-        : base(message, innerException)
+    public class ThemeCssUrlResolverException : ThemeException
     {
+        public ThemeCssUrlResolverException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
     }
 }

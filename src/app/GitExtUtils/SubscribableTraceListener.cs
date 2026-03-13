@@ -15,8 +15,6 @@ public interface ISubscribableTraceListener
 
 internal class SubscribableTraceListener : TraceListener, ISubscribableTraceListener
 {
-    private readonly Lock _lock = new();
-
     private readonly StringBuilder _trace = new();
 
     public event TraceHandler TraceReceived;
@@ -38,7 +36,7 @@ internal class SubscribableTraceListener : TraceListener, ISubscribableTraceList
 
     public override void Flush()
     {
-        lock (_lock)
+        lock (this)
         {
             base.Flush();
             try
@@ -60,7 +58,7 @@ internal class SubscribableTraceListener : TraceListener, ISubscribableTraceList
 
     public override void Write(string? message)
     {
-        lock (_lock)
+        lock (this)
         {
             _trace.Append(message);
         }
@@ -68,7 +66,7 @@ internal class SubscribableTraceListener : TraceListener, ISubscribableTraceList
 
     public override void WriteLine(string? message)
     {
-        lock (_lock)
+        lock (this)
         {
             _trace.AppendLine(message);
             Flush();

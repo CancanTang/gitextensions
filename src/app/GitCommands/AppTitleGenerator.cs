@@ -1,98 +1,99 @@
 ﻿using GitCommands.UserRepositoryHistory;
 using GitExtensions.Extensibility.Git;
 
-namespace GitCommands;
-
-/// <summary>
-/// Provides the ability to generate application title.
-/// </summary>
-public interface IAppTitleGenerator
+namespace GitCommands
 {
     /// <summary>
-    /// Generates main window title according to given repository.
+    /// Provides the ability to generate application title.
     /// </summary>
-    /// <param name="workingDir">Path to repository.</param>
-    /// <param name="isValidWorkingDir">Indicates whether the given path contains a valid repository.</param>
-    /// <param name="branchName">Current branch name.</param>
-    /// <param name="defaultBranchName">Default branch name if <paramref name="branchName"/> is null (but not empty).</param>
-    /// <param name="pathName">Current pathfilter.</param>
-    string Generate(string? workingDir = null, bool isValidWorkingDir = false, string? branchName = null, string defaultBranchName = "", string? pathName = null);
-}
-
-/// <summary>
-/// Generates application title.
-/// </summary>
-public sealed class AppTitleGenerator : IAppTitleGenerator
-{
-    private readonly IRepositoryDescriptionProvider _descriptionProvider;
-#if DEBUG
-    private static string? _extraInfo;
-#endif
-
-    public AppTitleGenerator(IRepositoryDescriptionProvider descriptionProvider)
+    public interface IAppTitleGenerator
     {
-        _descriptionProvider = descriptionProvider;
+        /// <summary>
+        /// Generates main window title according to given repository.
+        /// </summary>
+        /// <param name="workingDir">Path to repository.</param>
+        /// <param name="isValidWorkingDir">Indicates whether the given path contains a valid repository.</param>
+        /// <param name="branchName">Current branch name.</param>
+        /// <param name="defaultBranchName">Default branch name if <paramref name="branchName"/> is null (but not empty).</param>
+        /// <param name="pathName">Current pathfilter.</param>
+        string Generate(string? workingDir = null, bool isValidWorkingDir = false, string? branchName = null, string defaultBranchName = "", string? pathName = null);
     }
 
-    /// <inheritdoc />
-    public string Generate(string? workingDir = null, bool isValidWorkingDir = false, string? branchName = null, string defaultBranchName = "", string? pathName = null)
+    /// <summary>
+    /// Generates application title.
+    /// </summary>
+    public sealed class AppTitleGenerator : IAppTitleGenerator
     {
-        if (string.IsNullOrWhiteSpace(workingDir) || !isValidWorkingDir)
+        private readonly IRepositoryDescriptionProvider _descriptionProvider;
+#if DEBUG
+        private static string? _extraInfo;
+#endif
+
+        public AppTitleGenerator(IRepositoryDescriptionProvider descriptionProvider)
         {
-            return AppSettings.ApplicationName;
+            _descriptionProvider = descriptionProvider;
         }
 
-        if (string.IsNullOrWhiteSpace(branchName))
+        /// <inheritdoc />
+        public string Generate(string? workingDir = null, bool isValidWorkingDir = false, string? branchName = null, string defaultBranchName = "", string? pathName = null)
         {
-            branchName = defaultBranchName;
-        }
+            if (string.IsNullOrWhiteSpace(workingDir) || !isValidWorkingDir)
+            {
+                return AppSettings.ApplicationName;
+            }
 
-        // Pathname normally have quotes already
-        pathName = GetFileName(pathName);
+            if (string.IsNullOrWhiteSpace(branchName))
+            {
+                branchName = defaultBranchName;
+            }
 
-        string description = _descriptionProvider.Get(workingDir);
+            // Pathname normally have quotes already
+            pathName = GetFileName(pathName);
+
+            string description = _descriptionProvider.Get(workingDir);
 
 #if DEBUG
-        return $"{pathName}{description} ({branchName}) - {AppSettings.ApplicationName}{_extraInfo}";
+            return $"{pathName}{description} ({branchName}) - {AppSettings.ApplicationName}{_extraInfo}";
 #else
-        return $"{pathName}{description} ({branchName}) - {AppSettings.ApplicationName}";
+            return $"{pathName}{description} ({branchName}) - {AppSettings.ApplicationName}";
 #endif
 
-        static string? GetFileName(string? path)
-        {
-            if (string.IsNullOrWhiteSpace(path))
+            static string? GetFileName(string? path)
             {
-                return null;
-            }
+                if (string.IsNullOrWhiteSpace(path))
+                {
+                    return null;
+                }
 
-            string filePart = Path.GetFileName(path.Trim('"')).QuoteNE();
-            if (string.IsNullOrWhiteSpace(filePart))
-            {
-                // No file, just quote the pathFilter
-                filePart = path.StartsWith('"') && path.EndsWith('"')
-                    ? path
-                    : $"{path.Quote()}";
-            }
+                string filePart = Path.GetFileName(path.Trim('"')).QuoteNE();
+                if (string.IsNullOrWhiteSpace(filePart))
+                {
+                    // No file, just quote the pathFilter
+                    filePart = path.StartsWith(@"""") && path.EndsWith(@"""")
+                        ? path
+                        : $"{path.Quote()}";
+                }
 
-            return $"{filePart} ";
+                return $"{filePart} ";
+            }
         }
-    }
 
-    public static void Initialise(string sha, string buildBranch)
-    {
+        public static void Initialise(string sha, string buildBranch)
+        {
 #if DEBUG
-        if (ObjectId.TryParse(sha, out ObjectId? objectId))
-        {
-            _extraInfo = $" {objectId.ToShortString()}";
-            if (!string.IsNullOrWhiteSpace(buildBranch))
+            if (ObjectId.TryParse(sha, out ObjectId? objectId))
             {
-                _extraInfo += $" ({buildBranch})";
+                _extraInfo = $" {objectId.ToShortString()}";
+                if (!string.IsNullOrWhiteSpace(buildBranch))
+                {
+                    _extraInfo += $" ({buildBranch})";
+                }
             }
-        }
-        else
-        {
-            _extraInfo = " [DEBUG]";
-        }
+            else
+            {
+                _extraInfo = " [DEBUG]";
+            }
 #endif
+        }
     }
 }

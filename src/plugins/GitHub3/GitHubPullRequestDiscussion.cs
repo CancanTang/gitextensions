@@ -1,54 +1,55 @@
 ﻿using Git.hub;
 using GitExtensions.Extensibility.Plugins;
 
-namespace GitExtensions.Plugins.GitHub3;
-
-internal class GitHubPullRequestDiscussion : IPullRequestDiscussion
+namespace GitExtensions.Plugins.GitHub3
 {
-    private readonly PullRequest _pullRequest;
-
-    public GitHubPullRequestDiscussion(PullRequest pullRequest)
+    internal class GitHubPullRequestDiscussion : IPullRequestDiscussion
     {
-        _pullRequest = pullRequest;
-        Entries = [];
-        ForceReload();
-    }
+        private readonly PullRequest _pullRequest;
 
-    public List<IDiscussionEntry> Entries { get; private set; }
-
-    public void Post(string data)
-    {
-        _pullRequest.ToIssue().CreateComment(data);
-    }
-
-    public void ForceReload()
-    {
-        Entries.Clear();
-
-        Entries.Add(new GitHubDiscussionComment { Author = _pullRequest.User.Login, Created = _pullRequest.CreatedAt, Body = _pullRequest.Body });
-
-        foreach (PullRequestCommit commit in _pullRequest.GetCommits())
+        public GitHubPullRequestDiscussion(PullRequest pullRequest)
         {
-            Entries.Add(new GitHubDiscussionCommit { Sha = commit.Sha, Author = commit.AuthorName.Replace("<", "&lt;").Replace(">", "&gt;"), Created = commit.Commit.Author.Date, Body = commit.Commit.Message });
+            _pullRequest = pullRequest;
+            Entries = [];
+            ForceReload();
         }
 
-        foreach (IssueComment comment in _pullRequest.GetIssueComments())
+        public List<IDiscussionEntry> Entries { get; private set; }
+
+        public void Post(string data)
         {
-            Entries.Add(new GitHubDiscussionComment { Author = comment.User.Login, Created = comment.CreatedAt, Body = comment.Body });
+            _pullRequest.ToIssue().CreateComment(data);
         }
 
-        Entries = [.. Entries.OrderBy(entry => entry.Created)];
+        public void ForceReload()
+        {
+            Entries.Clear();
+
+            Entries.Add(new GitHubDiscussionComment { Author = _pullRequest.User.Login, Created = _pullRequest.CreatedAt, Body = _pullRequest.Body });
+
+            foreach (PullRequestCommit commit in _pullRequest.GetCommits())
+            {
+                Entries.Add(new GitHubDiscussionCommit { Sha = commit.Sha, Author = commit.AuthorName.Replace("<", "&lt;").Replace(">", "&gt;"), Created = commit.Commit.Author.Date, Body = commit.Commit.Message });
+            }
+
+            foreach (IssueComment comment in _pullRequest.GetIssueComments())
+            {
+                Entries.Add(new GitHubDiscussionComment { Author = comment.User.Login, Created = comment.CreatedAt, Body = comment.Body });
+            }
+
+            Entries = Entries.OrderBy(entry => entry.Created).ToList();
+        }
     }
-}
 
-internal class GitHubDiscussionComment : IDiscussionEntry
-{
-    public string? Author { get; internal set; }
-    public DateTime Created { get; internal set; }
-    public string? Body { get; internal set; }
-}
+    internal class GitHubDiscussionComment : IDiscussionEntry
+    {
+        public string? Author { get; internal set; }
+        public DateTime Created { get; internal set; }
+        public string? Body { get; internal set; }
+    }
 
-internal class GitHubDiscussionCommit : GitHubDiscussionComment, ICommitDiscussionEntry
-{
-    public string? Sha { get; internal set; }
+    internal class GitHubDiscussionCommit : GitHubDiscussionComment, ICommitDiscussionEntry
+    {
+        public string? Sha { get; internal set; }
+    }
 }

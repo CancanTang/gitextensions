@@ -1,36 +1,37 @@
 ﻿using FluentAssertions;
 using GitCommands.Git;
 
-namespace GitCommandsTests.Git;
-
-[SetCulture("en-US")]
-[SetUICulture("en-US")]
-[TestFixture]
-public class GitBranchNameOptionsTest
+namespace GitCommandsTests.Git
 {
-    [TestCase(null, "")]
-    [TestCase("", "")]
-    public void ReplacementToken_can_be_null_or_empty(string token, string expected)
+    [SetCulture("en-US")]
+    [SetUICulture("en-US")]
+    [TestFixture]
+    public class GitBranchNameOptionsTest
     {
-        GitBranchNameOptions options = new(token);
+        [TestCase(null, "")]
+        [TestCase("", "")]
+        public void ReplacementToken_can_be_null_or_empty(string token, string expected)
+        {
+            GitBranchNameOptions options = new(token);
 
-        options.ReplacementToken.Should().Be(expected);
-    }
+            options.ReplacementToken.Should().Be(expected);
+        }
 
-    [Test]
-    public void ReplacementToken_cant_be_multichar()
-    {
-        ((Action)(() => new GitBranchNameOptions("aaa"))).Should().Throw<ArgumentOutOfRangeException>()
-            .WithMessage("Replacement token must be a single character (Parameter 'replacementToken')");
-    }
+        [Test]
+        public void ReplacementToken_cant_be_multichar()
+        {
+            ((Action)(() => new GitBranchNameOptions("aaa"))).Should().Throw<ArgumentOutOfRangeException>()
+                .WithMessage("Replacement token must be a single character (Parameter 'replacementToken')");
+        }
 
-    [TestCase(" ", ' ')]
-    [TestCase("^", '^')]
-    [TestCase("~", '~')]
-    [TestCase(":", ':')]
-    public void ReplacementToken_cant_be_invalid(string token, char expected)
-    {
-        ((Action)(() => new GitBranchNameOptions(token))).Should().Throw<ArgumentOutOfRangeException>()
-            .WithMessage(string.Format("Replacement token invalid: '{0}' (Parameter 'replacementToken')", expected));
+        [TestCase(" ", ' ')]
+        [TestCase("^", '^')]
+        [TestCase("~", '~')]
+        [TestCase(":", ':')]
+        public void ReplacementToken_cant_be_invalid(string token, char expected)
+        {
+            ((Action)(() => new GitBranchNameOptions(token))).Should().Throw<ArgumentOutOfRangeException>()
+                .WithMessage(string.Format("Replacement token invalid: '{0}' (Parameter 'replacementToken')", expected));
+        }
     }
 }

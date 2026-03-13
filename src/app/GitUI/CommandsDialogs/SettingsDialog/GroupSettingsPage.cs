@@ -2,46 +2,47 @@
 using GitExtensions.Extensibility.Translations;
 using ResourceManager;
 
-namespace GitUI.CommandsDialogs.SettingsDialog;
-
-/// <summary>
-/// Page to group other pages.
-/// </summary>
-public abstract class GroupSettingsPage : Translate, ISettingsPage
+namespace GitUI.CommandsDialogs.SettingsDialog
 {
-    public string Title { get; }
-
-    protected GroupSettingsPage(string title)
+    /// <summary>
+    /// Page to group other pages.
+    /// </summary>
+    public abstract class GroupSettingsPage : Translate, ISettingsPage
     {
-        Title = title;
-        Translator.Translate(this, GitCommands.AppSettings.CurrentTranslation);
+        public string Title { get; }
+
+        protected GroupSettingsPage(string title)
+        {
+            Title = title;
+            Translator.Translate(this, GitCommands.AppSettings.CurrentTranslation);
+        }
+
+        public string GetTitle()
+        {
+            return Title;
+        }
+
+        public Control? GuiControl => null;
+
+        public void OnPageShown()
+        {
+        }
+
+        public void LoadSettings()
+        {
+        }
+
+        public void SaveSettings()
+        {
+        }
+
+        public IEnumerable<string> GetSearchKeywords()
+        {
+            return Array.Empty<string>();
+        }
+
+        public bool IsInstantSavePage => false;
+
+        public SettingsPageReference PageReference => new SettingsPageReferenceByType(GetType());
     }
-
-    public string GetTitle()
-    {
-        return Title;
-    }
-
-    public Control? GuiControl => null;
-
-    public void OnPageShown()
-    {
-    }
-
-    public void LoadSettings()
-    {
-    }
-
-    public void SaveSettings()
-    {
-    }
-
-    public IEnumerable<string> GetSearchKeywords()
-    {
-        return [];
-    }
-
-    public bool IsInstantSavePage => false;
-
-    public SettingsPageReference PageReference => new SettingsPageReferenceByType(GetType());
 }

@@ -1,21 +1,22 @@
 using System.Text.RegularExpressions;
 
-namespace GitCommands.Remotes;
-
-public abstract class RemoteParser
+namespace GitCommands.Remotes
 {
-    protected Match? MatchRegExes(string remoteUrl, Regex[] regExs)
+    public abstract class RemoteParser
     {
-        Match? m = null;
-        foreach (Regex regex in regExs)
+        protected Match? MatchRegExes(string remoteUrl, Regex[] regExs)
         {
-            m = regex.Match(remoteUrl);
-            if (m.Success)
+            Match? m = null;
+            foreach (Regex regex in regExs)
             {
-                break;
+                m = regex.Match(remoteUrl);
+                if (m.Success)
+                {
+                    break;
+                }
             }
-        }
 
-        return m;
+            return m;
+        }
     }
 }

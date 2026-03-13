@@ -1,205 +1,145 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.RegularExpressions;
 using GitExtensions.Extensibility.Git;
-using GitUIPluginInterfaces;
 using Microsoft;
 
-namespace GitCommands.Git;
-
-public static partial class SubmoduleHelpers
+namespace GitCommands.Git
 {
-    [GeneratedRegex(@"diff --git\s+[ab]/(?<filenamea>.+)\s+[ba]/(?<filenameb>.+)", RegexOptions.ExplicitCapture)]
-    private static partial Regex DiffCommandRegex { get; }
-    [GeneratedRegex(@"diff --cc (?<filenamea>.+)", RegexOptions.ExplicitCapture)]
-    private static partial Regex CombinedDiffCommandRegex { get; }
-
-    public static async Task<GitSubmoduleStatus?> GetSubmoduleDiffChangesAsync(IGitModule module, string? fileName, string? oldFileName, ObjectId? firstId, ObjectId? secondId, CancellationToken cancellationToken)
+    public static partial class SubmoduleHelpers
     {
-        (Patch? patch, string? errorMessage) = await module.GetSingleDiffAsync(firstId, secondId, fileName, oldFileName, "", GitModule.SystemEncoding, cacheResult: true, isTracked: true, useGitColoring: false, commandConfiguration: null, cancellationToken: cancellationToken).ConfigureAwait(false);
-        return GetSubmoduleChanges(patch, errorMessage, module, fileName);
-    }
+        [GeneratedRegex(@"diff --git [^/\s]+/(?<filenamea>.+)\s[^/\s]+/(?<filenameb>.+)", RegexOptions.ExplicitCapture)]
+        private static partial Regex DiffCommandRegex();
+        [GeneratedRegex(@"diff --cc (?<filenamea>.+)", RegexOptions.ExplicitCapture)]
+        private static partial Regex CombinedDiffCommandRegex();
 
-    public static async Task<GitSubmoduleStatus?> GetSubmoduleCurrentChangesAsync(IGitModule module, string? fileName, string? oldFileName, bool staged, bool noLocks = false)
-    {
-        Patch? patch = await module.GetCurrentChangesAsync(fileName, oldFileName, staged, extraDiffArguments: "", noLocks: noLocks).ConfigureAwait(false);
-        return GetSubmoduleChanges(patch, "", module, fileName);
-    }
-
-    private static GitSubmoduleStatus GetSubmoduleChanges(Patch? patch, string? errorMessage, IGitModule module, string? fileName)
-    {
-        if (!string.IsNullOrEmpty(errorMessage))
+        public static async Task<GitSubmoduleStatus?> GetCurrentSubmoduleChangesAsync(IGitModule module, string? fileName, string? oldFileName, ObjectId? firstId, ObjectId? secondId, CancellationToken cancellationToken)
         {
-            // (some) Git errors, propagate
-            return new GitSubmoduleStatus(errorMessage, null, false, null, null, null, null, null, GetSubmoduleStatus);
+            (Patch? patch, string? errorMessage) = await module.GetSingleDiffAsync(firstId, secondId, fileName, oldFileName, "", GitModule.SystemEncoding, cacheResult: true, isTracked: true, useGitColoring: false, commandConfiguration: null, cancellationToken: cancellationToken).ConfigureAwait(false);
+            return patch is null
+                ? new GitSubmoduleStatus(errorMessage ?? "", null, false, null, null, null, null)
+                : ParseSubmodulePatchStatus(patch, module, fileName);
         }
 
-        if (string.IsNullOrEmpty(patch?.Text))
+        public static async Task<GitSubmoduleStatus?> GetCurrentSubmoduleChangesAsync(IGitModule module, string? fileName, string? oldFileName, bool staged, bool noLocks = false)
         {
-            // Note that empty diff will give null Patch too, not necessarily an error
-            return null;
+            Patch? patch = await module.GetCurrentChangesAsync(fileName, oldFileName, staged, "", noLocks: noLocks).ConfigureAwait(false);
+            return ParseSubmodulePatchStatus(patch, module, fileName);
         }
 
-        IGitModule submodule = module.GetSubmodule(fileName);
-        CommitDataManager commitDataManager = new(() => submodule);
-        return ParseSubmoduleStatus(patch.Text, submodule, commitId => commitDataManager.GetCommitData(commitId));
-    }
-
-    private static GitSubmoduleStatus ParseSubmoduleStatus(string text, IGitModule submodule, Func<string, CommitData?> getCommitData)
-    {
-        string? name = null;
-        string? oldName = null;
-        bool isDirty = false;
-        ObjectId? commitId = null;
-        ObjectId? oldCommitId = null;
-        int? addedCommits = null;
-        int? removedCommits = null;
-
-        using (StringReader reader = new(text))
+        public static Task<GitSubmoduleStatus?> GetCurrentSubmoduleChangesAsync(IGitModule module, string submodule, bool noLocks = false)
         {
-            string? line = reader.ReadLine();
+            return GetCurrentSubmoduleChangesAsync(module, submodule, submodule, false, noLocks: noLocks);
+        }
 
-            if (line is not null)
+        private static GitSubmoduleStatus? ParseSubmodulePatchStatus(Patch? patch, IGitModule module, string? fileName)
+        {
+            GitSubmoduleStatus? submoduleStatus = ParseSubmoduleStatus(patch?.Text, module, fileName);
+            if (submoduleStatus is not null && submoduleStatus.Commit != submoduleStatus.OldCommit)
             {
-                Match match = DiffCommandRegex.Match(line);
-                if (match.Groups.Count > 1)
+                IGitModule submodule = submoduleStatus.GetSubmodule(module);
+                submoduleStatus.CheckSubmoduleStatus(submodule);
+            }
+
+            return submoduleStatus;
+        }
+
+        [return: NotNullIfNotNull("text")]
+        public static GitSubmoduleStatus? ParseSubmoduleStatus(string? text, IGitModule module, string? fileName)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return null;
+            }
+
+            string? name = null;
+            string? oldName = null;
+            bool isDirty = false;
+            ObjectId? commitId = null;
+            ObjectId? oldCommitId = null;
+            int? addedCommits = null;
+            int? removedCommits = null;
+
+            using (StringReader reader = new(text))
+            {
+                string? line = reader.ReadLine();
+
+                if (line is not null)
                 {
-                    name = match.Groups["filenamea"].Value;
-                    oldName = match.Groups["filenameb"].Value;
-                }
-                else
-                {
-                    match = CombinedDiffCommandRegex.Match(line);
+                    Match match = DiffCommandRegex().Match(line);
                     if (match.Groups.Count > 1)
                     {
                         name = match.Groups["filenamea"].Value;
-                        oldName = name;
+                        oldName = match.Groups["filenameb"].Value;
+                    }
+                    else
+                    {
+                        match = CombinedDiffCommandRegex().Match(line);
+                        if (match.Groups.Count > 1)
+                        {
+                            name = match.Groups["filenamea"].Value;
+                            oldName = name;
+                        }
+                    }
+                }
+
+                while ((line = reader.ReadLine()) is not null)
+                {
+                    // We are looking for lines resembling:
+                    //
+                    // -Subproject commit bfef4454fc51e345051ee5bf66686dc28deed627
+                    // +Subproject commit 8b20498b954609770205c2cc794b868b4ac3ee69-dirty
+
+                    if (!line.Contains("Subproject"))
+                    {
+                        continue;
+                    }
+
+                    char c = line[0];
+                    const string commitStr = "commit ";
+                    string hash = "";
+                    int pos = line.IndexOf(commitStr);
+                    if (pos >= 0)
+                    {
+                        hash = line[(pos + commitStr.Length)..];
+                    }
+
+                    bool endsWithDirty = hash.EndsWith("-dirty");
+                    hash = hash.Replace("-dirty", "");
+                    if (c == '-')
+                    {
+                        oldCommitId = ObjectId.Parse(hash);
+                    }
+                    else if (c == '+')
+                    {
+                        commitId = ObjectId.Parse(hash);
+                        isDirty = endsWithDirty;
+                    }
+
+                    // TODO: Support combined merge
+                }
+            }
+
+            if (oldCommitId is not null && commitId is not null)
+            {
+                if (oldCommitId == commitId)
+                {
+                    addedCommits = 0;
+                    removedCommits = 0;
+                }
+                else
+                {
+                    IGitModule submodule = module.GetSubmodule(fileName);
+                    if (submodule.IsValidGitWorkingDir())
+                    {
+                        addedCommits = submodule.GetCommitCount(commitId.ToString(), oldCommitId.ToString(), cache: true, throwOnErrorExit: false);
+                        removedCommits = submodule.GetCommitCount(oldCommitId.ToString(), commitId.ToString(), cache: true, throwOnErrorExit: false);
                     }
                 }
             }
 
-            while ((line = reader.ReadLine()) is not null)
-            {
-                // We are looking for lines resembling:
-                //
-                // -Subproject commit bfef4454fc51e345051ee5bf66686dc28deed627
-                // +Subproject commit 8b20498b954609770205c2cc794b868b4ac3ee69-dirty
+            Validates.NotNull(name);
 
-                if (!line.Contains("Subproject"))
-                {
-                    continue;
-                }
-
-                char c = line[0];
-                const string commitStr = "commit ";
-                string hash = "";
-                int pos = line.IndexOf(commitStr);
-                if (pos >= 0)
-                {
-                    hash = line[(pos + commitStr.Length)..];
-                }
-
-                bool endsWithDirty = hash.EndsWith("-dirty");
-                hash = hash.Replace("-dirty", "");
-                if (c == '-')
-                {
-                    oldCommitId = ObjectId.Parse(hash);
-                }
-                else if (c == '+')
-                {
-                    commitId = ObjectId.Parse(hash);
-                    isDirty = endsWithDirty;
-                }
-
-                // TODO: Support combined merge
-            }
+            return new GitSubmoduleStatus(name, oldName, isDirty, commitId, oldCommitId, addedCommits, removedCommits);
         }
-
-        Validates.NotNull(name);
-
-        if (!submodule.IsValidGitWorkingDir())
-        {
-            // cannot calculate the data
-            getCommitData = null;
-        }
-
-        // Force calculation of caches, could be separate
-        if (oldCommitId is not null && commitId is not null)
-        {
-            if (oldCommitId == commitId)
-            {
-                addedCommits = 0;
-                removedCommits = 0;
-            }
-            else if (submodule.IsValidGitWorkingDir())
-            {
-                (addedCommits, removedCommits) = submodule.GetCommitRangeDiffCount(commitId, oldCommitId);
-            }
-        }
-
-        GitSubmoduleStatus status = new(name, oldName, isDirty, commitId, oldCommitId, addedCommits, removedCommits, getCommitData, GetSubmoduleStatus);
-
-        // Force calculation of caches, could be separate
-        _ = status.Status;
-        _ = status.CommitData;
-        _ = status.OldCommitData;
-
-        return status;
-    }
-
-    private static SubmoduleStatus GetSubmoduleStatus(GitSubmoduleStatus submoduleStatus)
-    {
-        if (submoduleStatus.OldCommit is null)
-        {
-            return SubmoduleStatus.NewSubmodule;
-        }
-
-        if (submoduleStatus.Commit is null)
-        {
-            return SubmoduleStatus.RemovedSubmodule;
-        }
-
-        if (submoduleStatus.Commit == submoduleStatus.OldCommit)
-        {
-            return SubmoduleStatus.SameCommit;
-        }
-
-        // From this on, the status is by default Modified
-
-        if (submoduleStatus.AddedCommits is null || submoduleStatus.RemovedCommits is null)
-        {
-            return SubmoduleStatus.Modified;
-        }
-
-        if (submoduleStatus.AddedCommits > 0 && submoduleStatus.RemovedCommits == 0)
-        {
-            return SubmoduleStatus.FastForward;
-        }
-
-        if (submoduleStatus.AddedCommits == 0 && submoduleStatus.RemovedCommits > 0)
-        {
-            return SubmoduleStatus.Rewind;
-        }
-
-        if (submoduleStatus.CommitData is null || submoduleStatus.OldCommitData is null)
-        {
-            return SubmoduleStatus.Modified;
-        }
-
-        if (submoduleStatus.CommitData.CommitDate > submoduleStatus.OldCommitData.CommitDate)
-        {
-            return SubmoduleStatus.NewerTime;
-        }
-
-        if (submoduleStatus.CommitData.CommitDate < submoduleStatus.OldCommitData.CommitDate)
-        {
-            return SubmoduleStatus.OlderTime;
-        }
-
-        return SubmoduleStatus.Modified;
-    }
-
-    internal readonly struct TestAccessor
-    {
-        internal static GitSubmoduleStatus ParseSubmoduleStatus(string text, IGitModule submodule, Func<string, CommitData?> getCommitData)
-            => SubmoduleHelpers.ParseSubmoduleStatus(text, submodule, getCommitData);
     }
 }

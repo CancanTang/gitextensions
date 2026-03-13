@@ -1,6 +1,7 @@
-namespace ResourceManager.CommitDataRenders;
-
-public interface IHeaderLabelFormatter
+namespace ResourceManager.CommitDataRenders
 {
-    string FormatLabel(string label, int desiredLength);
+    public interface IHeaderLabelFormatter
+    {
+        string FormatLabel(string label, int desiredLength);
+    }
 }

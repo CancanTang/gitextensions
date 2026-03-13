@@ -1,95 +1,97 @@
 ﻿using GitCommands.Git;
 using GitExtensions.Extensibility;
 using GitExtensions.Extensibility.Git;
+using GitUI.CommandDialogs;
 using GitUI.HelperDialogs;
 using GitUIPluginInterfaces;
 using ResourceManager;
 
-namespace GitUI.CommandsDialogs.BrowseDialog;
-
-public sealed partial class FormBisect : GitModuleForm
+namespace GitUI.CommandsDialogs.BrowseDialog
 {
-    // TODO: Improve me
-    private readonly TranslationString _bisectStart =
-        new("Mark selected revisions as start bisect range?");
-
-    private readonly IRevisionGridInfo _revisionGridInfo;
-
-    public FormBisect(RevisionGridControl revisionGrid)
-        : base(revisionGrid.UICommands)
+    public sealed partial class FormBisect : GitModuleForm
     {
-        _revisionGridInfo = revisionGrid;
-        InitializeComponent();
-        InitializeComplete();
-        UpdateButtonsState();
-    }
+        // TODO: Improve me
+        private readonly TranslationString _bisectStart =
+            new("Mark selected revisions as start bisect range?");
 
-    private void UpdateButtonsState()
-    {
-        bool inTheMiddleOfBisect = Module.InTheMiddleOfBisect();
-        Start.Enabled = !inTheMiddleOfBisect;
-        Good.Enabled = inTheMiddleOfBisect;
-        Bad.Enabled = inTheMiddleOfBisect;
-        Stop.Enabled = inTheMiddleOfBisect;
-        btnSkip.Enabled = inTheMiddleOfBisect;
-    }
+        private readonly IRevisionGridInfo _revisionGridInfo;
 
-    private void Start_Click(object sender, EventArgs e)
-    {
-        FormProcess.ShowDialog(this, UICommands, arguments: Commands.StartBisect(), Module.WorkingDir, input: null, useDialogSettings: true);
-
-        UpdateButtonsState();
-
-        IReadOnlyList<GitRevision> revisions = _revisionGridInfo.GetSelectedRevisions();
-        if (revisions.Count > 1)
+        public FormBisect(RevisionGridControl revisionGrid)
+            : base(revisionGrid.UICommands)
         {
-            if (MessageBox.Show(this, _bisectStart.Text, Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            _revisionGridInfo = revisionGrid;
+            InitializeComponent();
+            InitializeComplete();
+            UpdateButtonsState();
+        }
+
+        private void UpdateButtonsState()
+        {
+            bool inTheMiddleOfBisect = Module.InTheMiddleOfBisect();
+            Start.Enabled = !inTheMiddleOfBisect;
+            Good.Enabled = inTheMiddleOfBisect;
+            Bad.Enabled = inTheMiddleOfBisect;
+            Stop.Enabled = inTheMiddleOfBisect;
+            btnSkip.Enabled = inTheMiddleOfBisect;
+        }
+
+        private void Start_Click(object sender, EventArgs e)
+        {
+            FormProcess.ShowDialog(this, UICommands, arguments: Commands.StartBisect(), Module.WorkingDir, input: null, useDialogSettings: true);
+
+            UpdateButtonsState();
+
+            IReadOnlyList<GitRevision> revisions = _revisionGridInfo.GetSelectedRevisions();
+            if (revisions.Count > 1)
             {
-                BisectRange(revisions[0].ObjectId, revisions[^1].ObjectId);
-                Close();
+                if (MessageBox.Show(this, _bisectStart.Text, Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                {
+                    BisectRange(revisions[0].ObjectId, revisions[^1].ObjectId);
+                    Close();
+                }
+            }
+
+            return;
+
+            void BisectRange(ObjectId startRevision, ObjectId endRevision)
+            {
+                ArgumentString command = Commands.ContinueBisect(GitBisectOption.Good, startRevision);
+                bool success = FormProcess.ShowDialog(this, UICommands, arguments: command, Module.WorkingDir, input: null, useDialogSettings: true);
+                if (!success)
+                {
+                    return;
+                }
+
+                command = Commands.ContinueBisect(GitBisectOption.Bad, endRevision);
+                FormProcess.ShowDialog(this, UICommands, arguments: command, Module.WorkingDir, input: null, useDialogSettings: true);
             }
         }
 
-        return;
-
-        void BisectRange(ObjectId startRevision, ObjectId endRevision)
+        private void Good_Click(object sender, EventArgs e)
         {
-            ArgumentString command = Commands.ContinueBisect(GitBisectOption.Good, startRevision);
-            bool success = FormProcess.ShowDialog(this, UICommands, arguments: command, Module.WorkingDir, input: null, useDialogSettings: true);
-            if (!success)
-            {
-                return;
-            }
-
-            command = Commands.ContinueBisect(GitBisectOption.Bad, endRevision);
-            FormProcess.ShowDialog(this, UICommands, arguments: command, Module.WorkingDir, input: null, useDialogSettings: true);
+            ContinueBisect(GitBisectOption.Good);
         }
-    }
 
-    private void Good_Click(object sender, EventArgs e)
-    {
-        ContinueBisect(GitBisectOption.Good);
-    }
+        private void Bad_Click(object sender, EventArgs e)
+        {
+            ContinueBisect(GitBisectOption.Bad);
+        }
 
-    private void Bad_Click(object sender, EventArgs e)
-    {
-        ContinueBisect(GitBisectOption.Bad);
-    }
+        private void Stop_Click(object sender, EventArgs e)
+        {
+            FormProcess.ShowDialog(this, UICommands, arguments: Commands.StopBisect(), Module.WorkingDir, input: null, useDialogSettings: false);
+            Close();
+        }
 
-    private void Stop_Click(object sender, EventArgs e)
-    {
-        FormProcess.ShowDialog(this, UICommands, arguments: Commands.StopBisect(), Module.WorkingDir, input: null, useDialogSettings: false);
-        Close();
-    }
+        private void btnSkip_Click(object sender, EventArgs e)
+        {
+            ContinueBisect(GitBisectOption.Skip);
+        }
 
-    private void btnSkip_Click(object sender, EventArgs e)
-    {
-        ContinueBisect(GitBisectOption.Skip);
-    }
-
-    private void ContinueBisect(GitBisectOption bisectOption)
-    {
-        FormProcess.ShowDialog(this, UICommands, arguments: Commands.ContinueBisect(bisectOption), Module.WorkingDir, input: null, useDialogSettings: false);
-        Close();
+        private void ContinueBisect(GitBisectOption bisectOption)
+        {
+            FormProcess.ShowDialog(this, UICommands, arguments: Commands.ContinueBisect(bisectOption), Module.WorkingDir, input: null, useDialogSettings: false);
+            Close();
+        }
     }
 }

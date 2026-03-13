@@ -1,33 +1,34 @@
 ﻿using System.Runtime.InteropServices;
 using static System.NativeMethods;
 
-namespace GitUI.Theming;
-
-internal class SystemBrushesCache : IDisposable
+namespace GitUI.Theming
 {
-    private readonly Dictionary<int, HandleRef> _cache = [];
-
-    public void Dispose()
+    internal class SystemBrushesCache : IDisposable
     {
-        GC.SuppressFinalize(this);
-        foreach (int key in _cache.Keys)
+        private readonly Dictionary<int, HandleRef> _cache = [];
+
+        public void Dispose()
         {
-            DeleteObject(_cache[key].Handle);
+            GC.SuppressFinalize(this);
+            foreach (int key in _cache.Keys)
+            {
+                DeleteObject(_cache[key].Handle);
+            }
+
+            _cache.Clear();
         }
 
-        _cache.Clear();
-    }
-
-    public IntPtr GetBrush(int colorref)
-    {
-        if (!_cache.TryGetValue(colorref, out HandleRef handle))
+        public IntPtr GetBrush(int colorref)
         {
-            IntPtr hbrush = CreateSolidBrush(colorref);
-            handle = new HandleRef(this, hbrush);
+            if (!_cache.TryGetValue(colorref, out HandleRef handle))
+            {
+                IntPtr hbrush = CreateSolidBrush(colorref);
+                handle = new HandleRef(this, hbrush);
 
-            _cache.Add(colorref, handle);
+                _cache.Add(colorref, handle);
+            }
+
+            return handle.Handle;
         }
-
-        return handle.Handle;
     }
 }
