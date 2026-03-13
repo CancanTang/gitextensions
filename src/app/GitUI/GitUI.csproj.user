@@ -3,4 +3,597 @@
   <PropertyGroup>
     <_LastSelectedProfileId>D:\gitextensions\src\app\GitUI\Properties\PublishProfiles\FolderProfile.pubxml</_LastSelectedProfileId>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Update="CommandsDialogs\AboutBoxDialog\FormContributors.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\BrowseDialog\DashboardControl\Dashboard.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\BrowseDialog\DashboardControl\FormDashboardCategoryTitle.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\BrowseDialog\DashboardControl\UserRepositoriesList.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\BrowseDialog\FormBisect.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\BrowseDialog\FormChangeLog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\BrowseDialog\FormDonate.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\BrowseDialog\FormGitCommandLog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\BrowseDialog\FormGoToCommit.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\BrowseDialog\FormOpenDirectory.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\BrowseDialog\FormRecentReposSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\BrowseDialog\FormUpdates.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\CommitDialog\FormCommitTemplateSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\EnvironmentInfo.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormAbout.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormAddFiles.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormAddToGitIgnore.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormApplyPatch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormArchive.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormatPatchDialog\SmtpCredentials.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormBlame.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormBrowse.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormBrowse.InitMenusAndToolbars.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormCheckoutBranch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormCheckoutRevision.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormCherryPick.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormCleanupRepository.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormClone.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormClone.RemoteActionResult.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormCommandlineHelp.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormCommit.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormCompareToBranch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormCreateBranch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormCreateTag.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormDeleteBranch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormDeleteRemoteBranch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormDeleteTag.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormDiff.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormFileHistory.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormFormatPatch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormGitAttributes.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormGitIgnore.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormInit.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormLog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormMailMap.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormMergeBranch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormMergeSubmodule.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormPull.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormPush.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormRebase.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormReflog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormRemotes.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormRenameBranch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormResetChanges.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormResolveConflicts.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormRevertCommit.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormSparseWorkingCopy.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormStash.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormSubmodules.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormVerify.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormVerify.LostObject.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormVerify.SortableLostObjectsList.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FormViewPatch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\FullBleedTabControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\Menus\CopyPathsToolStripMenuItem.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\Menus\HelpToolStripMenuItem.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\Menus\StartToolStripMenuItem.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\Menus\ToolsToolStripMenuItem.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\Menus\ToolStripMenuItemEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\Menus\WorkingDirectoryToolStripSplitButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\RepoHosting\CreatePullRequestForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\RepoHosting\ForkAndCloneForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\RepoHosting\ViewPullRequestsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\RevisionDiffControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\RevisionFileTreeControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\RevisionGpgInfoControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SearchControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SearchWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\AutoLayoutSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\ConfigFileSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\DistributedSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\FormAvailableEncodings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\AdvancedSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\AppearanceFontsSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\AppearanceSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\BlameViewerSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\BuildServerIntegrationSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\ChecklistSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\ColorsSettings\ColorsSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\CommitDialogSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\ConfirmationsSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\ConsoleStyleSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\ControlHotkeys.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\DetailedSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\DiffViewerSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\FormBrowseRepoSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\FormChooseTranslation.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\FormFixHome.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\GeneralSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\GitConfigAdvancedSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\GitConfigSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\GitRootIntroductionPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\GitSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\HotkeysSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\RevisionLinksSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\ScriptsSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\ScriptsSettingsPage.ScriptInfoProxy.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\ShellExtensionSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\SortingSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\SshSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Pages\TextboxHotkey.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Plugins\PluginRootIntroductionPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\Plugins\PluginSettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\SettingsPageBase.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\SettingsPageHeader.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\SettingsPageWithHeader.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\SettingsTreeViewUserControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SettingsDialog\SimpleHelpDisplayDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\SubmodulesDialog\FormAddSubmodule.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\ToolStripPushButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\WorktreeDialog\FormCreateWorktree.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommandsDialogs\WorktreeDialog\FormManageWorktree.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CommitInfo\CommitInfo.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CommitInfo\CommitInfoHeader.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Editor\FileViewer.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Editor\FileViewerInternal.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Editor\FindAndReplaceForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Editor\FormFindInCommitFilesGitGrep.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Editor\FormGoToLine.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FormPuttyError.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GitExtensionsDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GitExtensionsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GitModuleControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="GitModuleForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="HelperDialogs\FormBuildServerCredentials.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="HelperDialogs\FormChooseCommit.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="HelperDialogs\FormCommitDiff.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="HelperDialogs\FormEdit.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="HelperDialogs\FormProcess.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="HelperDialogs\FormRemoteProcess.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="HelperDialogs\FormResetAnotherBranch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="HelperDialogs\FormResetCurrentBranch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="HelperDialogs\FormSelectMultipleBranches.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="HelperDialogs\FormStatus.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="LeftPanel\ContextMenu\GitRefsSortByContextMenuItem.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="LeftPanel\ContextMenu\GitRefsSortOrderContextMenuItem.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="LeftPanel\RepoObjectsTree.Command.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="LeftPanel\RepoObjectsTree.ContextActions.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="LeftPanel\RepoObjectsTree.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="LeftPanel\RepoObjectsTree.SettingsContextMenu.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="ScriptsEngine\FormFilePrompt.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="ScriptsEngine\SimplePrompt.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="ScriptsEngine\SplitButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="SpellChecker\EditNetSpell.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="UserControls\AvatarControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="UserControls\BlameControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="UserControls\BranchComboBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="UserControls\BranchSelector.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="UserControls\CaseSensitiveComboBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="UserControls\CommitDiff.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="UserControls\CommitPickerSmallControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="UserControls\CommitSummaryUserControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="UserControls\ConsoleEmulatorOutputControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="UserControls\ConsoleOutputControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="UserControls\EditboxBasedConsoleOutputControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="UserControls\FileStatusList.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="UserControls\FilterToolBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="UserControls\FolderBrowserButton.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="UserControls\GotoUserManualControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="UserControls\HelpImageDisplayUserControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="UserControls\InteractiveGitActionControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="UserControls\MenuStripEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="UserControls\NativeListView.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="UserControls\NativeTreeView.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="UserControls\OutputHistoryControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="UserControls\PatchGrid.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="UserControls\RemotesComboboxControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="UserControls\RevisionGrid\CopyContextMenuItem.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="UserControls\RevisionGrid\EmptyRepoControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="UserControls\RevisionGrid\ErrorControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="UserControls\RevisionGrid\FormQuickGitRefSelector.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="UserControls\RevisionGrid\FormQuickItemSelector.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="UserControls\RevisionGrid\FormQuickStringSelector.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="UserControls\RevisionGrid\FormRevisionFilter.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="UserControls\RevisionGrid\LoadingControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="UserControls\RevisionGrid\RevisionDataGridView.BackgroundUpdater.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="UserControls\RevisionGrid\RevisionDataGridView.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="UserControls\RevisionGrid\RevisionGridControl.Command.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="UserControls\RevisionGrid\RevisionGridControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="UserControls\Settings\SettingsCheckBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="UserControls\SortDiffListContextMenuItem.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="UserControls\TextBoxEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="UserControls\ToolStripEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="UserControls\WaitSpinner.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="UserControls\WebBrowserControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+  </ItemGroup>
 </Project>
